@@ -893,443 +893,273 @@ HTML_PAGE = r"""
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hive â€” Multi-Agent Platform</title>
+<title>Hive</title>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  :root{--bg:#09090b;--surface:#18181b;--surface2:#1f1f23;--border:#27272a;--text:#fafafa;--text2:#a1a1aa;--muted:#52525b;--accent:#6366f1;--accent2:#818cf8;--green:#22c55e;--red:#ef4444;--blue:#3b82f6;--amber:#f59e0b;--radius:8px}
-  body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:hidden;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
-  .sidebar{width:240px;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--surface);flex-shrink:0}
-  .sidebar-brand{padding:20px;border-bottom:1px solid var(--border)}
-  .sidebar-brand h1{font-size:16px;font-weight:700;letter-spacing:-0.02em}
-  .sidebar-brand p{font-size:11px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:0.05em}
-  .nav{padding:8px;display:flex;flex-direction:column;gap:1px}
-  .nav-item{padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text2);transition:all .15s;display:flex;align-items:center;gap:8px}
-  .nav-item:hover{background:var(--surface2);color:var(--text)}
-  .nav-item.active{background:var(--accent);color:#fff;font-weight:500}
-  .nav-item .icon{width:16px;text-align:center;font-size:12px;opacity:.7}
-  .nav-item.active .icon{opacity:1}
-  .sidebar-agents{flex:1;overflow-y:auto;border-top:1px solid var(--border);padding:8px}
-  .sidebar-agents-label{font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:8px 12px 4px;font-weight:600}
-  .agent-item{padding:8px 12px;border-radius:6px;cursor:pointer;margin-bottom:1px;transition:all .12s}
-  .agent-item:hover{background:var(--surface2)}
-  .agent-item.active{background:var(--surface2);box-shadow:inset 3px 0 0 var(--accent)}
-  .agent-name{font-weight:500;font-size:13px}
-  .agent-meta{font-size:11px;color:var(--muted);margin-top:1px}
-  .sidebar-footer{padding:12px;border-top:1px solid var(--border)}
-  .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
-  .topbar{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-shrink:0}
-  .topbar h2{font-size:15px;font-weight:600;letter-spacing:-0.01em}
-  .topbar-right{display:flex;align-items:center;gap:8px}
-  .content{flex:1;overflow-y:auto;padding:20px}
-  .btn{padding:6px 14px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
-  .btn-accent{background:var(--accent);color:#fff}
-  .btn-accent:hover{background:var(--accent2)}
-  .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2)}
-  .btn-outline:hover{border-color:var(--text2);color:var(--text)}
-  .btn-danger{background:var(--red);color:#fff}
-  .btn-danger:hover{opacity:.9}
-  .btn-sm{padding:4px 10px;font-size:12px}
-  .btn-full{width:100%}
-  input,textarea,select{padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-size:13px;outline:none;width:100%;font-family:inherit;transition:border-color .15s}
-  input:focus,textarea:focus,select:focus{border-color:var(--accent)}
-  textarea{resize:vertical;min-height:60px}
-  select{cursor:pointer}
-  .chat-area{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:8px}
-  .bubble{max-width:75%;padding:10px 14px;border-radius:var(--radius);font-size:13px;line-height:1.6}
-  .bubble-user{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:2px}
-  .bubble-assistant{align-self:flex-start;background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:2px}
-  .bubble-system{align-self:center;color:var(--muted);font-size:12px;font-style:italic}
-  .chat-bar{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
-  .metrics{display:flex;gap:16px;padding:6px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);flex-shrink:0}
-  .metrics .val{color:var(--green);font-weight:600;font-variant-numeric:tabular-nums}
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
-  .card-title{font-size:14px;font-weight:600;margin-bottom:12px;letter-spacing:-0.01em}
-  .grid{display:grid;gap:12px}
-  .grid-2{grid-template-columns:1fr 1fr}
-  .grid-3{grid-template-columns:1fr 1fr 1fr}
-  .grid-4{grid-template-columns:repeat(4,1fr)}
-  table{width:100%;border-collapse:collapse;font-size:13px}
-  th{text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.04em}
-  td{padding:8px 12px;border-bottom:1px solid var(--border)}
-  tbody tr{transition:background .1s}
-  tbody tr:hover{background:var(--surface2)}
-  .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:0.02em}
-  .tag-green{background:#052e16;color:#4ade80}
-  .tag-blue{background:#172554;color:#60a5fa}
-  .tag-amber{background:#451a03;color:#fbbf24}
-  .tag-red{background:#450a0a;color:#f87171}
-  .tag-gray{background:#27272a;color:#a1a1aa}
-  .tag-purple{background:#2e1065;color:#a78bfa}
-  .stat-card{text-align:center;padding:20px}
-  .stat-value{font-size:24px;font-weight:700;letter-spacing:-0.02em;font-variant-numeric:tabular-nums}
-  .stat-label{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:0.04em}
-  .form-label{display:block;font-size:12px;color:var(--text2);margin-bottom:4px;font-weight:500}
-  .form-group{margin-bottom:12px}
-  .form-row{display:flex;gap:12px}
-  .form-row>*{flex:1}
-  .empty{display:flex;align-items:center;justify-content:center;flex:1;color:var(--muted);font-size:13px;flex-direction:column;gap:8px}
-  .router-result{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-top:12px}
-  .router-model{font-size:18px;font-weight:700;color:var(--accent2);letter-spacing:-0.01em}
-  .router-reason{font-size:13px;color:var(--text2);margin-top:4px}
-  .router-meta{display:flex;gap:16px;margin-top:12px;font-size:12px;color:var(--muted)}
-  .router-meta b{color:var(--text)}
-  .page{display:none}
-  .page.active{display:flex;flex-direction:column;flex:1;overflow:hidden}
-  .divider{height:1px;background:var(--border);margin:8px 0}
-  .provider-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
-  .provider-name{font-weight:500;font-size:13px}
-  .key-code{font-family:'JetBrains Mono',monospace;font-size:12px;padding:8px 12px;background:var(--bg);border-radius:6px;word-break:break-all;border:1px solid var(--border)}
-  .rec-card{border-left:3px solid var(--accent);padding-left:12px}
-  ::-webkit-scrollbar{width:5px}
-  ::-webkit-scrollbar-track{background:transparent}
-  ::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
-  ::-webkit-scrollbar-thumb:hover{background:#555}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#09090b;--s1:#18181b;--s2:#1f1f23;--bd:#27272a;--t1:#fafafa;--t2:#a1a1aa;--mt:#52525b;--ac:#6366f1;--ac2:#818cf8;--gn:#22c55e;--rd:#ef4444;--bl:#3b82f6;--am:#f59e0b;--r:8px}
+body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--bg);color:var(--t1);height:100vh;display:flex;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+input,textarea,select,button{font-family:inherit;font-size:inherit}
+input,textarea,select{padding:8px 12px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--t1);outline:none;width:100%}
+input:focus,textarea:focus,select:focus{border-color:var(--ac)}
+.btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-weight:500;transition:all .15s}
+.btn-p{background:var(--ac);color:#fff}.btn-p:hover{background:var(--ac2)}
+.btn-o{background:transparent;border:1px solid var(--bd);color:var(--t2)}.btn-o:hover{border-color:var(--t2)}
+.btn-d{background:var(--rd);color:#fff}
+.btn-s{padding:4px 10px;font-size:12px}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.tag-g{background:#052e16;color:#4ade80}.tag-r{background:#450a0a;color:#f87171}
+.tag-b{background:#172554;color:#60a5fa}.tag-gr{background:#27272a;color:#a1a1aa}
+
+/* Auth screen */
+#auth{display:flex;align-items:center;justify-content:center;width:100vw;height:100vh}
+#auth .card{width:380px;padding:32px;background:var(--s1);border:1px solid var(--bd);border-radius:12px}
+#auth h1{font-size:24px;font-weight:700;margin-bottom:4px}
+#auth .sub{color:var(--mt);font-size:12px;margin-bottom:24px}
+#auth .fg{margin-bottom:12px}
+#auth label{display:block;font-size:12px;color:var(--t2);margin-bottom:4px;font-weight:500}
+#auth .tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--bd)}
+#auth .tab{padding:8px 16px;cursor:pointer;color:var(--mt);font-size:13px;border-bottom:2px solid transparent}
+#auth .tab.active{color:var(--ac);border-bottom-color:var(--ac)}
+
+/* Main app */
+#app{display:none;width:100vw;height:100vh}
+.sidebar{width:260px;border-right:1px solid var(--bd);display:flex;flex-direction:column;background:var(--s1);flex-shrink:0}
+.sb-head{padding:16px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
+.sb-head h2{font-size:15px;font-weight:700}
+.sb-user{padding:8px 16px;border-bottom:1px solid var(--bd);font-size:12px;color:var(--t2)}
+.sb-nav{padding:8px}
+.sb-nav-item{padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--t2);display:flex;align-items:center;gap:8px}
+.sb-nav-item:hover{background:var(--s2);color:var(--t1)}
+.sb-nav-item.active{background:var(--ac);color:#fff}
+.sb-rooms{flex:1;overflow-y:auto;border-top:1px solid var(--bd);padding:8px}
+.sb-rooms-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--mt);padding:8px 12px 4px;font-weight:600}
+.room-item{padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;margin-bottom:2px}
+.room-item:hover{background:var(--s2)}
+.room-item.active{background:var(--s2);box-shadow:inset 3px 0 0 var(--ac)}
+.room-name{font-weight:500}.room-meta{font-size:11px;color:var(--mt)}
+
+/* Main content */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{padding:12px 20px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
+.topbar h3{font-size:15px;font-weight:600}
+.content{flex:1;overflow-y:auto;padding:20px}
+
+/* Chat */
+.chat-msgs{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:6px}
+.msg{max-width:75%;padding:8px 12px;border-radius:10px;font-size:13px;line-height:1.5}
+.msg-me{align-self:flex-end;background:var(--ac);color:#fff;border-bottom-right-radius:2px}
+.msg-other{align-self:flex-start;background:var(--s1);border:1px solid var(--bd);border-bottom-left-radius:2px}
+.msg-bot{align-self:flex-start;background:var(--s2);border:1px solid var(--bd);border-bottom-left-radius:2px}
+.msg-file{align-self:flex-start;background:var(--s2);border:1px solid var(--bl);border-radius:8px;padding:8px 12px;font-size:12px}
+.msg-sender{font-size:11px;color:var(--mt);margin-bottom:2px}
+.chat-bar{padding:12px 20px;border-top:1px solid var(--bd);display:flex;gap:8px;align-items:center}
+.chat-bar input{flex:1}
+
+/* Settings */
+.settings-section{margin-bottom:24px}
+.settings-section h4{font-size:14px;font-weight:600;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bd)}
+.key-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--s2)}
+
+/* Modal */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:24px;width:480px;max-width:90vw}
+.modal h3{font-size:16px;font-weight:600;margin-bottom:16px}
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:12px;color:var(--t2);margin-bottom:4px;font-weight:500}
+
+/* Hardware */
+.hw-card{background:var(--s2);border-radius:8px;padding:16px;margin-bottom:12px}
+.hw-stat{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}
+.hw-stat .val{font-weight:600;color:var(--gn)}
+.model-sug{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.model-chip{background:var(--s1);border:1px solid var(--bd);border-radius:6px;padding:6px 12px;font-size:12px}
 </style>
 </head>
 <body>
+
+<!-- AUTH SCREEN -->
+<div id="auth">
+<div class="card">
+  <h1>Hive</h1>
+  <div class="sub">Multi-agent AI platform</div>
+  <div class="tabs">
+    <div class="tab active" onclick="showAuthTab('login')">Login</div>
+    <div class="tab" onclick="showAuthTab('register')">Register</div>
+  </div>
+  <div id="auth-login">
+    <div class="fg"><label>Username</label><input id="loginUser" placeholder="yourname"></div>
+    <div class="fg"><label>Password</label><input id="loginPass" type="password" placeholder="password"></div>
+    <button class="btn btn-p" style="width:100%;margin-top:8px" onclick="doLogin()">Login</button>
+    <div id="loginErr" style="color:var(--rd);font-size:12px;margin-top:8px"></div>
+  </div>
+  <div id="auth-register" style="display:none">
+    <div class="fg"><label>Username</label><input id="regUser" placeholder="yourname"></div>
+    <div class="fg"><label>Display Name</label><input id="regName" placeholder="Your Name"></div>
+    <div class="fg"><label>Password</label><input id="regPass" type="password" placeholder="min 4 chars"></div>
+    <button class="btn btn-p" style="width:100%;margin-top:8px" onclick="doRegister()">Create Account</button>
+    <div id="regErr" style="color:var(--rd);font-size:12px;margin-top:8px"></div>
+  </div>
+</div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
 <div class="sidebar">
-  <div class="sidebar-brand">
-    <h1>Hive</h1>
-    <p>Agent Platform v0.2</p>
+  <div class="sb-head"><h2>Hive</h2><button class="btn btn-o btn-s" onclick="doLogout()">Logout</button></div>
+  <div class="sb-user" id="sbUser"></div>
+  <div class="sb-nav">
+    <div class="sb-nav-item active" data-view="chat" onclick="switchView('chat')">Chat</div>
+    <div class="sb-nav-item" data-view="agents" onclick="switchView('agents')">Agents</div>
+    <div class="sb-nav-item" data-view="settings" onclick="switchView('settings')">Settings</div>
+    <div class="sb-nav-item" data-view="hardware" onclick="switchView('hardware')">System</div>
   </div>
-  <div class="nav" id="navTabs">
-    <div class="nav-item active" data-page="chat"><span class="icon">&#9679;</span> Chat</div>
-    <div class="nav-item" data-page="models"><span class="icon">&#9670;</span> Models</div>
-    <div class="nav-item" data-page="router"><span class="icon">&#9654;</span> Router</div>
-    <div class="nav-item" data-page="arena"><span class="icon">&#9876;</span> Arena</div>
-    <div class="nav-item" data-page="costs"><span class="icon">&#9733;</span> Costs</div>
-    <div class="nav-item" data-page="keys"><span class="icon">&#9711;</span> API Keys</div>
-    <div class="nav-item" data-page="settings"><span class="icon">&#9881;</span> Settings</div>
-  </div>
-  <div class="sidebar-footer">
-    <button class="btn btn-accent btn-full" onclick="openModal()">New Agent</button>
-  </div>
-  <div class="sidebar-agents">
-    <div class="sidebar-agents-label">Agents</div>
-    <div id="agentList"></div>
+  <div class="sb-rooms" id="sbRooms">
+    <div class="sb-rooms-label">Rooms</div>
+    <div id="roomList"></div>
+    <div style="padding:8px"><button class="btn btn-o btn-s" style="width:100%" onclick="showModal('newRoom')">+ New Room</button></div>
   </div>
 </div>
 <div class="main">
-
-<div class="page active" id="page-chat">
-  <div class="topbar"><h2 id="chatTitle">Select an agent</h2><div id="chatActions"></div></div>
-  <div class="chat-area" id="messages"><div class="empty">Select or create an agent to begin</div></div>
-  <div class="metrics" id="statsBar" style="display:none">
-    <span>LLM calls: <span class="val" id="statCalls">0</span></span>
-    <span>Tools: <span class="val" id="statTools">0</span></span>
-    <span>Tokens: <span class="val" id="statTokens">0</span></span>
-    <span>Cost: <span class="val" id="statCost">$0.00</span></span>
-    <span>Latency: <span class="val" id="statLatency">0ms</span></span>
-  </div>
-  <div class="chat-bar" id="chatInput" style="display:none">
-    <input id="userMsg" placeholder="Send a message..." onkeydown="if(event.key==='Enter')sendMessage()">
-    <button class="btn btn-accent" onclick="sendMessage()">Send</button>
-  </div>
-</div>
-
-<div class="page" id="page-models">
-  <div class="topbar"><h2>Model Intelligence Rankings</h2><span style="font-size:11px;color:var(--muted)">Artificial Analysis, August 2026</span></div>
-  <div class="content" id="modelsList"></div>
-</div>
-
-<div class="page" id="page-router">
-  <div class="topbar"><h2>Model Router</h2></div>
-  <div class="content">
-    <div class="card">
-      <div class="card-title">Analyze Task</div>
-      <div class="form-group"><label class="form-label">Describe your task</label><textarea id="routerPrompt" placeholder="e.g., Write a Python function to implement binary search with error handling..."></textarea></div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Priority</label><select id="routerPriority"><option value="balanced">Balanced</option><option value="intelligence">Maximum Intelligence</option><option value="speed">Speed</option><option value="budget">Budget</option></select></div>
-        <div class="form-group"><label class="form-label">Requirements</label><div style="display:flex;gap:16px;margin-top:6px"><label style="font-size:13px;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" id="routerVision" style="width:auto"> Vision</label><label style="font-size:13px;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" id="routerPrivacy" style="width:auto"> Privacy</label></div></div>
-      </div>
-      <button class="btn btn-accent" onclick="analyzePrompt()">Analyze</button>
-      <div id="routerResult"></div>
+  <!-- Chat view -->
+  <div id="view-chat" class="view" style="display:flex;flex-direction:column;flex:1">
+    <div class="topbar"><h3 id="chatTitle">Select a room</h3><div id="chatActions"></div></div>
+    <div class="chat-msgs" id="chatMsgs"><div style="display:flex;align-items:center;justify-content:center;flex:1;color:var(--mt)">Select or create a room to start chatting</div></div>
+    <div class="chat-bar" id="chatBar" style="display:none">
+      <input id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMsg()">
+      <button class="btn btn-o btn-s" onclick="showModal('uploadFile')" title="Upload file">File</button>
+      <button class="btn btn-o btn-s" onclick="showModal('inviteBot')" title="Invite bot">Bot</button>
+      <button class="btn btn-p" onclick="sendMsg()">Send</button>
     </div>
   </div>
-</div>
-
-<div class="page" id="page-arena">
-  <div class="topbar"><h2>Model Arena</h2></div>
-  <div class="content">
-    <div class="card">
-      <div class="card-title">Compare Models</div>
-      <div class="form-group"><label class="form-label">Prompt</label><textarea id="arenaPrompt" placeholder="Enter a prompt to test across multiple models..."></textarea></div>
-      <div class="form-group"><label class="form-label">Providers (comma-separated, or empty for all configured)</label><input id="arenaProviders" placeholder="e.g., ollama, openai, anthropic"></div>
-      <button class="btn btn-accent" onclick="runArena()">Run Benchmark</button>
-      <div id="arenaResult" style="margin-top:12px"></div>
-    </div>
+  <!-- Agents view -->
+  <div id="view-agents" class="view" style="display:none;flex-direction:column;flex:1">
+    <div class="topbar"><h3>Agents</h3><button class="btn btn-p btn-s" onclick="showModal('newAgent')">+ New Agent</button></div>
+    <div class="content" id="agentsList"></div>
   </div>
-</div>
-
-<div class="page" id="page-costs">
-  <div class="topbar"><h2>Cost Optimization</h2><button class="btn btn-outline btn-sm" onclick="loadCosts()">Refresh</button></div>
-  <div class="content" id="costsContent"></div>
-</div>
-
-<div class="page" id="page-keys">
-  <div class="topbar"><h2>API Keys</h2></div>
-  <div class="content">
-    <div class="card">
-      <div class="card-title">Create Key</div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Name</label><input id="keyName" placeholder="my-application"></div>
-        <div class="form-group"><label class="form-label">Agent ID (optional)</label><input id="keyAgent" placeholder="agent-uuid"></div>
+  <!-- Settings view -->
+  <div id="view-settings" class="view" style="display:none;flex-direction:column;flex:1">
+    <div class="topbar"><h3>Settings</h3></div>
+    <div class="content">
+      <div class="settings-section">
+        <h4>API Keys</h4>
+        <p style="font-size:12px;color:var(--mt);margin-bottom:12px">Add your own API keys. Each user has their own keys — you pay for your own usage.</p>
+        <div id="keysList"></div>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <select id="keyProvider" style="width:160px"><option value="openai">OpenAI</option><option value="anthropic">Anthropic</option><option value="groq">Groq</option><option value="mistral">Mistral</option><option value="openrouter">OpenRouter</option><option value="xai">xAI</option><option value="deepseek">DeepSeek</option><option value="gemini">Gemini</option></select>
+          <input id="keyValue" placeholder="sk-..." style="flex:1">
+          <button class="btn btn-p btn-s" onclick="saveKey()">Save</button>
+        </div>
       </div>
-      <button class="btn btn-accent" onclick="createKey()">Generate Key</button>
-      <div id="keyResult" style="margin-top:8px"></div>
-    </div>
-    <div class="card"><div class="card-title">Active Keys</div><div id="keysList"></div></div>
-  </div>
-</div>
-
-<div class="page" id="page-settings">
-  <div class="topbar"><h2>Settings</h2></div>
-  <div class="content">
-    <div class="card">
-      <div class="card-title">Create Agent</div>
-      <div class="form-group"><label class="form-label">Name</label><input id="sAgentName" placeholder="Research Assistant"></div>
-      <div class="form-group"><label class="form-label">System Prompt</label><textarea id="sAgentPrompt" rows="3">You are a helpful assistant.</textarea></div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Provider</label><select id="sAgentProvider"></select></div>
-        <div class="form-group"><label class="form-label">Model (empty for default)</label><input id="sAgentModel" placeholder="llama3.3"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Temperature</label><input id="sAgentTemp" type="number" value="0.7" min="0" max="2" step="0.1"></div>
-        <div class="form-group"><label class="form-label">Max Tokens</label><input id="sAgentMaxTok" type="number" value="4096" min="100" max="128000"></div>
-      </div>
-      <button class="btn btn-accent" onclick="createAgentFull()">Create Agent</button>
-    </div>
-    <div class="card"><div class="card-title">Provider Status</div><div id="providerStatus"></div></div>
-  </div>
-</div>
-
-<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center">
-  <div class="card" style="width:420px;max-width:90vw;margin:0">
-    <div class="card-title">New Agent</div>
-    <div class="form-group"><label class="form-label">Name</label><input id="nName" placeholder="My Agent"></div>
-    <div class="form-group"><label class="form-label">System Prompt</label><textarea id="nPrompt">You are a helpful assistant.</textarea></div>
-    <div class="form-group"><label class="form-label">Provider</label><select id="nProvider"></select></div>
-    <div class="form-group"><label class="form-label">Model (empty for default)</label><input id="nModel"></div>
-    <div style="display:flex;gap:8px;margin-top:16px">
-      <button class="btn btn-accent" onclick="createAgentModal()">Create</button>
-      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- Setup Wizard -->
-<div id="wizard" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;align-items:center;justify-content:center">
-  <div class="card" style="width:520px;max-width:92vw;margin:0;padding:24px">
-    <div style="text-align:center;margin-bottom:20px">
-      <div style="font-size:20px;font-weight:700;letter-spacing:-0.02em">Welcome to Hive</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:4px">Let's get you set up</div>
-      <div id="wizardDots" style="margin-top:12px"></div>
-    </div>
-
-    <div id="wizard-step-1" class="wizard-step" style="display:none">
-      <div class="card-title">Step 1: Configure Providers</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Hive connects to LLM providers. Add your API keys in the <code>.env</code> file, then restart the server.</p>
-      <div id="wizardProviders" style="margin-bottom:16px"></div>
-      <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Ollama and LM Studio work locally without API keys. For cloud providers, edit <code>.env</code> and add your keys.</p>
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button class="btn btn-outline" onclick="hideWizard()">Skip setup</button>
-        <button class="btn btn-accent" onclick="showWizardStep(2)">Next</button>
-      </div>
-    </div>
-
-    <div id="wizard-step-2" class="wizard-step" style="display:none">
-      <div class="card-title">Step 2: Create Your First Agent</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Agents are AI assistants with their own personality, model, and tools.</p>
-      <div class="form-group"><label class="form-label">Agent Name</label><input id="wAgentName" placeholder="e.g., Research Assistant" value="Assistant"></div>
-      <div class="form-group"><label class="form-label">Provider</label><select id="wAgentProvider"></select></div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
-        <button class="btn btn-outline" onclick="showWizardStep(1)">Back</button>
-        <button class="btn btn-accent" onclick="wizardCreateAgent()">Create Agent</button>
-      </div>
-    </div>
-
-    <div id="wizard-step-3" class="wizard-step" style="display:none">
-      <div class="card-title">Step 3: You're Ready</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Your agent is ready. Select it from the sidebar and start chatting.</p>
-      <div style="background:var(--surface2);border-radius:6px;padding:12px;font-size:13px;margin-bottom:16px">
-        <div style="font-weight:600;margin-bottom:4px">Quick tips:</div>
-        <div style="color:var(--text2)">- Use <b>Models</b> tab to see all available LLMs and their rankings</div>
-        <div style="color:var(--text2)">- Use <b>Router</b> tab to auto-select the best model for a task</div>
-        <div style="color:var(--text2)">- Use <b>Arena</b> tab to compare models side-by-side</div>
-        <div style="color:var(--text2)">- Use <b>Costs</b> tab to monitor spending and get optimization tips</div>
-      </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button class="btn btn-accent" onclick="wizardFinish()">Start Using Hive</button>
-      </div>
-    </div>
-
-    <div id="wizard-step-4" class="wizard-step" style="display:none">
-      <div class="card-title">Agent Created</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Your agent has been created. You can start chatting now or explore the platform.</p>
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button class="btn btn-accent" onclick="wizardFinish()">Start Chatting</button>
+      <div class="settings-section">
+        <h4>Profile</h4>
+        <div id="profileInfo"></div>
       </div>
     </div>
   </div>
+  <!-- Hardware view -->
+  <div id="view-hardware" class="view" style="display:none;flex-direction:column;flex:1">
+    <div class="topbar"><h3>System Info</h3><button class="btn btn-o btn-s" onclick="loadHardware()">Refresh</button></div>
+    <div class="content" id="hwContent"></div>
+  </div>
+</div>
 </div>
 
-</div>
+<!-- MODALS -->
+<div class="modal-bg" id="modal-newRoom"><div class="modal">
+  <h3>New Room</h3>
+  <div class="fg"><label>Room Name</label><input id="nrName" placeholder="General"></div>
+  <div class="fg"><label>Type</label><select id="nrType"><option value="group">Group Chat</option><option value="dm">Direct Message</option></select></div>
+  <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+    <button class="btn btn-o" onclick="hideModal('newRoom')">Cancel</button>
+    <button class="btn btn-p" onclick="createRoom()">Create</button>
+  </div>
+</div></div>
+
+<div class="modal-bg" id="modal-newAgent"><div class="modal">
+  <h3>New Agent</h3>
+  <div class="fg"><label>Name</label><input id="naName" placeholder="Research Assistant"></div>
+  <div class="fg"><label>System Prompt</label><textarea id="naPrompt" rows="3">You are a helpful assistant.</textarea></div>
+  <div class="fg"><label>Provider</label><select id="naProvider"></select></div>
+  <div class="fg"><label>Model (empty = default)</label><input id="naModel" placeholder="gpt-4.1-mini"></div>
+  <div class="fg"><label>Skills (MD content, optional)</label><textarea id="naSkills" rows="2" placeholder="Additional instructions or knowledge..."></textarea></div>
+  <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+    <button class="btn btn-o" onclick="hideModal('newAgent')">Cancel</button>
+    <button class="btn btn-p" onclick="createAgent()">Create</button>
+  </div>
+</div></div>
+
+<div class="modal-bg" id="modal-inviteBot"><div class="modal">
+  <h3>Invite Bot to Room</h3>
+  <div class="fg"><label>Select Agent</label><select id="ibAgent"></select></div>
+  <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+    <button class="btn btn-o" onclick="hideModal('inviteBot')">Cancel</button>
+    <button class="btn btn-p" onclick="inviteBot()">Invite</button>
+  </div>
+</div></div>
+
+<div class="modal-bg" id="modal-uploadFile"><div class="modal">
+  <h3>Upload File</h3>
+  <div class="fg"><label>File</label><input type="file" id="ufFile"></div>
+  <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+    <button class="btn btn-o" onclick="hideModal('uploadFile')">Cancel</button>
+    <button class="btn btn-p" onclick="uploadFile()">Upload</button>
+  </div>
+</div></div>
+
 <script>
-let cur=null,convId=null;
+let token=null,userId=null,username=null,curRoom=null,ws=null;
 const $=id=>document.getElementById(id);
+const api=(url,opts={})=>fetch(url,{...opts,headers:{'Content-Type':'application/json',...opts.headers}}).then(r=>r.json());
 
-document.querySelectorAll('.nav-item').forEach(el=>{
-  el.addEventListener('click',()=>showPage(el.dataset.page));
-});
+// Auth
+function showAuthTab(t){document.querySelectorAll('#auth .tab').forEach((el,i)=>el.classList.toggle('active',i===(t==='login'?0:1)));$('auth-login').style.display=t==='login'?'block':'none';$('auth-register').style.display=t==='register'?'block':'none';}
+async function doRegister(){const u=$('regUser').value,p=$('regPass').value,n=$('regName').value;if(!u||!p){$('regErr').textContent='Fill all fields';return;}const r=await api('/api/auth/register',{method:'POST',body:JSON.stringify({username:u,password:p,display_name:n})});if(r.token){token=r.token;userId=r.id;username=r.username;enterApp();}else{$('regErr').textContent=r.detail||'Error';}}
+async function doLogin(){const u=$('loginUser').value,p=$('loginPass').value;if(!u||!p){$('loginErr').textContent='Fill all fields';return;}const r=await api('/api/auth/login',{method:'POST',body:JSON.stringify({username:u,password:p})});if(r.token){token=r.token;userId=r.id;username=r.username;enterApp();}else{$('loginErr').textContent=r.detail||'Invalid credentials';}}
+function doLogout(){token=null;userId=null;username=null;if(ws)ws.close();$('app').style.display='none';$('auth').style.display='flex';}
+function enterApp(){$('auth').style.display='none';$('app').style.display='flex';$('sbUser').textContent=username;loadRooms();loadProviders();loadHardware();}
 
-function showPage(name){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(t=>t.classList.remove('active'));
-  const page=$('page-'+name);if(page)page.classList.add('active');
-  const tabs=document.querySelectorAll('.nav-item');
-  const idx=['chat','models','router','arena','costs','keys','settings'].indexOf(name);
-  if(idx>=0&&tabs[idx])tabs[idx].classList.add('active');
-  if(name==='models')loadModels();
-  if(name==='costs')loadCosts();
-  if(name==='keys')loadKeys();
-  if(name==='settings')loadProviders();
-}
+// Views
+function switchView(v){document.querySelectorAll('.view').forEach(el=>el.style.display='none');$('view-'+v).style.display='flex';document.querySelectorAll('.sb-nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view===v));if(v==='agents')loadAgents();if(v==='settings')loadKeys();if(v==='hardware')loadHardware();}
 
-async function loadAgents(){
-  const r=await fetch('/api/agents');const agents=await r.json();
-  $('agentList').innerHTML=agents.map(a=>`<div class="agent-item ${cur?.id===a.id?'active':''}" onclick="selectAgent('${a.id}')"><div class="agent-name">${a.name}</div><div class="agent-meta">${a.provider} / ${a.model||'default'}</div></div>`).join('')||'<div style="padding:8px 12px;font-size:12px;color:var(--muted)">No agents yet</div>';
-  const pr=await fetch('/api/providers');const providers=await pr.json();
-  const opts=providers.map(p=>`<option value="${p.name}">${p.name}${p.configured?'':'  (not configured)'}</option>`).join('');
-  ['nProvider','sAgentProvider'].forEach(id=>{const el=$(id);if(el)el.innerHTML=opts;});
-}
+// Rooms
+async function loadRooms(){const rooms=await api('/api/rooms?user_id='+userId);$('roomList').innerHTML=rooms.map(r=>`<div class="room-item ${curRoom===r.id?'active':''}" onclick="openRoom('${r.id}','${r.name}','${r.type}')"><div class="room-name">${r.name||r.id}</div><div class="room-meta">${r.type}</div></div>`).join('')||'<div style="padding:8px 12px;font-size:12px;color:var(--mt)">No rooms yet</div>';}
+async function openRoom(id,name,type){curRoom=id;$('chatTitle').textContent=name;loadRooms();$('chatBar').style.display='flex';connectWS(id);const msgs=await api('/api/rooms/'+id+'/messages');$('chatMsgs').innerHTML=msgs.map(m=>renderMsg(m)).join('')||'<div style="display:flex;align-items:center;justify-content:center;flex:1;color:var(--mt)">No messages yet</div>';$('chatMsgs').scrollTop=$('chatMsgs').scrollHeight;}
+function renderMsg(m){const cls=m.sender_type==='agent'?'msg-bot':(m.sender_id===userId?'msg-me':'msg-other');const sender=m.sender_type==='agent'?'bot':'user';return `<div class="msg ${cls}"><div class="msg-sender">${sender}: ${m.sender_id}</div>${esc(m.content)}</div>`;}
 
-async function selectAgent(id){
-  const r=await fetch('/api/agents/'+id);cur=await r.json();convId=null;
-  $('chatTitle').textContent=cur.name;$('messages').innerHTML='';$('chatInput').style.display='flex';$('statsBar').style.display='flex';
-  $('chatActions').innerHTML=`<button class="btn btn-danger btn-sm" onclick="deleteAgent('${id}')">Delete</button>`;
-  showPage('chat');loadAgents();
-}
+// WebSocket
+function connectWS(roomId){if(ws)ws.close();ws=new WebSocket('ws://'+location.host+'/ws/'+roomId+'?token='+token);ws.onmessage=e=>{const d=JSON.parse(e.data);if(d.type==='new_message'){$('chatMsgs').innerHTML+=renderMsg(d.message);$('chatMsgs').scrollTop=$('chatMsgs').scrollHeight;}if(d.type==='file_shared'){$('chatMsgs').innerHTML+=`<div class="msg-file">File: <a href="${d.file.url}" style="color:var(--bl)">${d.file.filename}</a> (${d.file.size} bytes)</div>`;$('chatMsgs').scrollTop=$('chatMsgs').scrollHeight;}};}
+async function sendMsg(){const inp=$('chatInput');const c=inp.value.trim();if(!c||!curRoom)return;inp.value='';await api('/api/rooms/'+curRoom+'/messages?user_id='+userId,{method:'POST',body:JSON.stringify({content:c})});}
 
-async function deleteAgent(id){if(!confirm('Delete this agent?'))return;await fetch('/api/agents/'+id,{method:'DELETE'});cur=null;$('chatTitle').textContent='Select an agent';$('messages').innerHTML='<div class="empty">Select or create an agent</div>';$('chatInput').style.display='none';$('statsBar').style.display='none';$('chatActions').innerHTML='';loadAgents();}
+// Agents
+async function loadAgents(){const agents=await api('/api/agents');$('agentsList').innerHTML=agents.map(a=>`<div class="hw-card"><div style="display:flex;justify-content:space-between"><strong>${a.name}</strong><span class="tag tag-gr">${a.provider}</span></div><div style="font-size:12px;color:var(--mt);margin-top:4px">${a.system_prompt.substring(0,100)}...</div><div style="margin-top:8px;display:flex;gap:8px"><button class="btn btn-o btn-s" onclick="showAgentSkills('${a.id}')">Skills</button><button class="btn btn-d btn-s" onclick="deleteAgent('${a.id}')">Delete</button></div></div>`).join('')||'<div style="color:var(--mt)">No agents yet. Create one!</div>';}
+async function createAgent(){const n=$('naName').value,p=$('naPrompt').value,pr=$('naProvider').value,m=$('naModel').value,sk=$('naSkills').value;if(!n)return;const r=await api('/api/agents',{method:'POST',body:JSON.stringify({name:n,system_prompt:p,provider:pr,model:m})});if(sk&&r.id){await api('/api/agents/'+r.id+'/skills',{method:'POST',body:JSON.stringify({name:'custom',content:sk,skill_type:'prompt'})});}hideModal('newAgent');loadAgents();}
+async function deleteAgent(id){await fetch('/api/agents/'+id,{method:'DELETE'});loadAgents();}
+async function showAgentSkills(id){const skills=await api('/api/agents/'+id+'/skills');alert('Skills: '+(skills.length?skills.map(s=>s.name+' ('+s.skill_type+')').join(', '):'none'));}
 
-function openModal(){$('modal').style.display='flex';loadAgents();}
-function closeModal(){$('modal').style.display='none';}
+// Keys
+async function loadKeys(){const keys=await api('/api/users/keys?user_id='+userId);$('keysList').innerHTML=keys.map(k=>`<div class="key-row"><span>${k.provider} ${k.model?'('+k.model+')':''}</span><button class="btn btn-d btn-s" onclick="deleteKey('${k.provider}')">Remove</button></div>`).join('')||'<div style="color:var(--mt);font-size:13px">No API keys configured. Add one below.</div>';$('profileInfo').innerHTML=`<div style="font-size:13px">Username: <strong>${username}</strong></div><div style="font-size:13px;color:var(--mt)">ID: ${userId}</div>`;}
+async function saveKey(){const p=$('keyProvider').value,k=$('keyValue').value;if(!k)return;await api('/api/users/keys?user_id='+userId,{method:'POST',body:JSON.stringify({provider:p,api_key:k})});$('keyValue').value='';loadKeys();}
+async function deleteKey(p){await fetch('/api/users/keys/'+p+'?user_id='+userId,{method:'DELETE'});loadKeys();}
 
-async function createAgentModal(){
-  const body={name:$('nName').value,system_prompt:$('nPrompt').value,provider:$('nProvider').value,model:$('nModel').value};
-  if(!body.name)return;await fetch('/api/agents',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});closeModal();$('nName').value='';loadAgents();
-}
+// Hardware
+async function loadHardware(){const r=await api('/api/hardware');const h=r.hardware;$('hwContent').innerHTML=`<div class="hw-card"><h4 style="margin-bottom:8px">Hardware</h4><div class="hw-stat"><span>OS</span><span class="val">${h.os}</span></div><div class="hw-stat"><span>CPU Cores</span><span class="val">${h.cpu_cores}</span></div><div class="hw-stat"><span>RAM</span><span class="val">${h.ram_gb} GB</span></div><div class="hw-stat"><span>GPU</span><span class="val">${h.gpu}</span></div><div class="hw-stat"><span>VRAM</span><span class="val">${h.gpu_vram_gb} GB</span></div></div><div class="hw-card"><h4 style="margin-bottom:8px">Recommendation</h4><p style="font-size:13px;color:var(--t2)">${r.recommendation}</p><div class="model-sug">${r.suggested_models.map(m=>`<div class="model-chip">${m.size} ${m.quant||''} ${m.fits?'<span class="tag tag-g">fits</span>':'<span class="tag tag-r">wont fit</span>'}</div>`).join('')}</div></div>`;}
 
-async function createAgentFull(){
-  const body={name:$('sAgentName').value,system_prompt:$('sAgentPrompt').value,provider:$('sAgentProvider').value,model:$('sAgentModel').value,temperature:parseFloat($('sAgentTemp').value),max_tokens:parseInt($('sAgentMaxTok').value)};
-  if(!body.name)return;await fetch('/api/agents',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});$('sAgentName').value='';loadAgents();
-}
+// Room/Agent creation helpers
+async function createRoom(){const n=$('nrName').value,t=$('nrType').value;if(!n)return;await api('/api/rooms?user_id='+userId,{method:'POST',body:JSON.stringify({name:n,type:t})});hideModal('newRoom');loadRooms();}
+async function loadProviders(){const p=await api('/api/providers');const opts=p.map(x=>`<option value="${x.name}">${x.name}${x.configured?'':' (no key)'}</option>`).join('');$('naProvider').innerHTML=opts;}
+async function inviteBot(){const a=$('ibCharacter').value;if(!a||!curRoom)return;await api('/api/rooms/'+curRoom+'/members',{method:'POST',body:JSON.stringify({member_type:'agent',member_id:a})});hideModal('inviteBot');}
+async function uploadFile(){const f=$('ufFile').files[0];if(!f||!curRoom)return;const reader=new FileReader();reader.onload=async()=>{const b64=reader.result.split(',')[1];await api('/api/rooms/'+curRoom+'/files?user_id='+userId+'&filename='+f.name,{method:'POST',body:JSON.stringify({content:b64})});hideModal('uploadFile');};reader.readAsDataURL(f);}
 
-async function sendMessage(){
-  const input=$('userMsg');const msg=input.value.trim();if(!msg||!cur)return;input.value='';
-  const msgs=$('messages');msgs.innerHTML+=`<div class="bubble bubble-user">${esc(msg)}</div><div class="bubble bubble-system">Processing...</div>`;msgs.scrollTop=msgs.scrollHeight;
-  try{
-    const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent_id:cur.id,message:msg,conversation_id:convId})});
-    const data=await r.json();convId=data.conversation_id;
-    msgs.querySelector('.bubble-system:last-child')?.remove();
-    msgs.innerHTML+=`<div class="bubble bubble-assistant">${esc(data.response).replace(/\\n/g,'<br>')}</div>`;
-    const s=data.stats;$('statCalls').textContent=s.llm_calls;$('statTools').textContent=s.tool_executions;$('statTokens').textContent=s.tokens_in+s.tokens_out;$('statCost').textContent='$'+s.cost_usd.toFixed(4);$('statLatency').textContent=s.latency_ms+'ms';
-  }catch(e){msgs.querySelector('.bubble-system:last-child')?.remove();msgs.innerHTML+=`<div class="bubble bubble-system" style="color:var(--red)">Error: ${e.message}</div>`;}
-  msgs.scrollTop=msgs.scrollHeight;
-}
-
-async function loadModels(){
-  const r=await fetch('/api/models');const models=await r.json();
-  $('modelsList').innerHTML=`<table><thead><tr><th>#</th><th>Model</th><th>Intelligence</th><th>Context</th><th>Speed</th><th>Cost (in / out per 1M)</th><th>Capabilities</th></tr></thead><tbody>${
-    models.map((m,i)=>`<tr><td style="color:var(--accent2);font-weight:700">${i+1}</td><td style="font-weight:600">${m.model}</td><td><span class="tag ${m.intelligence>=60?'tag-green':m.intelligence>=50?'tag-blue':m.intelligence>=40?'tag-amber':'tag-gray'}">${m.intelligence}</span></td><td>${fmtCtx(m.context_window)}</td><td><span class="tag ${m.speed_tier==='ultra'?'tag-green':m.speed_tier==='fast'?'tag-blue':'tag-gray'}">${m.speed_tier}</span></td><td style="font-variant-numeric:tabular-nums">$${m.cost_in_per_m} / $${m.cost_out_per_m}</td><td>${m.vision?'<span class="tag tag-purple" style="margin-right:4px">vision</span>':''}${m.tools?'<span class="tag tag-blue">tools</span>':''}</td></tr>`).join('')
-  }</tbody></table>`;
-}
-function fmtCtx(n){if(n>=1e6)return(n/1e6).toFixed(n%1e6===0?0:1)+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return n;}
-
-async function analyzePrompt(){
-  const body={prompt:$('routerPrompt').value,priority:$('routerPriority').value,vision:$('routerVision').checked,privacy:$('routerPrivacy').checked};
-  if(!body.prompt)return;
-  const r=await fetch('/api/router',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  const d=await r.json();
-  $('routerResult').innerHTML=`<div class="router-result"><div class="router-model">${d.provider} / ${d.model}</div><div class="router-reason">${d.reason}</div><div class="router-meta"><span>Intelligence: <b>${d.intelligence}/100</b></span><span>Speed: <b>${d.speed_tier}</b></span><span>Cost tier: <b>${d.cost_tier}</b></span><span>Est. $${d.estimated_cost_per_1k_tokens}/1K tokens</span></div></div>`;
-}
-
-async function runArena(){
-  const prompt=$('arenaPrompt').value;if(!prompt)return;
-  const provStr=$('arenaProviders').value;const providers=provStr?provStr.split(',').map(s=>s.trim()):[];
-  $('arenaResult').innerHTML='<div class="bubble bubble-system">Running benchmark...</div>';
-  try{
-    const r=await fetch('/api/arena',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt,providers})});
-    const d=await r.json();
-    $('arenaResult').innerHTML=`<table><thead><tr><th>#</th><th>Provider</th><th>Model</th><th>Latency</th><th>Tokens</th><th>Cost</th></tr></thead><tbody>${
-      d.results.map((r,i)=>`<tr><td style="font-weight:700;color:${i===0?'var(--green)':'var(--muted)'}">${i+1}</td><td>${r.provider}</td><td style="font-weight:600">${r.model}</td><td style="font-variant-numeric:tabular-nums">${r.latency_ms}ms</td><td style="font-variant-numeric:tabular-nums">${r.tokens_in+r.tokens_out}</td><td style="font-variant-numeric:tabular-nums">$${r.cost_usd.toFixed(4)}</td></tr>`).join('')
-    }</tbody></table><div style="margin-top:16px"><div style="font-size:13px;font-weight:600;margin-bottom:8px">Responses</div>${
-      d.results.map(r=>`<div class="card"><div style="font-size:11px;color:var(--muted);margin-bottom:4px">${r.provider} / ${r.model} &middot; ${r.latency_ms}ms</div><div style="font-size:13px">${esc(r.response).substring(0,300).replace(/\\n/g,'<br>')}${r.response.length>300?'...':''}</div></div>`).join('')
-    }</div>`;
-  }catch(e){$('arenaResult').innerHTML=`<div class="bubble bubble-system" style="color:var(--red)">Error: ${e.message}</div>`;}
-}
-
-async function loadCosts(){
-  const r=await fetch('/api/costs');const d=await r.json();
-  if(d.total_requests===0){$('costsContent').innerHTML='<div class="empty">No usage data yet. Chat with an agent to generate data.</div>';return;}
-  $('costsContent').innerHTML=`<div class="grid grid-4" style="margin-bottom:16px"><div class="card stat-card"><div class="stat-value" style="color:var(--green)">$${d.total_cost.toFixed(4)}</div><div class="stat-label">Total Cost</div></div><div class="card stat-card"><div class="stat-value" style="color:var(--accent2)">${d.total_requests}</div><div class="stat-label">Requests</div></div><div class="card stat-card"><div class="stat-value" style="color:var(--blue)">$${d.potential_savings.toFixed(4)}</div><div class="stat-label">Potential Savings</div></div><div class="card stat-card"><div class="stat-value" style="color:var(--amber)">${d.savings_pct}%</div><div class="stat-label">Optimization</div></div></div>${
-    Object.entries(d.by_model).map(([m,v])=>`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><strong style="font-size:13px">${m}</strong><span style="color:var(--green);font-weight:600;font-size:13px">$${v.cost.toFixed(4)}</span></div><div style="font-size:12px;color:var(--muted);margin-top:4px">${v.requests} requests &middot; avg $${v.avg_cost_per_request.toFixed(4)}/req &middot; avg ${v.avg_latency_ms}ms</div></div>`).join('')
-  }${d.recommendations.length?`<div style="font-size:14px;font-weight:600;margin:16px 0 8px">Recommendations</div>${d.recommendations.map(r=>`<div class="card rec-card"><div style="font-weight:600;font-size:13px">${r.type==='model_downgrade'?'Switch to cheaper model':r.type==='enable_caching'?'Enable response caching':'Speed optimization'}</div><div style="font-size:12px;color:var(--text2);margin-top:4px">${r.reason}</div><div style="font-size:12px;color:var(--green);margin-top:4px;font-weight:500">Save $${r.potential_savings.toFixed(4)}</div></div>`).join('')}`:''}`;
-}
-
-async function loadKeys(){
-  const r=await fetch('/api/keys');const keys=await r.json();
-  $('keysList').innerHTML=keys.length?`<table><thead><tr><th>Name</th><th>Requests</th><th>Last Used</th><th>Status</th><th></th></tr></thead><tbody>${keys.map(k=>`<tr><td style="font-weight:500">${k.name}</td><td style="font-variant-numeric:tabular-nums">${k.request_count}</td><td style="font-size:12px">${k.last_used?new Date(k.last_used*1000).toLocaleString():'never'}</td><td><span class="tag ${k.enabled?'tag-green':'tag-red'}">${k.enabled?'active':'revoked'}</span></td><td><button class="btn btn-danger btn-sm" onclick="revokeKey('${k.name}')">Revoke</button></td></tr>`).join('')}</tbody></table>`:'<div style="font-size:13px;color:var(--muted)">No API keys created yet.</div>';
-}
-
-async function createKey(){
-  const name=$('keyName').value;if(!name)return;
-  const r=await fetch('/api/keys',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,agent_id:$('keyAgent').value||null})});
-  const d=await r.json();$('keyResult').innerHTML=`<div class="card" style="border-color:var(--green)"><div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:8px">Key generated successfully</div><div class="key-code">${d.key}</div><div style="font-size:11px;color:var(--red);margin-top:8px">Save this key now. It will not be displayed again.</div></div>`;$('keyName').value='';loadKeys();
-}
-
-async function revokeKey(name){if(!confirm('Revoke key "'+name+'"?'))return;await fetch('/api/keys/'+name,{method:'DELETE'});loadKeys();}
-
-async function loadProviders(){
-  const r=await fetch('/api/providers');const providers=await r.json();
-  $('providerStatus').innerHTML=providers.map(p=>`<div class="provider-row"><span class="provider-name">${p.name}</span><span class="tag ${p.configured?'tag-green':'tag-gray'}">${p.configured?'configured':'not configured'}</span></div>`).join('');
-}
-
+// Modals
+function showModal(id){$(('modal-'+id)).classList.add('show');if(id==='inviteBot'){api('/api/agents').then(a=>$('ibAgent').innerHTML=a.map(x=>`<option value="${x.id}">${x.name}</option>`).join(''));}}
+function hideModal(id){$('modal-'+id).classList.remove('show');}
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-loadAgents();
 
-// ── Setup Wizard ──
-const WIZARD_KEY = 'hive_wizard_done';
-function shouldShowWizard(){return !localStorage.getItem(WIZARD_KEY);}
-function hideWizard(){localStorage.setItem(WIZARD_KEY,'1');$('wizard').style.display='none';}
-
-async function initWizard(){
-  if(!shouldShowWizard())return;
-  const [providers,agents]=await Promise.all([fetch('/api/providers').then(r=>r.json()),fetch('/api/agents').then(r=>r.json())]);
-  const configured=providers.filter(p=>p.configured);
-  const step=agents.length===0?(configured.length===0?1:2):3;
-  showWizardStep(step);
-  $('wizard').style.display='flex';
-  // Populate provider list in step 1
-  $('wizardProviders').innerHTML=providers.map(p=>`<div class="provider-row"><span class="provider-name">${p.name}</span><span class="tag ${p.configured?'tag-green':'tag-gray'}">${p.configured?'ready':'not configured'}</span></div>`).join('');
-  // Populate provider select in step 2
-  $('wAgentProvider').innerHTML=configured.map(p=>`<option value="${p.name}">${p.name} (${p.model})</option>`).join('')||providers.map(p=>`<option value="${p.name}">${p.name}${p.configured?'':' (no key)'}</option>`).join('');
-}
-function showWizardStep(n){
-  document.querySelectorAll('.wizard-step').forEach(s=>s.style.display='none');
-  const el=$('wizard-step-'+n);if(el)el.style.display='block';
-  $('wizardDots').innerHTML=[1,2,3,4].map(i=>`<span style="width:8px;height:8px;border-radius:50%;background:${i===n?'var(--accent)':'var(--border)'};display:inline-block;margin:0 3px"></span>`).join('');
-}
-async function wizardCreateAgent(){
-  const name=$('wAgentName').value||'Assistant';
-  const provider=$('wAgentProvider').value;
-  const body={name,system_prompt:'You are a helpful assistant.',provider,model:''};
-  await fetch('/api/agents',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  showWizardStep(4);
-  loadAgents();
-}
-function wizardFinish(){hideWizard();loadAgents();}
-initWizard();
+// Check saved session
+if(localStorage.getItem('hive_token')){token=localStorage.getItem('hive_token');userId=localStorage.getItem('hive_user');username=localStorage.getItem('hive_name');enterApp();}
+// Save session on login
+const origEnter=enterApp;enterApp=function(){localStorage.setItem('hive_token',token);localStorage.setItem('hive_user',userId);localStorage.setItem('hive_name',username);origEnter();};
 </script>
 </body>
 </html>
