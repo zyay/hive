@@ -1,11 +1,13 @@
 """
 Hive API — FastAPI backend for agent management, chat, and observability.
+v0.2: swarm, arena, memory, scheduler, API keys, voice.
 """
 
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -19,6 +21,8 @@ from hive.core.db import (
     update_agent, delete_agent, create_conversation,
     get_conversation, save_messages, get_usage_summary, log_usage,
 )
+from hive.core.api_keys import validate_key
+from hive.api.routes import router as v2_router, init_routes
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -27,14 +31,19 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
-    logger.info("Hive initialized — database ready")
+    init_routes()
+    logger.info("Hive v0.2 initialized — all systems ready")
+    # Start scheduler loop in background
+    from hive.core.scheduler import scheduler_loop
+    task = asyncio.create_task(scheduler_loop(interval=60))
     yield
+    task.cancel()
 
 
 app = FastAPI(
     title="Hive",
-    description="Self-hosted multi-agent AI platform",
-    version="0.1.0",
+    description="Self-hosted multi-agent AI platform — swarm, arena, memory, voice",
+    version="0.2.0",
     lifespan=lifespan,
 )
 
@@ -44,6 +53,32 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include v0.2 routes (arena, memory, scheduler, keys, voice)
+app.include_router(v2_router)
+
+
+# Auth middleware for API key protection
+@app.middleware("http")
+async def auth_middleware(request: Request, call_next):
+    # Skip auth for non-API routes and health check
+    path = request.url.path
+    if not path.startswith("/api/") or path in ("/api/health", "/health"):
+        return await call_next(request)
+
+    # Skip auth for read-only endpoints
+    if request.method == "GET" and not path.startswith("/api/keys"):
+        return await call_next(request)
+
+    # Check API key if provided
+    api_key = request.headers.get("X-API-Key") or request.headers.get("Authorization", "").replace("Bearer ", "")
+    if api_key:
+        key_info = validate_key(api_key)
+        if not key_info:
+            raise HTTPException(401, "Invalid API key")
+        request.state.api_key = key_info
+
+    return await call_next(request)
 
 
 # ---------------------------------------------------------------------------
