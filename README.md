@@ -1,5 +1,7 @@
 # 🐝 Hive — Self-hosted Multi-Agent AI Platform
 
+[![CI](https://github.com/zyay/hive/actions/workflows/ci.yml/badge.svg)](https://github.com/zyay/hive/actions/workflows/ci.yml)
+
 > **v0.2** — Swarm orchestration · Model Arena · Long-term memory · Scheduler · API keys · Voice I/O · 8 LLM providers · MCP integration
 
 Create, manage, and chat with AI agents powered by **any LLM provider** — all running on your own machine. Agents can delegate to each other, compare models side-by-side, remember across sessions, and run on schedule.
