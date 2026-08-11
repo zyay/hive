@@ -1029,6 +1029,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--ac)}
       <input id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMsg()">
       <button class="btn btn-o btn-s" onclick="showModal('uploadFile')" title="Upload file">File</button>
       <button class="btn btn-o btn-s" onclick="showModal('inviteBot')" title="Invite bot">Bot</button>
+      <button class="btn btn-o btn-s" onclick="showModal('inviteUser')" title="Invite user">User</button>
       <button class="btn btn-p" onclick="sendMsg()">Send</button>
     </div>
   </div>
@@ -1098,6 +1099,15 @@ input:focus,textarea:focus,select:focus{border-color:var(--ac)}
   </div>
 </div></div>
 
+<div class="modal-bg" id="modal-inviteUser"><div class="modal">
+  <h3>Invite User to Room</h3>
+  <div class="fg"><label>Select User</label><select id="iuUser"></select></div>
+  <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+    <button class="btn btn-o" onclick="hideModal('inviteUser')">Cancel</button>
+    <button class="btn btn-p" onclick="inviteUser()">Invite</button>
+  </div>
+</div></div>
+
 <div class="modal-bg" id="modal-uploadFile"><div class="modal">
   <h3>Upload File</h3>
   <div class="fg"><label>File</label><input type="file" id="ufFile"></div>
@@ -1148,11 +1158,12 @@ async function loadHardware(){const r=await api('/api/hardware');const h=r.hardw
 // Room/Agent creation helpers
 async function createRoom(){const n=$('nrName').value,t=$('nrType').value;if(!n)return;await api('/api/rooms?user_id='+userId,{method:'POST',body:JSON.stringify({name:n,type:t})});hideModal('newRoom');loadRooms();}
 async function loadProviders(){const p=await api('/api/providers');const opts=p.map(x=>`<option value="${x.name}">${x.name}${x.configured?'':' (no key)'}</option>`).join('');$('naProvider').innerHTML=opts;}
-async function inviteBot(){const a=$('ibCharacter').value;if(!a||!curRoom)return;await api('/api/rooms/'+curRoom+'/members',{method:'POST',body:JSON.stringify({member_type:'agent',member_id:a})});hideModal('inviteBot');}
+async function inviteBot(){const a=$('ibAgent').value;if(!a||!curRoom)return;await api('/api/rooms/'+curRoom+'/members',{method:'POST',body:JSON.stringify({member_type:'agent',member_id:a})});hideModal('inviteBot');openRoom(curRoom,$('chatTitle').textContent,'group');}
+async function inviteUser(){const u=$('iuUser').value;if(!u||!curRoom)return;await api('/api/rooms/'+curRoom+'/members',{method:'POST',body:JSON.stringify({member_type:'user',member_id:u})});hideModal('inviteUser');openRoom(curRoom,$('chatTitle').textContent,'group');}
 async function uploadFile(){const f=$('ufFile').files[0];if(!f||!curRoom)return;const reader=new FileReader();reader.onload=async()=>{const b64=reader.result.split(',')[1];await api('/api/rooms/'+curRoom+'/files?user_id='+userId+'&filename='+f.name,{method:'POST',body:JSON.stringify({content:b64})});hideModal('uploadFile');};reader.readAsDataURL(f);}
 
 // Modals
-function showModal(id){$(('modal-'+id)).classList.add('show');if(id==='inviteBot'){api('/api/agents').then(a=>$('ibAgent').innerHTML=a.map(x=>`<option value="${x.id}">${x.name}</option>`).join(''));}}
+function showModal(id){$('modal-'+id).classList.add('show');if(id==='inviteBot'){api('/api/agents').then(a=>$('ibAgent').innerHTML=a.map(x=>`<option value="${x.id}">${x.name}</option>`).join(''));}if(id==='inviteUser'){api('/api/users').then(u=>$('iuUser').innerHTML=u.filter(x=>x.id!==userId).map(x=>`<option value="${x.id}">${x.display_name||x.username}</option>`).join('')||'<option value="">No other users</option>');}}
 function hideModal(id){$('modal-'+id).classList.remove('show');}
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 

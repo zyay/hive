@@ -24,8 +24,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          pip install pytest pytest-asyncio bcrypt
-          pip install -e .
+          pip install pytest pytest-asyncio bcrypt chromadb sentence-transformers
 
       - name: Run tests
         run: pytest tests/ -v

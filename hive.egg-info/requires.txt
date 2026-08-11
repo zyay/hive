@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+httpx
+pydantic
+pyyaml
+requests
+aiosqlite
+jinja2
+bcrypt
+websockets
+
+[dev]
+pytest>=8.0
+pytest-asyncio
