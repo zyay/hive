@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+httpx
+pydantic
+pyyaml
+requests
+aiosqlite
+jinja2

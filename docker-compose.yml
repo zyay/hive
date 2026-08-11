@@ -1,0 +1,26 @@
+services:
+  hive:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - hive-data:/app/data
+      - ./.env:/app/.env:ro
+    environment:
+      - HIVE_HOST=0.0.0.0
+      - HIVE_PORT=8000
+      - DEFAULT_PROVIDER=ollama
+      - OLLAMA_HOST=http://ollama:11434
+    depends_on:
+      - ollama
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+
+volumes:
+  hive-data:
+  ollama-data:
