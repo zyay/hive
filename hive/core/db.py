@@ -1,0 +1,241 @@
+"""
+Database layer — SQLite for agent configs, conversations, and usage logs.
+"""
+
+import json
+import time
+import sqlite3
+from pathlib import Path
+from typing import Optional
+
+from hive.core.agent import AgentConfig
+
+DB_PATH = Path("hive.db")
+
+
+def get_connection() -> sqlite3.Connection:
+    conn = sqlite3.connect(str(DB_PATH))
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def init_db():
+    """Create tables if they don't exist."""
+    conn = get_connection()
+    conn.executescript("""
+        CREATE TABLE IF NOT EXISTS agents (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            system_prompt TEXT NOT NULL DEFAULT '',
+            provider TEXT NOT NULL DEFAULT 'ollama',
+            model TEXT NOT NULL DEFAULT '',
+            tools TEXT NOT NULL DEFAULT '[]',
+            temperature REAL NOT NULL DEFAULT 0.7,
+            max_tokens INTEGER NOT NULL DEFAULT 4096,
+            created_at REAL NOT NULL,
+            updated_at REAL NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS conversations (
+            id TEXT PRIMARY KEY,
+            agent_id TEXT NOT NULL,
+            messages TEXT NOT NULL DEFAULT '[]',
+            created_at REAL NOT NULL,
+            updated_at REAL NOT NULL,
+            FOREIGN KEY (agent_id) REFERENCES agents(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS usage_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            agent_id TEXT,
+            provider TEXT,
+            model TEXT,
+            tokens_in INTEGER DEFAULT 0,
+            tokens_out INTEGER DEFAULT 0,
+            cost_usd REAL DEFAULT 0.0,
+            latency_ms REAL DEFAULT 0.0,
+            tool_calls INTEGER DEFAULT 0,
+            llm_calls INTEGER DEFAULT 0,
+            timestamp REAL NOT NULL
+        );
+    """)
+    conn.commit()
+    conn.close()
+
+
+# ---------------------------------------------------------------------------
+# Agent CRUD
+# ---------------------------------------------------------------------------
+
+async def create_agent(config: AgentConfig) -> dict:
+    import uuid
+    agent_id = str(uuid.uuid4())[:8]
+    now = time.time()
+    conn = get_connection()
+    conn.execute(
+        "INSERT INTO agents (id, name, system_prompt, provider, model, tools, temperature, max_tokens, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (agent_id, config.name, config.system_prompt, config.provider, config.model,
+         json.dumps(config.tools), config.temperature, config.max_tokens, now, now)
+    )
+    conn.commit()
+    conn.close()
+    return {"id": agent_id, **_agent_to_dict(config), "created_at": now}
+
+
+async def get_agent(agent_id: str) -> Optional[dict]:
+    conn = get_connection()
+    row = conn.execute("SELECT * FROM agents WHERE id = ?", (agent_id,)).fetchone()
+    conn.close()
+    if not row:
+        return None
+    return dict(row)
+
+
+async def get_all_agents() -> list[dict]:
+    conn = get_connection()
+    rows = conn.execute("SELECT * FROM agents ORDER BY created_at DESC").fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+async def update_agent(agent_id: str, updates: dict) -> Optional[dict]:
+    conn = get_connection()
+    existing = conn.execute("SELECT * FROM agents WHERE id = ?", (agent_id,)).fetchone()
+    if not existing:
+        conn.close()
+        return None
+
+    fields = []
+    values = []
+    for key, val in updates.items():
+        if key in ("tools",) and isinstance(val, list):
+            val = json.dumps(val)
+        fields.append(f"{key} = ?")
+        values.append(val)
+    fields.append("updated_at = ?")
+    values.append(time.time())
+    values.append(agent_id)
+
+    conn.execute(f"UPDATE agents SET {', '.join(fields)} WHERE id = ?", values)
+    conn.commit()
+    conn.close()
+    return await get_agent(agent_id)
+
+
+async def delete_agent(agent_id: str) -> bool:
+    conn = get_connection()
+    cursor = conn.execute("DELETE FROM agents WHERE id = ?", (agent_id,))
+    conn.execute("DELETE FROM conversations WHERE agent_id = ?", (agent_id,))
+    conn.commit()
+    conn.close()
+    return cursor.rowcount > 0
+
+
+def _agent_to_dict(config: AgentConfig) -> dict:
+    return {
+        "name": config.name,
+        "system_prompt": config.system_prompt,
+        "provider": config.provider,
+        "model": config.model,
+        "tools": config.tools,
+        "temperature": config.temperature,
+        "max_tokens": config.max_tokens,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Conversations
+# ---------------------------------------------------------------------------
+
+async def create_conversation(agent_id: str) -> str:
+    import uuid
+    conv_id = str(uuid.uuid4())[:8]
+    now = time.time()
+    conn = get_connection()
+    conn.execute(
+        "INSERT INTO conversations (id, agent_id, messages, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+        (conv_id, agent_id, "[]", now, now)
+    )
+    conn.commit()
+    conn.close()
+    return conv_id
+
+
+async def get_conversation(conv_id: str) -> Optional[dict]:
+    conn = get_connection()
+    row = conn.execute("SELECT * FROM conversations WHERE id = ?", (conv_id,)).fetchone()
+    conn.close()
+    if not row:
+        return None
+    d = dict(row)
+    d["messages"] = json.loads(d["messages"])
+    return d
+
+
+async def save_messages(conv_id: str, messages: list[dict]):
+    conn = get_connection()
+    conn.execute(
+        "UPDATE conversations SET messages = ?, updated_at = ? WHERE id = ?",
+        (json.dumps(messages), time.time(), conv_id)
+    )
+    conn.commit()
+    conn.close()
+
+
+async def get_agent_conversations(agent_id: str) -> list[dict]:
+    conn = get_connection()
+    rows = conn.execute(
+        "SELECT id, created_at, updated_at FROM conversations WHERE agent_id = ? ORDER BY updated_at DESC",
+        (agent_id,)
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+# ---------------------------------------------------------------------------
+# Usage tracking
+# ---------------------------------------------------------------------------
+
+async def log_usage(agent_id: str, provider: str, model: str, tokens_in: int, tokens_out: int,
+                    cost_usd: float, latency_ms: float, tool_calls: int, llm_calls: int):
+    conn = get_connection()
+    conn.execute(
+        "INSERT INTO usage_logs (agent_id, provider, model, tokens_in, tokens_out, cost_usd, latency_ms, tool_calls, llm_calls, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (agent_id, provider, model, tokens_in, tokens_out, cost_usd, latency_ms, tool_calls, llm_calls, time.time())
+    )
+    conn.commit()
+    conn.close()
+
+
+async def get_usage_summary(agent_id: str = None, days: int = 7) -> dict:
+    conn = get_connection()
+    since = time.time() - (days * 86400)
+    where = "WHERE timestamp > ?"
+    params = [since]
+    if agent_id:
+        where += " AND agent_id = ?"
+        params.append(agent_id)
+
+    row = conn.execute(f"""
+        SELECT
+            COUNT(*) as total_requests,
+            SUM(tokens_in) as total_tokens_in,
+            SUM(tokens_out) as total_tokens_out,
+            SUM(cost_usd) as total_cost,
+            AVG(latency_ms) as avg_latency,
+            SUM(tool_calls) as total_tool_calls,
+            SUM(llm_calls) as total_llm_calls
+        FROM usage_logs {where}
+    """, params).fetchone()
+    conn.close()
+
+    return {
+        "period_days": days,
+        "total_requests": row[0] or 0,
+        "total_tokens_in": row[1] or 0,
+        "total_tokens_out": row[2] or 0,
+        "total_cost_usd": round(row[3] or 0, 6),
+        "avg_latency_ms": round(row[4] or 0, 1),
+        "total_tool_calls": row[5] or 0,
+        "total_llm_calls": row[6] or 0,
+    }
