@@ -830,6 +830,62 @@ HTML_PAGE = r"""
   </div>
 </div>
 
+<!-- Setup Wizard -->
+<div id="wizard" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;align-items:center;justify-content:center">
+  <div class="card" style="width:520px;max-width:92vw;margin:0;padding:24px">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:20px;font-weight:700;letter-spacing:-0.02em">Welcome to Hive</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">Let's get you set up</div>
+      <div id="wizardDots" style="margin-top:12px"></div>
+    </div>
+
+    <div id="wizard-step-1" class="wizard-step" style="display:none">
+      <div class="card-title">Step 1: Configure Providers</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Hive connects to LLM providers. Add your API keys in the <code>.env</code> file, then restart the server.</p>
+      <div id="wizardProviders" style="margin-bottom:16px"></div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Ollama and LM Studio work locally without API keys. For cloud providers, edit <code>.env</code> and add your keys.</p>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-outline" onclick="hideWizard()">Skip setup</button>
+        <button class="btn btn-accent" onclick="showWizardStep(2)">Next</button>
+      </div>
+    </div>
+
+    <div id="wizard-step-2" class="wizard-step" style="display:none">
+      <div class="card-title">Step 2: Create Your First Agent</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Agents are AI assistants with their own personality, model, and tools.</p>
+      <div class="form-group"><label class="form-label">Agent Name</label><input id="wAgentName" placeholder="e.g., Research Assistant" value="Assistant"></div>
+      <div class="form-group"><label class="form-label">Provider</label><select id="wAgentProvider"></select></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-outline" onclick="showWizardStep(1)">Back</button>
+        <button class="btn btn-accent" onclick="wizardCreateAgent()">Create Agent</button>
+      </div>
+    </div>
+
+    <div id="wizard-step-3" class="wizard-step" style="display:none">
+      <div class="card-title">Step 3: You're Ready</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Your agent is ready. Select it from the sidebar and start chatting.</p>
+      <div style="background:var(--surface2);border-radius:6px;padding:12px;font-size:13px;margin-bottom:16px">
+        <div style="font-weight:600;margin-bottom:4px">Quick tips:</div>
+        <div style="color:var(--text2)">- Use <b>Models</b> tab to see all available LLMs and their rankings</div>
+        <div style="color:var(--text2)">- Use <b>Router</b> tab to auto-select the best model for a task</div>
+        <div style="color:var(--text2)">- Use <b>Arena</b> tab to compare models side-by-side</div>
+        <div style="color:var(--text2)">- Use <b>Costs</b> tab to monitor spending and get optimization tips</div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-accent" onclick="wizardFinish()">Start Using Hive</button>
+      </div>
+    </div>
+
+    <div id="wizard-step-4" class="wizard-step" style="display:none">
+      <div class="card-title">Agent Created</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Your agent has been created. You can start chatting now or explore the platform.</p>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-accent" onclick="wizardFinish()">Start Chatting</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </div>
 <script>
 let cur=null,convId=null;
@@ -954,6 +1010,39 @@ async function loadProviders(){
 
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 loadAgents();
+
+// ── Setup Wizard ──
+const WIZARD_KEY = 'hive_wizard_done';
+function shouldShowWizard(){return !localStorage.getItem(WIZARD_KEY);}
+function hideWizard(){localStorage.setItem(WIZARD_KEY,'1');$('wizard').style.display='none';}
+
+async function initWizard(){
+  if(!shouldShowWizard())return;
+  const [providers,agents]=await Promise.all([fetch('/api/providers').then(r=>r.json()),fetch('/api/agents').then(r=>r.json())]);
+  const configured=providers.filter(p=>p.configured);
+  const step=agents.length===0?(configured.length===0?1:2):3;
+  showWizardStep(step);
+  $('wizard').style.display='flex';
+  // Populate provider list in step 1
+  $('wizardProviders').innerHTML=providers.map(p=>`<div class="provider-row"><span class="provider-name">${p.name}</span><span class="tag ${p.configured?'tag-green':'tag-gray'}">${p.configured?'ready':'not configured'}</span></div>`).join('');
+  // Populate provider select in step 2
+  $('wAgentProvider').innerHTML=configured.map(p=>`<option value="${p.name}">${p.name} (${p.model})</option>`).join('')||providers.map(p=>`<option value="${p.name}">${p.name}${p.configured?'':' (no key)'}</option>`).join('');
+}
+function showWizardStep(n){
+  document.querySelectorAll('.wizard-step').forEach(s=>s.style.display='none');
+  const el=$('wizard-step-'+n);if(el)el.style.display='block';
+  $('wizardDots').innerHTML=[1,2,3,4].map(i=>`<span style="width:8px;height:8px;border-radius:50%;background:${i===n?'var(--accent)':'var(--border)'};display:inline-block;margin:0 3px"></span>`).join('');
+}
+async function wizardCreateAgent(){
+  const name=$('wAgentName').value||'Assistant';
+  const provider=$('wAgentProvider').value;
+  const body={name,system_prompt:'You are a helpful assistant.',provider,model:''};
+  await fetch('/api/agents',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  showWizardStep(4);
+  loadAgents();
+}
+function wizardFinish(){hideWizard();loadAgents();}
+initWizard();
 </script>
 </body>
 </html>
