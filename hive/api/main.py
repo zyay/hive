@@ -1,5 +1,5 @@
 """
-Hive API — FastAPI backend for agent management, chat, and observability.
+Hive API â€” FastAPI backend for agent management, chat, and observability.
 v0.2: swarm, arena, memory, scheduler, API keys, voice.
 """
 
@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     init_db()
     init_routes()
-    logger.info("Hive v0.2 initialized — all systems ready")
+    logger.info("Hive v0.2 initialized â€” all systems ready")
     # Start scheduler loop in background
     from hive.core.scheduler import scheduler_loop
     task = asyncio.create_task(scheduler_loop(interval=60))
@@ -42,7 +42,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Hive",
-    description="Self-hosted multi-agent AI platform — swarm, arena, memory, voice",
+    description="Self-hosted multi-agent AI platform â€” swarm, arena, memory, voice",
     version="0.2.0",
     lifespan=lifespan,
 )
@@ -161,7 +161,7 @@ class RouterRequest(BaseModel):
 
 @app.post("/api/router")
 def route_model(body: RouterRequest):
-    """Intelligent model selection — recommends the best model for your task."""
+    """Intelligent model selection â€” recommends the best model for your task."""
     from hive.core.model_router import select_model
     rec = select_model(
         task=body.task,
@@ -213,7 +213,7 @@ def analyze_task(body: AnalyzeRequest):
 
 @app.get("/api/costs")
 def cost_analysis():
-    """Cost optimization analysis — usage patterns and savings recommendations."""
+    """Cost optimization analysis â€” usage patterns and savings recommendations."""
     from hive.core.db import get_connection
     from hive.core.cost_optimizer import analyze_usage
     conn = get_connection()
@@ -391,368 +391,356 @@ def ui():
     return HTML_PAGE
 
 
-HTML_PAGE = """
+HTML_PAGE = r"""
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🐝 Hive</title>
+<title>Hive â€” Multi-Agent Platform</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  :root{--bg:#0a0a0a;--surface:#141414;--border:#222;--text:#e0e0e0;--muted:#666;--accent:#f59e0b;--green:#10b981;--red:#ef4444;--blue:#3b82f6}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:hidden}
-  /* Sidebar */
-  .sidebar{width:260px;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--surface);flex-shrink:0}
-  .sidebar-header{padding:1rem;border-bottom:1px solid var(--border)}
-  .sidebar-header h1{font-size:1.2rem}
-  .sidebar-header h1 span{color:var(--accent)}
-  .nav-tabs{display:flex;flex-direction:column;padding:0.5rem;gap:2px}
-  .nav-tab{padding:0.6rem 0.75rem;border-radius:6px;cursor:pointer;font-size:0.85rem;color:var(--muted);transition:all .15s;display:flex;align-items:center;gap:0.5rem}
-  .nav-tab:hover{background:#1a1a1a;color:var(--text)}
-  .nav-tab.active{background:#1a1a1a;color:var(--accent);font-weight:600}
-  .agent-list{flex:1;overflow-y:auto;padding:0.5rem}
-  .agent-item{padding:0.6rem;border-radius:6px;cursor:pointer;margin-bottom:2px;transition:background .15s}
-  .agent-item:hover{background:#1a1a1a}
-  .agent-item.active{background:#1a1a1a;border-left:3px solid var(--accent)}
-  .agent-item .name{font-weight:600;font-size:0.85rem}
-  .agent-item .meta{font-size:0.7rem;color:var(--muted);margin-top:2px}
-  /* Main */
-  .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-  .topbar{padding:0.75rem 1rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:1rem}
-  .topbar h2{font-size:1rem;white-space:nowrap}
-  .content{flex:1;overflow-y:auto;padding:1rem}
-  /* Buttons & inputs */
-  .btn{padding:0.4rem 0.8rem;border:none;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600;transition:all .15s}
-  .btn-primary{background:var(--accent);color:#000}
-  .btn-primary:hover{background:#d97706}
-  .btn-sm{padding:0.25rem 0.5rem;font-size:0.7rem}
+  :root{--bg:#09090b;--surface:#18181b;--surface2:#1f1f23;--border:#27272a;--text:#fafafa;--text2:#a1a1aa;--muted:#52525b;--accent:#6366f1;--accent2:#818cf8;--green:#22c55e;--red:#ef4444;--blue:#3b82f6;--amber:#f59e0b;--radius:8px}
+  body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:hidden;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .sidebar{width:240px;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--surface);flex-shrink:0}
+  .sidebar-brand{padding:20px;border-bottom:1px solid var(--border)}
+  .sidebar-brand h1{font-size:16px;font-weight:700;letter-spacing:-0.02em}
+  .sidebar-brand p{font-size:11px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:0.05em}
+  .nav{padding:8px;display:flex;flex-direction:column;gap:1px}
+  .nav-item{padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text2);transition:all .15s;display:flex;align-items:center;gap:8px}
+  .nav-item:hover{background:var(--surface2);color:var(--text)}
+  .nav-item.active{background:var(--accent);color:#fff;font-weight:500}
+  .nav-item .icon{width:16px;text-align:center;font-size:12px;opacity:.7}
+  .nav-item.active .icon{opacity:1}
+  .sidebar-agents{flex:1;overflow-y:auto;border-top:1px solid var(--border);padding:8px}
+  .sidebar-agents-label{font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:8px 12px 4px;font-weight:600}
+  .agent-item{padding:8px 12px;border-radius:6px;cursor:pointer;margin-bottom:1px;transition:all .12s}
+  .agent-item:hover{background:var(--surface2)}
+  .agent-item.active{background:var(--surface2);box-shadow:inset 3px 0 0 var(--accent)}
+  .agent-name{font-weight:500;font-size:13px}
+  .agent-meta{font-size:11px;color:var(--muted);margin-top:1px}
+  .sidebar-footer{padding:12px;border-top:1px solid var(--border)}
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+  .topbar{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-shrink:0}
+  .topbar h2{font-size:15px;font-weight:600;letter-spacing:-0.01em}
+  .topbar-right{display:flex;align-items:center;gap:8px}
+  .content{flex:1;overflow-y:auto;padding:20px}
+  .btn{padding:6px 14px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+  .btn-accent{background:var(--accent);color:#fff}
+  .btn-accent:hover{background:var(--accent2)}
+  .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2)}
+  .btn-outline:hover{border-color:var(--text2);color:var(--text)}
   .btn-danger{background:var(--red);color:#fff}
-  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
-  .btn-ghost:hover{border-color:var(--accent)}
-  input,textarea,select{padding:0.5rem;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-size:0.85rem;outline:none;width:100%}
+  .btn-danger:hover{opacity:.9}
+  .btn-sm{padding:4px 10px;font-size:12px}
+  .btn-full{width:100%}
+  input,textarea,select{padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-size:13px;outline:none;width:100%;font-family:inherit;transition:border-color .15s}
   input:focus,textarea:focus,select:focus{border-color:var(--accent)}
   textarea{resize:vertical;min-height:60px}
-  /* Chat */
-  .chat-messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:0.5rem}
-  .msg{max-width:80%;padding:0.6rem 0.8rem;border-radius:10px;font-size:0.85rem;line-height:1.5}
-  .msg-user{align-self:flex-end;background:#1e3a5f;border-bottom-right-radius:3px}
-  .msg-assistant{align-self:flex-start;background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:3px}
-  .msg-system{align-self:center;color:var(--muted);font-size:0.75rem;font-style:italic}
-  .chat-input{padding:0.75rem;border-top:1px solid var(--border);display:flex;gap:0.5rem}
-  .stats-bar{display:flex;gap:0.75rem;padding:0.4rem 0.75rem;border-top:1px solid var(--border);font-size:0.7rem;color:var(--muted);flex-wrap:wrap}
-  .stat .val{color:var(--green);font-weight:600}
-  /* Cards */
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:0.75rem}
-  .card h3{font-size:0.9rem;margin-bottom:0.5rem}
-  .grid{display:grid;gap:0.75rem}
+  select{cursor:pointer}
+  .chat-area{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:8px}
+  .bubble{max-width:75%;padding:10px 14px;border-radius:var(--radius);font-size:13px;line-height:1.6}
+  .bubble-user{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:2px}
+  .bubble-assistant{align-self:flex-start;background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:2px}
+  .bubble-system{align-self:center;color:var(--muted);font-size:12px;font-style:italic}
+  .chat-bar{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
+  .metrics{display:flex;gap:16px;padding:6px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);flex-shrink:0}
+  .metrics .val{color:var(--green);font-weight:600;font-variant-numeric:tabular-nums}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+  .card-title{font-size:14px;font-weight:600;margin-bottom:12px;letter-spacing:-0.01em}
+  .grid{display:grid;gap:12px}
   .grid-2{grid-template-columns:1fr 1fr}
   .grid-3{grid-template-columns:1fr 1fr 1fr}
-  .grid-4{grid-template-columns:1fr 1fr 1fr 1fr}
-  /* Tables */
-  table{width:100%;border-collapse:collapse;font-size:0.8rem}
-  th{text-align:left;padding:0.5rem;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600;font-size:0.7rem;text-transform:uppercase}
-  td{padding:0.5rem;border-bottom:1px solid #1a1a1a}
-  tr:hover td{background:#1a1a1a}
-  /* Badges */
-  .badge{display:inline-block;padding:0.15rem 0.4rem;border-radius:4px;font-size:0.65rem;font-weight:600}
-  .badge-green{background:#064e3b;color:#10b981}
-  .badge-blue{background:#1e3a5f;color:#60a5fa}
-  .badge-amber{background:#451a03;color:#f59e0b}
-  .badge-red{background:#450a0a;color:#ef4444}
-  .badge-gray{background:#1f1f1f;color:#888}
-  /* Model card */
-  .model-row{display:flex;align-items:center;gap:0.75rem;padding:0.6rem;border-bottom:1px solid #1a1a1a}
-  .model-row:hover{background:#1a1a1a}
-  .model-rank{width:24px;text-align:center;font-weight:700;color:var(--accent);font-size:0.9rem}
-  .model-info{flex:1}
-  .model-name{font-weight:600;font-size:0.85rem}
-  .model-meta{font-size:0.7rem;color:var(--muted)}
-  .model-stats{display:flex;gap:0.75rem;font-size:0.7rem}
-  .model-stats span{color:var(--muted)}
-  .model-stats .val{color:var(--text);font-weight:600}
-  /* Router */
-  .router-result{background:#1a1a0a;border:1px solid #333;border-radius:8px;padding:1rem;margin-top:0.75rem}
-  .router-result .rec{font-size:1.1rem;font-weight:700;color:var(--accent)}
-  .router-result .reason{font-size:0.8rem;color:var(--muted);margin-top:0.25rem}
-  /* Empty */
-  .empty{display:flex;align-items:center;justify-content:center;flex:1;color:var(--muted);font-size:0.9rem;flex-direction:column;gap:0.5rem}
-  /* Form */
-  .form-group{margin-bottom:0.75rem}
-  .form-group label{display:block;font-size:0.75rem;color:var(--muted);margin-bottom:0.25rem;font-weight:600}
-  .form-row{display:flex;gap:0.5rem}
+  .grid-4{grid-template-columns:repeat(4,1fr)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.04em}
+  td{padding:8px 12px;border-bottom:1px solid var(--border)}
+  tbody tr{transition:background .1s}
+  tbody tr:hover{background:var(--surface2)}
+  .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:0.02em}
+  .tag-green{background:#052e16;color:#4ade80}
+  .tag-blue{background:#172554;color:#60a5fa}
+  .tag-amber{background:#451a03;color:#fbbf24}
+  .tag-red{background:#450a0a;color:#f87171}
+  .tag-gray{background:#27272a;color:#a1a1aa}
+  .tag-purple{background:#2e1065;color:#a78bfa}
+  .stat-card{text-align:center;padding:20px}
+  .stat-value{font-size:24px;font-weight:700;letter-spacing:-0.02em;font-variant-numeric:tabular-nums}
+  .stat-label{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:0.04em}
+  .form-label{display:block;font-size:12px;color:var(--text2);margin-bottom:4px;font-weight:500}
+  .form-group{margin-bottom:12px}
+  .form-row{display:flex;gap:12px}
   .form-row>*{flex:1}
-  /* Scrollbar */
-  ::-webkit-scrollbar{width:6px}
+  .empty{display:flex;align-items:center;justify-content:center;flex:1;color:var(--muted);font-size:13px;flex-direction:column;gap:8px}
+  .router-result{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-top:12px}
+  .router-model{font-size:18px;font-weight:700;color:var(--accent2);letter-spacing:-0.01em}
+  .router-reason{font-size:13px;color:var(--text2);margin-top:4px}
+  .router-meta{display:flex;gap:16px;margin-top:12px;font-size:12px;color:var(--muted)}
+  .router-meta b{color:var(--text)}
+  .page{display:none}
+  .page.active{display:flex;flex-direction:column;flex:1;overflow:hidden}
+  .divider{height:1px;background:var(--border);margin:8px 0}
+  .provider-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+  .provider-name{font-weight:500;font-size:13px}
+  .key-code{font-family:'JetBrains Mono',monospace;font-size:12px;padding:8px 12px;background:var(--bg);border-radius:6px;word-break:break-all;border:1px solid var(--border)}
+  .rec-card{border-left:3px solid var(--accent);padding-left:12px}
+  ::-webkit-scrollbar{width:5px}
   ::-webkit-scrollbar-track{background:transparent}
   ::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
   ::-webkit-scrollbar-thumb:hover{background:#555}
-  /* Page sections */
-  .page{display:none}
-  .page.active{display:flex;flex-direction:column;flex:1;overflow:hidden}
 </style>
 </head>
 <body>
 <div class="sidebar">
-  <div class="sidebar-header">
-    <h1>🐝 <span>Hive</span></h1>
-    <p style="font-size:0.65rem;color:var(--muted);margin-top:2px">Multi-agent AI platform · v0.2</p>
+  <div class="sidebar-brand">
+    <h1>Hive</h1>
+    <p>Agent Platform v0.2</p>
   </div>
-  <div class="nav-tabs">
-    <div class="nav-tab active" onclick="showPage('chat')">💬 Chat</div>
-    <div class="nav-tab" onclick="showPage('models')">🧠 Models</div>
-    <div class="nav-tab" onclick="showPage('router')">🎯 Model Router</div>
-    <div class="nav-tab" onclick="showPage('arena')">⚔️ Arena</div>
-    <div class="nav-tab" onclick="showPage('costs')">💰 Costs</div>
-    <div class="nav-tab" onclick="showPage('keys')">🔑 API Keys</div>
-    <div class="nav-tab" onclick="showPage('settings')">⚙️ Settings</div>
+  <div class="nav" id="navTabs">
+    <div class="nav-item active" data-page="chat"><span class="icon">&#9679;</span> Chat</div>
+    <div class="nav-item" data-page="models"><span class="icon">&#9670;</span> Models</div>
+    <div class="nav-item" data-page="router"><span class="icon">&#9654;</span> Router</div>
+    <div class="nav-item" data-page="arena"><span class="icon">&#9876;</span> Arena</div>
+    <div class="nav-item" data-page="costs"><span class="icon">&#9733;</span> Costs</div>
+    <div class="nav-item" data-page="keys"><span class="icon">&#9711;</span> API Keys</div>
+    <div class="nav-item" data-page="settings"><span class="icon">&#9881;</span> Settings</div>
   </div>
-  <div style="padding:0.5rem;border-top:1px solid var(--border)">
-    <button class="btn btn-primary" style="width:100%" onclick="toggleNewAgent()">+ New Agent</button>
+  <div class="sidebar-footer">
+    <button class="btn btn-accent btn-full" onclick="openModal()">New Agent</button>
   </div>
-  <div class="agent-list" id="agentList"></div>
+  <div class="sidebar-agents">
+    <div class="sidebar-agents-label">Agents</div>
+    <div id="agentList"></div>
+  </div>
 </div>
 <div class="main">
 
-<!-- ═══════════ CHAT PAGE ═══════════ -->
 <div class="page active" id="page-chat">
-  <div class="topbar">
-    <h2 id="chatTitle">Select an agent</h2>
-    <div id="chatActions"></div>
+  <div class="topbar"><h2 id="chatTitle">Select an agent</h2><div id="chatActions"></div></div>
+  <div class="chat-area" id="messages"><div class="empty">Select or create an agent to begin</div></div>
+  <div class="metrics" id="statsBar" style="display:none">
+    <span>LLM calls: <span class="val" id="statCalls">0</span></span>
+    <span>Tools: <span class="val" id="statTools">0</span></span>
+    <span>Tokens: <span class="val" id="statTokens">0</span></span>
+    <span>Cost: <span class="val" id="statCost">$0.00</span></span>
+    <span>Latency: <span class="val" id="statLatency">0ms</span></span>
   </div>
-  <div class="chat-messages" id="messages">
-    <div class="empty">🐝 Select or create an agent to start chatting</div>
-  </div>
-  <div class="stats-bar" id="statsBar" style="display:none">
-    <div class="stat">LLM: <span class="val" id="statCalls">0</span></div>
-    <div class="stat">Tools: <span class="val" id="statTools">0</span></div>
-    <div class="stat">Tokens: <span class="val" id="statTokens">0</span></div>
-    <div class="stat">Cost: <span class="val" id="statCost">$0</span></div>
-    <div class="stat">Latency: <span class="val" id="statLatency">0ms</span></div>
-  </div>
-  <div class="chat-input" id="chatInput" style="display:none">
-    <input id="userMsg" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMessage()">
-    <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+  <div class="chat-bar" id="chatInput" style="display:none">
+    <input id="userMsg" placeholder="Send a message..." onkeydown="if(event.key==='Enter')sendMessage()">
+    <button class="btn btn-accent" onclick="sendMessage()">Send</button>
   </div>
 </div>
 
-<!-- ═══════════ MODELS PAGE ═══════════ -->
 <div class="page" id="page-models">
-  <div class="topbar"><h2>🧠 Model Intelligence Rankings</h2><span style="font-size:0.7rem;color:var(--muted)">Artificial Analysis Aug 2026</span></div>
+  <div class="topbar"><h2>Model Intelligence Rankings</h2><span style="font-size:11px;color:var(--muted)">Artificial Analysis, August 2026</span></div>
   <div class="content" id="modelsList"></div>
 </div>
 
-<!-- ═══════════ ROUTER PAGE ═══════════ -->
 <div class="page" id="page-router">
-  <div class="topbar"><h2>🎯 Intelligent Model Router</h2></div>
+  <div class="topbar"><h2>Model Router</h2></div>
   <div class="content">
     <div class="card">
-      <h3>Analyze a task</h3>
-      <div class="form-group"><label>What do you need help with?</label><textarea id="routerPrompt" placeholder="e.g., Write a Python function to sort a list, or analyze this complex architecture problem..."></textarea></div>
+      <div class="card-title">Analyze Task</div>
+      <div class="form-group"><label class="form-label">Describe your task</label><textarea id="routerPrompt" placeholder="e.g., Write a Python function to implement binary search with error handling..."></textarea></div>
       <div class="form-row">
-        <div class="form-group"><label>Priority</label><select id="routerPriority"><option value="balanced">Balanced</option><option value="intelligence">Maximum Intelligence</option><option value="speed">Speed</option><option value="budget">Budget</option></select></div>
-        <div class="form-group"><label>Requirements</label><div style="display:flex;gap:0.5rem;margin-top:0.25rem"><label style="font-size:0.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" id="routerVision" style="width:auto"> Vision</label><label style="font-size:0.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" id="routerPrivacy" style="width:auto"> Privacy</label></div></div>
+        <div class="form-group"><label class="form-label">Priority</label><select id="routerPriority"><option value="balanced">Balanced</option><option value="intelligence">Maximum Intelligence</option><option value="speed">Speed</option><option value="budget">Budget</option></select></div>
+        <div class="form-group"><label class="form-label">Requirements</label><div style="display:flex;gap:16px;margin-top:6px"><label style="font-size:13px;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" id="routerVision" style="width:auto"> Vision</label><label style="font-size:13px;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" id="routerPrivacy" style="width:auto"> Privacy</label></div></div>
       </div>
-      <button class="btn btn-primary" onclick="analyzePrompt()">Analyze & Recommend</button>
+      <button class="btn btn-accent" onclick="analyzePrompt()">Analyze</button>
       <div id="routerResult"></div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════ ARENA PAGE ═══════════ -->
 <div class="page" id="page-arena">
-  <div class="topbar"><h2>⚔️ Model Arena</h2></div>
+  <div class="topbar"><h2>Model Arena</h2></div>
   <div class="content">
     <div class="card">
-      <h3>Compare models on the same prompt</h3>
-      <div class="form-group"><label>Prompt</label><textarea id="arenaPrompt" placeholder="Enter a prompt to test across models..."></textarea></div>
-      <div class="form-group"><label>Providers (comma-separated, or leave empty for all configured)</label><input id="arenaProviders" placeholder="e.g., ollama,openai,anthropic"></div>
-      <button class="btn btn-primary" onclick="runArena()">Run Arena</button>
-      <div id="arenaResult" style="margin-top:0.75rem"></div>
+      <div class="card-title">Compare Models</div>
+      <div class="form-group"><label class="form-label">Prompt</label><textarea id="arenaPrompt" placeholder="Enter a prompt to test across multiple models..."></textarea></div>
+      <div class="form-group"><label class="form-label">Providers (comma-separated, or empty for all configured)</label><input id="arenaProviders" placeholder="e.g., ollama, openai, anthropic"></div>
+      <button class="btn btn-accent" onclick="runArena()">Run Benchmark</button>
+      <div id="arenaResult" style="margin-top:12px"></div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════ COSTS PAGE ═══════════ -->
 <div class="page" id="page-costs">
-  <div class="topbar"><h2>💰 Cost Optimization</h2><button class="btn btn-ghost btn-sm" onclick="loadCosts()">Refresh</button></div>
+  <div class="topbar"><h2>Cost Optimization</h2><button class="btn btn-outline btn-sm" onclick="loadCosts()">Refresh</button></div>
   <div class="content" id="costsContent"></div>
 </div>
 
-<!-- ═══════════ KEYS PAGE ═══════════ -->
 <div class="page" id="page-keys">
-  <div class="topbar"><h2>🔑 API Keys</h2></div>
+  <div class="topbar"><h2>API Keys</h2></div>
   <div class="content">
     <div class="card">
-      <h3>Create API Key</h3>
+      <div class="card-title">Create Key</div>
       <div class="form-row">
-        <div class="form-group"><label>Name</label><input id="keyName" placeholder="my-app"></div>
-        <div class="form-group"><label>Agent (optional)</label><input id="keyAgent" placeholder="agent ID"></div>
+        <div class="form-group"><label class="form-label">Name</label><input id="keyName" placeholder="my-application"></div>
+        <div class="form-group"><label class="form-label">Agent ID (optional)</label><input id="keyAgent" placeholder="agent-uuid"></div>
       </div>
-      <button class="btn btn-primary" onclick="createKey()">Create Key</button>
-      <div id="keyResult" style="margin-top:0.5rem"></div>
+      <button class="btn btn-accent" onclick="createKey()">Generate Key</button>
+      <div id="keyResult" style="margin-top:8px"></div>
     </div>
-    <div class="card"><h3>Existing Keys</h3><div id="keysList"></div></div>
+    <div class="card"><div class="card-title">Active Keys</div><div id="keysList"></div></div>
   </div>
 </div>
 
-<!-- ═══════════ SETTINGS PAGE ═══════════ -->
 <div class="page" id="page-settings">
-  <div class="topbar"><h2>⚙️ Settings</h2></div>
+  <div class="topbar"><h2>Settings</h2></div>
   <div class="content">
     <div class="card">
-      <h3>Create New Agent</h3>
-      <div class="form-group"><label>Name</label><input id="sAgentName" placeholder="Research Assistant"></div>
-      <div class="form-group"><label>System Prompt</label><textarea id="sAgentPrompt" rows="3">You are a helpful assistant.</textarea></div>
+      <div class="card-title">Create Agent</div>
+      <div class="form-group"><label class="form-label">Name</label><input id="sAgentName" placeholder="Research Assistant"></div>
+      <div class="form-group"><label class="form-label">System Prompt</label><textarea id="sAgentPrompt" rows="3">You are a helpful assistant.</textarea></div>
       <div class="form-row">
-        <div class="form-group"><label>Provider</label><select id="sAgentProvider"></select></div>
-        <div class="form-group"><label>Model (empty = default)</label><input id="sAgentModel" placeholder="llama3.3"></div>
+        <div class="form-group"><label class="form-label">Provider</label><select id="sAgentProvider"></select></div>
+        <div class="form-group"><label class="form-label">Model (empty for default)</label><input id="sAgentModel" placeholder="llama3.3"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Temperature</label><input id="sAgentTemp" type="number" value="0.7" min="0" max="2" step="0.1"></div>
-        <div class="form-group"><label>Max Tokens</label><input id="sAgentMaxTok" type="number" value="4096" min="100" max="128000"></div>
+        <div class="form-group"><label class="form-label">Temperature</label><input id="sAgentTemp" type="number" value="0.7" min="0" max="2" step="0.1"></div>
+        <div class="form-group"><label class="form-label">Max Tokens</label><input id="sAgentMaxTok" type="number" value="4096" min="100" max="128000"></div>
       </div>
-      <button class="btn btn-primary" onclick="createAgentFull()">Create Agent</button>
+      <button class="btn btn-accent" onclick="createAgentFull()">Create Agent</button>
     </div>
-    <div class="card">
-      <h3>Provider Status</h3>
-      <div id="providerStatus"></div>
+    <div class="card"><div class="card-title">Provider Status</div><div id="providerStatus"></div></div>
+  </div>
+</div>
+
+<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center">
+  <div class="card" style="width:420px;max-width:90vw;margin:0">
+    <div class="card-title">New Agent</div>
+    <div class="form-group"><label class="form-label">Name</label><input id="nName" placeholder="My Agent"></div>
+    <div class="form-group"><label class="form-label">System Prompt</label><textarea id="nPrompt">You are a helpful assistant.</textarea></div>
+    <div class="form-group"><label class="form-label">Provider</label><select id="nProvider"></select></div>
+    <div class="form-group"><label class="form-label">Model (empty for default)</label><input id="nModel"></div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-accent" onclick="createAgentModal()">Create</button>
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
     </div>
   </div>
 </div>
 
-<!-- ═══════════ NEW AGENT MODAL ═══════════ -->
-<div id="newAgentModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;display:none;align-items:center;justify-content:center">
-  <div class="card" style="width:400px;max-width:90vw">
-    <h3>New Agent</h3>
-    <div class="form-group"><label>Name</label><input id="nAgentName" placeholder="My Agent"></div>
-    <div class="form-group"><label>System Prompt</label><textarea id="nAgentPrompt">You are a helpful assistant.</textarea></div>
-    <div class="form-group"><label>Provider</label><select id="nAgentProvider"></select></div>
-    <div class="form-group"><label>Model (empty = default)</label><input id="nAgentModel"></div>
-    <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
-      <button class="btn btn-primary" onclick="createAgentModal()">Create</button>
-      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-    </div>
-  </div>
 </div>
-
-</div><!-- /main -->
 <script>
-let currentAgent=null,conversationId=null;
+let cur=null,convId=null;
 const $=id=>document.getElementById(id);
 
-// ── Navigation ──
+document.querySelectorAll('.nav-item').forEach(el=>{
+  el.addEventListener('click',()=>showPage(el.dataset.page));
+});
+
 function showPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  $('page-'+name).classList.add('active');
-  document.querySelectorAll('.nav-tab')[['chat','models','router','arena','costs','keys','settings'].indexOf(name)].classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(t=>t.classList.remove('active'));
+  const page=$('page-'+name);if(page)page.classList.add('active');
+  const tabs=document.querySelectorAll('.nav-item');
+  const idx=['chat','models','router','arena','costs','keys','settings'].indexOf(name);
+  if(idx>=0&&tabs[idx])tabs[idx].classList.add('active');
   if(name==='models')loadModels();
   if(name==='costs')loadCosts();
   if(name==='keys')loadKeys();
   if(name==='settings')loadProviders();
 }
 
-// ── Agents ──
 async function loadAgents(){
   const r=await fetch('/api/agents');const agents=await r.json();
-  $('agentList').innerHTML=agents.map(a=>`<div class="agent-item ${currentAgent?.id===a.id?'active':''}" onclick="selectAgent('${a.id}')"><div class="name">${a.name}</div><div class="meta">${a.provider} · ${a.model||'default'}</div></div>`).join('');
-  // Populate provider selects
+  $('agentList').innerHTML=agents.map(a=>`<div class="agent-item ${cur?.id===a.id?'active':''}" onclick="selectAgent('${a.id}')"><div class="agent-name">${a.name}</div><div class="agent-meta">${a.provider} / ${a.model||'default'}</div></div>`).join('')||'<div style="padding:8px 12px;font-size:12px;color:var(--muted)">No agents yet</div>';
   const pr=await fetch('/api/providers');const providers=await pr.json();
-  const opts=providers.map(p=>`<option value="${p.name}">${p.name}${p.configured?'':'  (no key)'}</option>`).join('');
-  ['nAgentProvider','sAgentProvider'].forEach(id=>{const el=$(id);if(el)el.innerHTML=opts;});
+  const opts=providers.map(p=>`<option value="${p.name}">${p.name}${p.configured?'':'  (not configured)'}</option>`).join('');
+  ['nProvider','sAgentProvider'].forEach(id=>{const el=$(id);if(el)el.innerHTML=opts;});
 }
+
 async function selectAgent(id){
-  const r=await fetch('/api/agents/'+id);currentAgent=await r.json();conversationId=null;
-  $('chatTitle').textContent=currentAgent.name;$('messages').innerHTML='';$('chatInput').style.display='flex';$('statsBar').style.display='flex';
+  const r=await fetch('/api/agents/'+id);cur=await r.json();convId=null;
+  $('chatTitle').textContent=cur.name;$('messages').innerHTML='';$('chatInput').style.display='flex';$('statsBar').style.display='flex';
   $('chatActions').innerHTML=`<button class="btn btn-danger btn-sm" onclick="deleteAgent('${id}')">Delete</button>`;
   showPage('chat');loadAgents();
 }
-async function deleteAgent(id){if(!confirm('Delete?'))return;await fetch('/api/agents/'+id,{method:'DELETE'});currentAgent=null;$('chatTitle').textContent='Select an agent';$('messages').innerHTML='<div class="empty">🐝 Select an agent</div>';$('chatInput').style.display='none';$('statsBar').style.display='none';$('chatActions').innerHTML='';loadAgents();}
-function toggleNewAgent(){$('newAgentModal').style.display='flex';loadAgents();}
-function closeModal(){$('newAgentModal').style.display='none';}
+
+async function deleteAgent(id){if(!confirm('Delete this agent?'))return;await fetch('/api/agents/'+id,{method:'DELETE'});cur=null;$('chatTitle').textContent='Select an agent';$('messages').innerHTML='<div class="empty">Select or create an agent</div>';$('chatInput').style.display='none';$('statsBar').style.display='none';$('chatActions').innerHTML='';loadAgents();}
+
+function openModal(){$('modal').style.display='flex';loadAgents();}
+function closeModal(){$('modal').style.display='none';}
+
 async function createAgentModal(){
-  const body={name:$('nAgentName').value,system_prompt:$('nAgentPrompt').value,provider:$('nAgentProvider').value,model:$('nAgentModel').value};
-  if(!body.name)return;await fetch('/api/agents',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});closeModal();$('nAgentName').value='';loadAgents();
-}
-async function createAgentFull(){
-  const body={name:$('sAgentName').value,system_prompt:$('sAgentPrompt').value,provider:$('sAgentProvider').value,model:$('sAgentModel').value,temperature:parseFloat($('sAgentTemp').value),max_tokens:parseInt($('sAgentMaxTok').value)};
-  if(!body.name)return;await fetch('/api/agents',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});$('sAgentName').value='';loadAgents();alert('Agent created!');
+  const body={name:$('nName').value,system_prompt:$('nPrompt').value,provider:$('nProvider').value,model:$('nModel').value};
+  if(!body.name)return;await fetch('/api/agents',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});closeModal();$('nName').value='';loadAgents();
 }
 
-// ── Chat ──
+async function createAgentFull(){
+  const body={name:$('sAgentName').value,system_prompt:$('sAgentPrompt').value,provider:$('sAgentProvider').value,model:$('sAgentModel').value,temperature:parseFloat($('sAgentTemp').value),max_tokens:parseInt($('sAgentMaxTok').value)};
+  if(!body.name)return;await fetch('/api/agents',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});$('sAgentName').value='';loadAgents();
+}
+
 async function sendMessage(){
-  const input=$('userMsg');const msg=input.value.trim();if(!msg||!currentAgent)return;input.value='';
-  const msgs=$('messages');msgs.innerHTML+=`<div class="msg msg-user">${esc(msg)}</div><div class="msg msg-system">Thinking...</div>`;msgs.scrollTop=msgs.scrollHeight;
+  const input=$('userMsg');const msg=input.value.trim();if(!msg||!cur)return;input.value='';
+  const msgs=$('messages');msgs.innerHTML+=`<div class="bubble bubble-user">${esc(msg)}</div><div class="bubble bubble-system">Processing...</div>`;msgs.scrollTop=msgs.scrollHeight;
   try{
-    const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent_id:currentAgent.id,message:msg,conversation_id:conversationId})});
-    const data=await r.json();conversationId=data.conversation_id;
-    msgs.querySelector('.msg-system:last-child')?.remove();
-    msgs.innerHTML+=`<div class="msg msg-assistant">${esc(data.response).replace(/\\n/g,'<br>')}</div>`;
+    const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent_id:cur.id,message:msg,conversation_id:convId})});
+    const data=await r.json();convId=data.conversation_id;
+    msgs.querySelector('.bubble-system:last-child')?.remove();
+    msgs.innerHTML+=`<div class="bubble bubble-assistant">${esc(data.response).replace(/\\n/g,'<br>')}</div>`;
     const s=data.stats;$('statCalls').textContent=s.llm_calls;$('statTools').textContent=s.tool_executions;$('statTokens').textContent=s.tokens_in+s.tokens_out;$('statCost').textContent='$'+s.cost_usd.toFixed(4);$('statLatency').textContent=s.latency_ms+'ms';
-  }catch(e){msgs.querySelector('.msg-system:last-child')?.remove();msgs.innerHTML+=`<div class="msg msg-system" style="color:var(--red)">Error: ${e.message}</div>`;}
+  }catch(e){msgs.querySelector('.bubble-system:last-child')?.remove();msgs.innerHTML+=`<div class="bubble bubble-system" style="color:var(--red)">Error: ${e.message}</div>`;}
   msgs.scrollTop=msgs.scrollHeight;
 }
 
-// ── Models ──
 async function loadModels(){
   const r=await fetch('/api/models');const models=await r.json();
-  $('modelsList').innerHTML=`<table><thead><tr><th>#</th><th>Model</th><th>Intelligence</th><th>Context</th><th>Speed</th><th>Cost (in/out per 1M)</th><th>Capabilities</th></tr></thead><tbody>${
-    models.map((m,i)=>`<tr><td style="color:var(--accent);font-weight:700">${i+1}</td><td style="font-weight:600">${m.model}</td><td><span class="badge ${m.intelligence>=60?'badge-green':m.intelligence>=50?'badge-blue':m.intelligence>=40?'badge-amber':'badge-gray'}">${m.intelligence}/100</span></td><td>${formatCtx(m.context_window)}</td><td><span class="badge ${m.speed_tier==='ultra'?'badge-green':m.speed_tier==='fast'?'badge-blue':'badge-gray'}">${m.speed_tier}</span></td><td>$${m.cost_in_per_m} / $${m.cost_out_per_m}</td><td>${m.vision?'👁 ':''}${m.tools?'🔧 ':''}</td></tr>`).join('')
+  $('modelsList').innerHTML=`<table><thead><tr><th>#</th><th>Model</th><th>Intelligence</th><th>Context</th><th>Speed</th><th>Cost (in / out per 1M)</th><th>Capabilities</th></tr></thead><tbody>${
+    models.map((m,i)=>`<tr><td style="color:var(--accent2);font-weight:700">${i+1}</td><td style="font-weight:600">${m.model}</td><td><span class="tag ${m.intelligence>=60?'tag-green':m.intelligence>=50?'tag-blue':m.intelligence>=40?'tag-amber':'tag-gray'}">${m.intelligence}</span></td><td>${fmtCtx(m.context_window)}</td><td><span class="tag ${m.speed_tier==='ultra'?'tag-green':m.speed_tier==='fast'?'tag-blue':'tag-gray'}">${m.speed_tier}</span></td><td style="font-variant-numeric:tabular-nums">$${m.cost_in_per_m} / $${m.cost_out_per_m}</td><td>${m.vision?'<span class="tag tag-purple" style="margin-right:4px">vision</span>':''}${m.tools?'<span class="tag tag-blue">tools</span>':''}</td></tr>`).join('')
   }</tbody></table>`;
 }
-function formatCtx(n){if(n>=1e6)return(n/1e6).toFixed(n%1e6===0?0:1)+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return n;}
+function fmtCtx(n){if(n>=1e6)return(n/1e6).toFixed(n%1e6===0?0:1)+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return n;}
 
-// ── Router ──
 async function analyzePrompt(){
   const body={prompt:$('routerPrompt').value,priority:$('routerPriority').value,vision:$('routerVision').checked,privacy:$('routerPrivacy').checked};
   if(!body.prompt)return;
   const r=await fetch('/api/router',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   const d=await r.json();
-  $('routerResult').innerHTML=`<div class="router-result"><div class="rec">${d.provider} / ${d.model}</div><div class="reason">${d.reason}</div><div style="display:flex;gap:1rem;margin-top:0.5rem;font-size:0.75rem"><span>Intelligence: <b style="color:var(--green)">${d.intelligence}/100</b></span><span>Speed: <b>${d.speed_tier}</b></span><span>Cost: <b>${d.cost_tier}</b></span><span>~$${d.estimated_cost_per_1k_tokens}/1K tokens</span></div></div>`;
+  $('routerResult').innerHTML=`<div class="router-result"><div class="router-model">${d.provider} / ${d.model}</div><div class="router-reason">${d.reason}</div><div class="router-meta"><span>Intelligence: <b>${d.intelligence}/100</b></span><span>Speed: <b>${d.speed_tier}</b></span><span>Cost tier: <b>${d.cost_tier}</b></span><span>Est. $${d.estimated_cost_per_1k_tokens}/1K tokens</span></div></div>`;
 }
 
-// ── Arena ──
 async function runArena(){
   const prompt=$('arenaPrompt').value;if(!prompt)return;
   const provStr=$('arenaProviders').value;const providers=provStr?provStr.split(',').map(s=>s.trim()):[];
-  $('arenaResult').innerHTML='<div class="msg msg-system">Running arena... this may take a moment</div>';
+  $('arenaResult').innerHTML='<div class="bubble bubble-system">Running benchmark...</div>';
   try{
     const r=await fetch('/api/arena',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt,providers})});
     const d=await r.json();
     $('arenaResult').innerHTML=`<table><thead><tr><th>#</th><th>Provider</th><th>Model</th><th>Latency</th><th>Tokens</th><th>Cost</th></tr></thead><tbody>${
-      d.results.map((r,i)=>`<tr><td>${i===0?'🏆':'  '}${i+1}</td><td>${r.provider}</td><td style="font-weight:600">${r.model}</td><td>${r.latency_ms}ms</td><td>${r.tokens_in+r.tokens_out}</td><td>$${r.cost_usd.toFixed(4)}</td></tr>`).join('')
-    }</tbody></table><div style="margin-top:0.75rem"><h3 style="font-size:0.85rem;margin-bottom:0.5rem">Responses</h3>${
-      d.results.map(r=>`<div class="card"><div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.25rem">${r.provider} / ${r.model} · ${r.latency_ms}ms</div><div style="font-size:0.8rem">${esc(r.response).substring(0,300).replace(/\\n/g,'<br>')}${r.response.length>300?'...':''}</div></div>`).join('')
+      d.results.map((r,i)=>`<tr><td style="font-weight:700;color:${i===0?'var(--green)':'var(--muted)'}">${i+1}</td><td>${r.provider}</td><td style="font-weight:600">${r.model}</td><td style="font-variant-numeric:tabular-nums">${r.latency_ms}ms</td><td style="font-variant-numeric:tabular-nums">${r.tokens_in+r.tokens_out}</td><td style="font-variant-numeric:tabular-nums">$${r.cost_usd.toFixed(4)}</td></tr>`).join('')
+    }</tbody></table><div style="margin-top:16px"><div style="font-size:13px;font-weight:600;margin-bottom:8px">Responses</div>${
+      d.results.map(r=>`<div class="card"><div style="font-size:11px;color:var(--muted);margin-bottom:4px">${r.provider} / ${r.model} &middot; ${r.latency_ms}ms</div><div style="font-size:13px">${esc(r.response).substring(0,300).replace(/\\n/g,'<br>')}${r.response.length>300?'...':''}</div></div>`).join('')
     }</div>`;
-  }catch(e){$('arenaResult').innerHTML=`<div class="msg msg-system" style="color:var(--red)">Error: ${e.message}</div>`;}
+  }catch(e){$('arenaResult').innerHTML=`<div class="bubble bubble-system" style="color:var(--red)">Error: ${e.message}</div>`;}
 }
 
-// ── Costs ──
 async function loadCosts(){
   const r=await fetch('/api/costs');const d=await r.json();
   if(d.total_requests===0){$('costsContent').innerHTML='<div class="empty">No usage data yet. Chat with an agent to generate data.</div>';return;}
-  $('costsContent').innerHTML=`<div class="grid grid-4" style="margin-bottom:1rem"><div class="card" style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--green)">$${d.total_cost.toFixed(4)}</div><div style="font-size:0.7rem;color:var(--muted)">Total Cost</div></div><div class="card" style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--accent)">${d.total_requests}</div><div style="font-size:0.7rem;color:var(--muted)">Requests</div></div><div class="card" style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--blue)">$${d.potential_savings.toFixed(4)}</div><div style="font-size:0.7rem;color:var(--muted)">Potential Savings</div></div><div class="card" style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--red)">${d.savings_pct}%</div><div style="font-size:0.7rem;color:var(--muted)">Optimization</div></div></div>${
-    Object.entries(d.by_model).map(([m,v])=>`<div class="card"><div style="display:flex;justify-content:space-between"><strong>${m}</strong><span style="color:var(--green)">$${v.cost.toFixed(4)}</span></div><div style="font-size:0.75rem;color:var(--muted);margin-top:4px">${v.requests} requests · avg $${v.avg_cost_per_request.toFixed(4)}/req · avg ${v.avg_latency_ms}ms</div></div>`).join('')
-  }${d.recommendations.length?`<h3 style="margin:1rem 0 0.5rem;font-size:0.9rem">💡 Recommendations</h3>${d.recommendations.map(r=>`<div class="card" style="border-left:3px solid var(--accent)"><div style="font-weight:600;font-size:0.85rem">${r.type==='model_downgrade'?'Switch to cheaper model':r.type==='enable_caching'?'Enable caching':'Speed optimization'}</div><div style="font-size:0.8rem;color:var(--muted);margin-top:4px">${r.reason}</div><div style="font-size:0.75rem;color:var(--green);margin-top:4px">Save $${r.potential_savings.toFixed(4)}</div></div>`).join('')}`:''}`;
+  $('costsContent').innerHTML=`<div class="grid grid-4" style="margin-bottom:16px"><div class="card stat-card"><div class="stat-value" style="color:var(--green)">$${d.total_cost.toFixed(4)}</div><div class="stat-label">Total Cost</div></div><div class="card stat-card"><div class="stat-value" style="color:var(--accent2)">${d.total_requests}</div><div class="stat-label">Requests</div></div><div class="card stat-card"><div class="stat-value" style="color:var(--blue)">$${d.potential_savings.toFixed(4)}</div><div class="stat-label">Potential Savings</div></div><div class="card stat-card"><div class="stat-value" style="color:var(--amber)">${d.savings_pct}%</div><div class="stat-label">Optimization</div></div></div>${
+    Object.entries(d.by_model).map(([m,v])=>`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><strong style="font-size:13px">${m}</strong><span style="color:var(--green);font-weight:600;font-size:13px">$${v.cost.toFixed(4)}</span></div><div style="font-size:12px;color:var(--muted);margin-top:4px">${v.requests} requests &middot; avg $${v.avg_cost_per_request.toFixed(4)}/req &middot; avg ${v.avg_latency_ms}ms</div></div>`).join('')
+  }${d.recommendations.length?`<div style="font-size:14px;font-weight:600;margin:16px 0 8px">Recommendations</div>${d.recommendations.map(r=>`<div class="card rec-card"><div style="font-weight:600;font-size:13px">${r.type==='model_downgrade'?'Switch to cheaper model':r.type==='enable_caching'?'Enable response caching':'Speed optimization'}</div><div style="font-size:12px;color:var(--text2);margin-top:4px">${r.reason}</div><div style="font-size:12px;color:var(--green);margin-top:4px;font-weight:500">Save $${r.potential_savings.toFixed(4)}</div></div>`).join('')}`:''}`;
 }
 
-// ── API Keys ──
 async function loadKeys(){
   const r=await fetch('/api/keys');const keys=await r.json();
-  $('keysList').innerHTML=keys.length?`<table><thead><tr><th>Name</th><th>Requests</th><th>Last Used</th><th>Status</th><th></th></tr></thead><tbody>${keys.map(k=>`<tr><td>${k.name}</td><td>${k.request_count}</td><td>${k.last_used?new Date(k.last_used*1000).toLocaleString():'never'}</td><td><span class="badge ${k.enabled?'badge-green':'badge-red'}">${k.enabled?'active':'revoked'}</span></td><td><button class="btn btn-danger btn-sm" onclick="revokeKey('${k.name}')">Revoke</button></td></tr>`).join('')}</tbody></table>`:'<p style="color:var(--muted);font-size:0.85rem">No API keys yet.</p>';
+  $('keysList').innerHTML=keys.length?`<table><thead><tr><th>Name</th><th>Requests</th><th>Last Used</th><th>Status</th><th></th></tr></thead><tbody>${keys.map(k=>`<tr><td style="font-weight:500">${k.name}</td><td style="font-variant-numeric:tabular-nums">${k.request_count}</td><td style="font-size:12px">${k.last_used?new Date(k.last_used*1000).toLocaleString():'never'}</td><td><span class="tag ${k.enabled?'tag-green':'tag-red'}">${k.enabled?'active':'revoked'}</span></td><td><button class="btn btn-danger btn-sm" onclick="revokeKey('${k.name}')">Revoke</button></td></tr>`).join('')}</tbody></table>`:'<div style="font-size:13px;color:var(--muted)">No API keys created yet.</div>';
 }
+
 async function createKey(){
   const name=$('keyName').value;if(!name)return;
   const r=await fetch('/api/keys',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,agent_id:$('keyAgent').value||null})});
-  const d=await r.json();$('keyResult').innerHTML=`<div class="card" style="border:1px solid var(--green)"><strong>Key created:</strong><code style="display:block;margin-top:0.5rem;padding:0.5rem;background:var(--bg);border-radius:4px;word-break:break-all;font-size:0.8rem">${d.key}</code><p style="font-size:0.7rem;color:var(--red);margin-top:0.25rem">⚠️ Save this key — it won't be shown again.</p></div>`;$('keyName').value='';loadKeys();
+  const d=await r.json();$('keyResult').innerHTML=`<div class="card" style="border-color:var(--green)"><div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:8px">Key generated successfully</div><div class="key-code">${d.key}</div><div style="font-size:11px;color:var(--red);margin-top:8px">Save this key now. It will not be displayed again.</div></div>`;$('keyName').value='';loadKeys();
 }
-async function revokeKey(name){if(!confirm('Revoke '+name+'?'))return;await fetch('/api/keys/'+name,{method:'DELETE'});loadKeys();}
 
-// ── Providers ──
+async function revokeKey(name){if(!confirm('Revoke key "'+name+'"?'))return;await fetch('/api/keys/'+name,{method:'DELETE'});loadKeys();}
+
 async function loadProviders(){
   const r=await fetch('/api/providers');const providers=await r.json();
-  $('providerStatus').innerHTML=providers.map(p=>`<div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid #1a1a1a"><span style="font-weight:600;font-size:0.85rem">${p.name}</span><span class="badge ${p.configured?'badge-green':'badge-gray'}">${p.configured?'configured':'no key'}</span></div>`).join('');
+  $('providerStatus').innerHTML=providers.map(p=>`<div class="provider-row"><span class="provider-name">${p.name}</span><span class="tag ${p.configured?'tag-green':'tag-gray'}">${p.configured?'configured':'not configured'}</span></div>`).join('');
 }
 
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
