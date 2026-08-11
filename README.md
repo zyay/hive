@@ -1,265 +1,188 @@
-# 🐝 Hive — Self-hosted Multi-Agent AI Platform
+# Hive — Self-hosted Multi-Agent AI Platform
 
 [![CI](https://github.com/zyay/hive/actions/workflows/ci.yml/badge.svg)](https://github.com/zyay/hive/actions/workflows/ci.yml)
 
-> **v0.2** — Swarm orchestration · Model Arena · Long-term memory · Scheduler · API keys · Voice I/O · 8 LLM providers · MCP integration
+> **v0.3** — 10 LLM providers · Swarm orchestration · Vector memory · SSE streaming · JWT auth · Benchmark suite · MCP integrations · 92 tests
 
-Create, manage, and chat with AI agents powered by **any LLM provider** — all running on your own machine. Agents can delegate to each other, compare models side-by-side, remember across sessions, and run on schedule.
+Create, manage, and chat with AI agents powered by any LLM provider — all running on your own machine. Agents can delegate to each other, compare models side-by-side, remember across sessions, and run on schedule.
 
 ## What is Hive?
 
-Hive is a self-hosted platform for orchestrating AI agents. Each agent has its own personality (system prompt), model, and tools. You can create agents, chat with them, and monitor costs — all from a clean web UI.
+Hive is a self-hosted platform for orchestrating AI agents. Each agent has its own personality (system prompt), model, and tools. You can create agents, chat with them, and monitor costs — all from a professional web dashboard.
 
-**Key insight:** Instead of being locked into one AI provider, Hive lets you switch between 8+ providers with a single config change. Use Ollama for free local inference, OpenAI for quality, Groq for speed, or OpenRouter for access to 100+ models.
+Instead of being locked into one AI provider, Hive lets you switch between 10+ providers with a single config change. Use Ollama for free local inference, OpenAI for quality, Groq for speed, or OpenRouter for access to 300+ models.
 
 ## Features
 
 ### Core
 | Feature | Description |
 |---|---|
-| **Multi-provider LLM layer** | 8 providers via 2 adapters (OpenAI-compat + Anthropic native) |
+| **Multi-provider LLM layer** | 10 providers via 2 adapters (OpenAI-compat + Anthropic native) |
 | **Agent management** | Create, edit, delete agents with custom prompts, models, and tools |
 | **Tool calling** | Built-in tools + extensible `@register_tool` decorator |
 | **Cost tracking** | Per-request cost estimation, token counting, latency monitoring |
 | **Conversation memory** | Persistent conversations in SQLite |
-| **Web UI** | Dark-themed dashboard with agent list, chat, and live stats |
+| **Web UI** | Professional dark dashboard — 7 tabs (Chat, Models, Router, Arena, Costs, API Keys, Settings) |
 | **Docker Compose** | One command: `docker compose up` |
 
-### Advanced (v0.2)
+### Advanced
 | Feature | Description |
 |---|---|
-| **🐝 Swarm orchestration** | Agent-to-agent delegation via `call_agent` tool |
-| **⚔️ Model Arena** | Compare N models on same prompt — latency, cost, response side-by-side |
-| **🧠 Long-term memory** | Persistent keyword-based memory per agent with importance weighting |
-| **⏰ Scheduled automations** | Cron-based agent tasks with background scheduler loop |
-| **🔌 API keys + auth** | Create/revoke API keys, SHA-256 hashed, auth middleware |
-| **🎙️ Voice I/O** | Whisper STT + OpenAI TTS integration |
-| **🔗 MCP integration** | Connect to any MCP server (mcp-agent-tools, mcp-rag-bridge) |
+| **Swarm orchestration** | Agent-to-agent delegation via `call_agent` tool |
+| **Model Arena** | Compare N models on same prompt — latency, cost, response side-by-side |
+| **Model Router** | Intelligent model selection based on task analysis (coding, reasoning, budget, speed) |
+| **Adaptive reasoning** | Auto-detect task complexity and recommend effort level |
+| **Vector memory** | ChromaDB + sentence-transformers semantic recall per agent |
+| **SSE streaming** | Real-time token streaming via `/api/chat/stream` |
+| **JWT authentication** | Zero-dependency HMAC-SHA256 token create/verify |
+| **Full cron parser** | 5-field cron with ranges, steps, commas — no external deps |
+| **Prometheus metrics** | Counters, histograms, gauges + text export at `/api/metrics/prometheus` |
+| **Cost optimizer** | Usage analysis + savings recommendations |
+| **MCP integrations** | Connect to mcp-agent-tools and mcp-rag-bridge as plugins |
+| **Benchmark suite** | 18 prompts across 4 categories (reasoning, coding, factual, creative) |
+| **Voice I/O** | Whisper STT + OpenAI TTS integration |
+| **Scheduled automations** | Cron-based agent tasks with background scheduler loop |
 
 ## Architecture
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│                     Web UI (dark dashboard)                  │
-│         agents · chat · arena · memory · stats               │
-└──────────────────────────┬───────────────────────────────────┘
-                           │ HTTP
-┌──────────────────────────▼───────────────────────────────────┐
-│                    FastAPI backend (hive)                     │
-│                                                              │
-│  ┌─────────────┐  ┌──────────────┐  ┌────────────────────┐  │
-│  │ Agent loop  │  │ Model layer  │  │ Swarm              │  │
-│  │ (tool call, │  │ 8 providers  │  │ (call_agent,       │  │
-│  │  multi-turn)│  │ 2 adapters   │  │  list_hive_agents) │  │
-│  └─────────────┘  └──────────────┘  └────────────────────┘  │
-│                                                              │
-│  ┌─────────────┐  ┌──────────────┐  ┌────────────────────┐  │
-│  │ Arena       │  │ Memory       │  │ Scheduler          │  │
-│  │ (parallel   │  │ (per-agent   │  │ (cron tasks,       │  │
-│  │  comparison)│  │  recall)     │  │  background loop)  │  │
-│  └─────────────┘  └──────────────┘  └────────────────────┘  │
-│                                                              │
-│  ┌─────────────┐  ┌──────────────┐  ┌────────────────────┐  │
-│  │ Voice I/O   │  │ API keys     │  │ MCP client         │  │
-│  │ (Whisper +  │  │ (SHA-256,    │  │ (connect to any    │  │
-│  │  TTS)       │  │  auth)       │  │  MCP server)       │  │
-│  └─────────────┘  └──────────────┘  └────────────────────┘  │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐    │
-│  │ SQLite (agents, conversations, usage, memory, keys)  │    │
-│  └──────────────────────────────────────────────────────┘    │
-└──────────────────────────────────────────────────────────────┘
+Web UI (7 tabs)
+    |
+    v
+FastAPI Backend
+    |
+    +-- Agent Loop (tool calling, multi-turn)
+    +-- Model Layer (10 providers, 2 adapters)
+    +-- Swarm (agent-to-agent delegation)
+    +-- Model Router (intelligent selection)
+    +-- Adaptive Reasoning (complexity detection)
+    |
+    +-- Memory
+    |   +-- SQLite (keyword-based)
+    |   +-- ChromaDB (vector embeddings)
+    |
+    +-- Streaming (SSE real-time)
+    +-- Auth (JWT, API keys)
+    +-- Metrics (Prometheus)
+    +-- Cron (full 5-field parser)
+    +-- Cost Optimizer
+    |
+    +-- MCP Integrations
+    |   +-- mcp-agent-tools (19 tools)
+    |   +-- mcp-rag-bridge (7 tools)
+    |
+    +-- Benchmark Suite (18 prompts, 4 categories)
+    +-- Voice I/O (Whisper + TTS)
+    |
+    v
+SQLite + ChromaDB (persistent storage)
 ```
 
 ## Quick start
 
 ```bash
-# 1. Clone
 git clone https://github.com/zyay/hive.git
 cd hive
-
-# 2. Set up
-python -m venv venv && venv\Scripts\activate   # Windows
-# source venv/bin/activate                      # macOS/Linux
+python -m venv venv && venv\Scripts\activate    # Windows
 pip install -r requirements.txt
-cp .env.example .env                            # edit with your API keys
-
-# 3. Run
+cp .env.example .env                             # edit with your API keys
 python main.py
 # Open http://127.0.0.1:8000
 ```
 
-### Or with Docker:
+### Docker
 
 ```bash
 docker compose up --build
-# Hive at http://localhost:8000, Ollama at http://localhost:11434
 ```
 
 ## Supported providers
 
-> **10 providers · 30+ models · Aug 2026 pricing**
-
 | Provider | Type | Default model | Context | Cost (in/out per 1M) |
 |---|---|---|---|---|
-| **Ollama** | 🏠 Local | llama3.3 | 128K | $0 |
-| **LM Studio** | 🏠 Local | any | varies | $0 |
-| **OpenAI** | ☁️ Cloud | gpt-4.1-mini | 1M | $0.40 / $1.60 |
-| **Anthropic** | ☁️ Cloud | claude-sonnet-4 | 200K | $3.00 / $15.00 |
-| **Google Gemini** | ☁️ Cloud | gemini-2.5-flash | 1M | free tier |
-| **Groq** | ☁️ Fast | llama-3.3-70b | 128K | $0.59 / $0.79 |
-| **Mistral** | ☁️ Cloud | mistral-large | 128K | $2.00 / $6.00 |
-| **OpenRouter** | ☁️ 300+ models | claude-3.5-sonnet | varies | varies |
-| **xAI** | ☁️ Cloud | grok-3-mini | 131K | $0.30 / $0.50 |
-| **DeepSeek** | ☁️ Cloud | deepseek-chat | 128K | $0.27 / $1.10 |
-
-All OpenAI-compatible providers share the same adapter — just change `base_url` and `api_key`.
-
-### Latest models supported
-
-| Provider | Models |
-|---|---|
-| OpenAI | gpt-4.1, gpt-4.1-mini, gpt-4.1-nano, gpt-4o |
-| Anthropic | claude-opus-4, claude-sonnet-4, claude-3.5-sonnet, claude-3.5-haiku |
-| Google | gemini-2.5-pro, gemini-2.5-flash |
-| xAI | grok-3, grok-3-mini |
-| DeepSeek | deepseek-chat, deepseek-reasoner (R1) |
-| Meta | llama-3.3-70b (via Groq/OpenRouter) |
-| Mistral | mistral-large, mistral-small |
+| Ollama | Local | llama3.3 | 128K | $0 |
+| LM Studio | Local | any | varies | $0 |
+| OpenAI | Cloud | gpt-4.1-mini | 1M | $0.40 / $1.60 |
+| Anthropic | Cloud | claude-sonnet-4 | 200K | $3.00 / $15.00 |
+| Google Gemini | Cloud | gemini-2.5-flash | 1M | free tier |
+| Groq | Fast | llama-3.3-70b | 128K | $0.59 / $0.79 |
+| Mistral | Cloud | mistral-large | 128K | $2.00 / $6.00 |
+| OpenRouter | 300+ models | claude-3.5-sonnet | varies | varies |
+| xAI | Cloud | grok-3-mini | 131K | $0.30 / $0.50 |
+| DeepSeek | Cloud | deepseek-chat | 128K | $0.27 / $1.10 |
 
 ## API reference
 
-### Core endpoints
+### Core
 | Endpoint | Method | Description |
 |---|---|---|
 | `/` | GET | Web UI |
 | `/health` | GET | Health check |
 | `/api/providers` | GET | List configured providers |
-| `/api/tools` | GET | List available tools |
+| `/api/models` | GET | All models with intelligence rankings |
 | `/api/agents` | GET/POST | List / create agents |
 | `/api/agents/{id}` | GET/PUT/DELETE | Agent CRUD |
-| `/api/chat` | POST | Send message to agent |
+| `/api/chat` | POST | Chat with agent |
+| `/api/chat/stream` | POST | SSE streaming chat |
 | `/api/usage` | GET | Usage statistics |
 
-### v0.2 endpoints
+### Intelligence
 | Endpoint | Method | Description |
 |---|---|---|
-| `/api/arena` | POST | Compare models side-by-side |
-| `/api/memory/{agent_id}` | GET/POST/DELETE | Agent memory CRUD |
-| `/api/memory/{agent_id}/recall` | GET | Semantic recall |
-| `/api/schedule` | GET/POST | List / create scheduled tasks |
-| `/api/schedule/{id}` | DELETE | Remove scheduled task |
-| `/api/keys` | GET/POST | List / create API keys |
-| `/api/voice/transcribe` | POST | Speech-to-text |
-| `/api/voice/synthesize` | POST | Text-to-speech |
+| `/api/router` | POST | Intelligent model selection |
+| `/api/analyze` | POST | Analyze task complexity |
+| `/api/compare` | POST | Compare models side-by-side |
+| `/api/arena` | POST | Run arena benchmark |
+| `/api/benchmark/run` | POST | Full benchmark suite |
+| `/api/benchmark/categories` | GET | List benchmark categories |
 
-### Example: create an agent and chat
+### Memory
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/memory` | GET/POST/DELETE | Keyword memory |
+| `/api/memory/vector` | POST | Store vector memory |
+| `/api/memory/vector/{id}` | GET | Semantic recall |
+| `/api/memory/vector/{id}/all` | GET | List all memories |
 
-```bash
-# Create agent
-curl -X POST http://localhost:8000/api/agents \
-  -H "Content-Type: application/json" \
-  -d '{"name": "Researcher", "system_prompt": "You are a research assistant.", "provider": "ollama"}'
-
-# Chat
-curl -X POST http://localhost:8000/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{"agent_id": "abc123", "message": "What is retrieval-augmented generation?"}'
-
-# Model Arena — compare 3 providers
-curl -X POST http://localhost:8000/api/arena \
-  -H "Content-Type: application/json" \
-  -d '{"prompt": "Explain quantum computing in 3 sentences", "providers": ["ollama", "openai", "groq"]}'
-```
-
-## Adding custom tools
-
-```python
-from hive.core.agent import register_tool
-
-@register_tool(
-    name="weather",
-    description="Get current weather for a city",
-    parameters={"type": "object", "properties": {"city": {"type": "string"}}, "required": ["city"]},
-)
-def get_weather(city: str) -> str:
-    return f"Weather in {city}: 22°C, sunny"
-```
+### Operations
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/auth/token` | POST | Create JWT token |
+| `/api/auth/verify` | GET | Verify JWT token |
+| `/api/keys` | GET/POST | API key management |
+| `/api/costs` | GET | Cost optimization analysis |
+| `/api/metrics` | GET | Metrics summary (JSON) |
+| `/api/metrics/prometheus` | GET | Prometheus text format |
+| `/api/cron/next` | POST | Next run time for cron |
+| `/api/integrations` | GET | List MCP integrations |
+| `/api/integrations/discover` | POST | Discover MCP tools |
+| `/api/integrations/call` | POST | Call MCP tool |
 
 ## Testing
 
 ```bash
-# Run all tests
-pytest tests/ -v
-
-# Run with coverage
-pip install pytest-cov
-pytest --cov=hive --cov-report=html
-```
-
-**Test coverage:** 17 tests covering config, agent loop, LLM layer, tool registry, cost estimation, providers.
-
-## Performance
-
-| Metric | Value |
-|---|---|
-| Agent loop latency | ~200ms (local Ollama) |
-| Swarm delegation | ~400ms (2 agent calls) |
-| Arena (3 providers) | ~2s parallel |
-| Cost per 1K tokens | $0.00015 (GPT-4o-mini) vs $0.00 (Ollama) |
-| Memory per agent | ~2KB (keyword-based) |
-| DB size | ~1MB per 1000 conversations |
-| Startup time | <1s |
-
-## Cross-repo integrations
-
-Hive connects to your other projects via MCP:
-
-```
-hive ←→ mcp-agent-tools (19 tools: file, MySQL, web, calc, text)
-hive ←→ mcp-rag-bridge (7 tools: query KB, add/update/delete docs)
-hive ←→ rag-docs-assistant (RAG pipeline as a service)
-```
-
-```python
-from hive.core.mcp_client import mcp_registry
-
-# Register MCP servers
-mcp_registry.register("agent-tools", "python", ["path/to/mcp-agent-tools/server.py"])
-mcp_registry.register("rag-bridge", "python", ["path/to/mcp-rag-bridge/server.py"])
-
-# Connect and discover tools
-await mcp_registry.connect_all()
-schemas = mcp_registry.get_all_tool_schemas()  # → all tools available to agents
+pytest tests/ -v          # 92 tests
+pytest --cov=hive         # with coverage
 ```
 
 ## Design decisions
 
 | Decision | Why |
 |---|---|
-| **Adapter pattern** | 2 adapters (OpenAI-compat + Anthropic) cover 8+ providers |
+| **Adapter pattern** | 2 adapters (OpenAI-compat + Anthropic) cover 10 providers |
 | **SQLite** | Zero-config, single-file, perfect for self-hosted |
-| **Cost tracking** | Every request logged with tokens + estimated cost |
-| **Tool registry** | Decorator-based — add tools with one function |
+| **ChromaDB for vectors** | Persistent, embedded, no separate server |
+| **Zero-dep JWT** | No jose/pyjwt needed — pure HMAC-SHA256 |
+| **Zero-dep cron** | No croniter needed — full 5-field parser built-in |
 | **AST calculator** | No `eval()` — security-first math evaluation |
-| **Keyword memory** | Simple, fast, no embedding model needed for recall |
-| **Background scheduler** | asyncio task — no external cron daemon needed |
-| **SHA-256 API keys** | Raw keys shown once, only hashes stored |
-
-## Roadmap (v0.3)
-
-- [ ] Hive swarm visualization (graph view of agent calls)
-- [ ] RAG per agent (native ChromaDB integration)
-- [ ] Advanced evals framework (automated agent quality scoring)
-- [ ] Multi-user support with auth
-- [ ] Public marketplace for agent templates
-- [ ] Streaming responses (SSE)
+| **Prometheus format** | Industry standard — works with Grafana out of the box |
+| **MCP integrations** | Reuse existing tools from sibling projects |
 
 ## Related projects
 
 - [rag-docs-assistant](https://github.com/zyay/rag-docs-assistant) — RAG pipeline with hybrid search, reranking, evals, 27 tests
-- [mcp-agent-tools](https://github.com/zyay/mcp-agent-tools) — MCP server with 19 tools, sandbox, rate limiting, security audit
-- [mcp-rag-bridge](https://github.com/zyay/mcp-rag-bridge) — MCP bridge for RAG knowledge bases, 7 tools
+- [mcp-agent-tools](https://github.com/zyay/mcp-agent-tools) — MCP server with 19 tools, sandbox, rate limiting, 30 tests
+- [mcp-rag-bridge](https://github.com/zyay/mcp-rag-bridge) — MCP bridge for RAG knowledge bases, 7 tools, 13 tests
 
 ## License
 
