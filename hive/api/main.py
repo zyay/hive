@@ -507,6 +507,91 @@ def cron_next(expression: str):
 
 
 # ---------------------------------------------------------------------------
+# MCP Integrations
+# ---------------------------------------------------------------------------
+
+@app.get("/api/integrations")
+def list_integrations():
+    """List registered MCP integrations and their tools."""
+    from hive.core.mcp_integrations import integrations, setup_default_integrations
+    setup_default_integrations()
+    return {
+        name: {"path": conn.server_path, "tools": conn.tools}
+        for name, conn in integrations.connections.items()
+    }
+
+
+@app.post("/api/integrations/discover")
+async def discover_integrations():
+    """Discover tools on all registered MCP servers."""
+    from hive.core.mcp_integrations import integrations, setup_default_integrations
+    setup_default_integrations()
+    results = await integrations.discover_all()
+    return results
+
+
+class IntegrationCallRequest(BaseModel):
+    tool: str  # "server__tool" format
+    arguments: dict = {}
+
+
+@app.post("/api/integrations/call")
+async def call_integration(body: IntegrationCallRequest):
+    """Call a tool on a registered MCP server."""
+    from hive.core.mcp_integrations import integrations, setup_default_integrations
+    setup_default_integrations()
+    result = await integrations.execute(body.tool, body.arguments)
+    return {"result": result}
+
+
+# ---------------------------------------------------------------------------
+# Benchmark Suite
+# ---------------------------------------------------------------------------
+
+class BenchmarkRequest(BaseModel):
+    models: list[str]  # "provider/model" format
+    categories: list[str] = []
+
+
+@app.post("/api/benchmark/run")
+async def run_benchmark_suite(body: BenchmarkRequest):
+    """Run benchmark suite on multiple models."""
+    from hive.core.benchmark_suite import run_comparison, format_comparison_table
+    model_pairs = []
+    for m in body.models:
+        parts = m.split("/", 1)
+        if len(parts) == 2:
+            model_pairs.append((parts[0], parts[1]))
+        else:
+            model_pairs.append(("ollama", parts[0]))
+    results = await run_comparison(model_pairs, body.categories or None)
+    return {
+        "results": [
+            {
+                "provider": r.provider,
+                "model": r.model,
+                "score": r.score,
+                "avg_latency_ms": r.avg_latency_ms,
+                "total_cost_usd": r.total_cost_usd,
+                "num_prompts": r.num_prompts,
+            }
+            for r in results
+        ],
+        "table": format_comparison_table(results),
+    }
+
+
+@app.get("/api/benchmark/categories")
+def benchmark_categories():
+    """List available benchmark categories and prompt counts."""
+    from hive.core.benchmark_suite import BENCHMARKS
+    return {
+        name: {"prompts": len(prompts), "sample": prompts[0]["prompt"][:80]}
+        for name, prompts in BENCHMARKS.items()
+    }
+
+
+# ---------------------------------------------------------------------------
 # Web UI
 # ---------------------------------------------------------------------------
 

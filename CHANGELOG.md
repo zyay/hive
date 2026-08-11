@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.3.0] — 2026-08-11
+
+### New Features
+- Vector memory — ChromaDB + sentence-transformers semantic recall per agent
+- SSE streaming — real-time token streaming via /api/chat/stream
+- JWT authentication — zero-dependency HMAC-SHA256 token create/verify
+- Full cron parser — 5-field cron with ranges, steps, commas
+- Prometheus metrics — counters, histograms, gauges + text export
+- MCP integrations — connect to mcp-agent-tools and mcp-rag-bridge
+- Benchmark suite — automated evaluation (reasoning, coding, factual, creative)
+
+### New Endpoints
+- POST /api/chat/stream, /api/memory/vector, /api/auth/token
+- GET /api/auth/verify, /api/metrics, /api/metrics/prometheus
+- POST /api/cron/next, /api/integrations/discover, /api/integrations/call
+- POST /api/benchmark/run, GET /api/benchmark/categories
+
+### Tests: 97 pytest tests
+
+---
+
 ## [0.2.0] — 2026-08-11
 
 ### ✨ New Features
