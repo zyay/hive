@@ -8,7 +8,7 @@ import os
 
 class Settings:
     # Server
-    HOST: str = os.getenv("HIVE_HOST", "127.0.0.1")
+    HOST: str = os.getenv("HIVE_HOST", "0.0.0.0")
     PORT: int = int(os.getenv("HIVE_PORT", "8000"))
 
     # Default provider
