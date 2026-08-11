@@ -10,7 +10,6 @@ from fastapi.responses import Response
 from pydantic import BaseModel
 from typing import Optional
 
-from hive.core.arena import run_arena, format_arena_table
 from hive.core.memory import init_memory, remember, recall, list_memories, forget, clear_memories
 from hive.core.scheduler import init_scheduler, create_task, get_tasks, delete_task, toggle_task
 from hive.core.api_keys import init_api_keys, create_key, validate_key, list_keys, revoke_key
@@ -44,26 +43,47 @@ class ArenaRequest(BaseModel):
 @router.post("/api/arena")
 async def arena(body: ArenaRequest):
     """Run the same prompt on multiple models simultaneously."""
-    results = await run_arena(
-        prompt=body.prompt,
-        providers=body.providers or None,
-        system_prompt=body.system_prompt,
-    )
-    return {
-        "results": [
-            {
-                "provider": r.provider,
-                "model": r.model,
-                "response": r.response,
-                "latency_ms": r.latency_ms,
-                "tokens_in": r.tokens_in,
-                "tokens_out": r.tokens_out,
-                "cost_usd": r.cost_usd,
+    import asyncio
+    from hive.core.llm import chat
+    from hive.core.config import settings
+
+    providers = body.providers or [
+        name for name, cfg in settings.PROVIDERS.items()
+        if cfg["api_key"] or name == "ollama"
+    ]
+
+    messages = [
+        {"role": "system", "content": body.system_prompt},
+        {"role": "user", "content": body.prompt},
+    ]
+
+    async def run_one(provider: str):
+        cfg = settings.PROVIDERS.get(provider, {})
+        try:
+            resp = await chat(provider=provider, model=cfg.get("model", ""), messages=messages)
+            return {
+                "provider": provider,
+                "model": resp.model,
+                "response": resp.content,
+                "latency_ms": resp.latency_ms,
+                "tokens_in": resp.tokens_in,
+                "tokens_out": resp.tokens_out,
+                "cost_usd": resp.cost_usd,
             }
-            for r in results
-        ],
-        "table": format_arena_table(results),
-    }
+        except Exception as e:
+            return {
+                "provider": provider,
+                "model": cfg.get("model", "unknown"),
+                "response": f"Error: {e}",
+                "latency_ms": 0,
+                "tokens_in": 0,
+                "tokens_out": 0,
+                "cost_usd": 0,
+            }
+
+    results = await asyncio.gather(*[run_one(p) for p in providers])
+    results = sorted(results, key=lambda r: r["latency_ms"])
+    return {"results": results}
 
 
 # ---------------------------------------------------------------------------

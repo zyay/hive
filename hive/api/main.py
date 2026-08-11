@@ -399,192 +399,363 @@ HTML_PAGE = """
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🐝 Hive</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  :root { --bg: #0a0a0a; --surface: #141414; --border: #222; --text: #e0e0e0; --muted: #888; --accent: #f59e0b; --green: #10b981; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; }
-  .sidebar { width: 280px; border-right: 1px solid var(--border); display: flex; flex-direction: column; background: var(--surface); }
-  .sidebar-header { padding: 1rem; border-bottom: 1px solid var(--border); }
-  .sidebar-header h1 { font-size: 1.3rem; }
-  .sidebar-header h1 span { color: var(--accent); }
-  .agent-list { flex: 1; overflow-y: auto; padding: 0.5rem; }
-  .agent-item { padding: 0.75rem; border-radius: 8px; cursor: pointer; margin-bottom: 0.25rem; transition: background 0.15s; }
-  .agent-item:hover { background: #1a1a1a; }
-  .agent-item.active { background: #1a1a1a; border: 1px solid var(--accent); }
-  .agent-item .name { font-weight: 600; font-size: 0.9rem; }
-  .agent-item .meta { font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem; }
-  .btn { padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.15s; }
-  .btn-primary { background: var(--accent); color: #000; }
-  .btn-primary:hover { background: #d97706; }
-  .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.75rem; }
-  .btn-danger { background: #dc2626; color: #fff; }
-  .main { flex: 1; display: flex; flex-direction: column; }
-  .chat-header { padding: 1rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-  .chat-header h2 { font-size: 1.1rem; }
-  .chat-messages { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
-  .msg { max-width: 80%; padding: 0.75rem 1rem; border-radius: 12px; font-size: 0.9rem; line-height: 1.5; }
-  .msg-user { align-self: flex-end; background: #1e3a5f; border-bottom-right-radius: 4px; }
-  .msg-assistant { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
-  .msg-tool { align-self: flex-start; background: #1a1a0a; border: 1px solid #333; font-size: 0.8rem; font-family: monospace; }
-  .msg-system { align-self: center; color: var(--muted); font-size: 0.8rem; font-style: italic; }
-  .chat-input { padding: 1rem; border-top: 1px solid var(--border); display: flex; gap: 0.5rem; }
-  .chat-input input { flex: 1; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 0.9rem; outline: none; }
-  .chat-input input:focus { border-color: var(--accent); }
-  .stats-bar { display: flex; gap: 1rem; padding: 0.5rem 1rem; border-top: 1px solid var(--border); font-size: 0.75rem; color: var(--muted); }
-  .stat { display: flex; gap: 0.3rem; }
-  .stat .val { color: var(--green); font-weight: 600; }
-  .empty { display: flex; align-items: center; justify-content: center; flex: 1; color: var(--muted); font-size: 1.1rem; }
-  .new-agent-form { padding: 1rem; display: none; flex-direction: column; gap: 0.5rem; border-bottom: 1px solid var(--border); }
-  .new-agent-form.show { display: flex; }
-  .new-agent-form input, .new-agent-form textarea, .new-agent-form select { padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-size: 0.85rem; }
-  .new-agent-form textarea { min-height: 60px; resize: vertical; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#0a0a0a;--surface:#141414;--border:#222;--text:#e0e0e0;--muted:#666;--accent:#f59e0b;--green:#10b981;--red:#ef4444;--blue:#3b82f6}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:hidden}
+  /* Sidebar */
+  .sidebar{width:260px;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--surface);flex-shrink:0}
+  .sidebar-header{padding:1rem;border-bottom:1px solid var(--border)}
+  .sidebar-header h1{font-size:1.2rem}
+  .sidebar-header h1 span{color:var(--accent)}
+  .nav-tabs{display:flex;flex-direction:column;padding:0.5rem;gap:2px}
+  .nav-tab{padding:0.6rem 0.75rem;border-radius:6px;cursor:pointer;font-size:0.85rem;color:var(--muted);transition:all .15s;display:flex;align-items:center;gap:0.5rem}
+  .nav-tab:hover{background:#1a1a1a;color:var(--text)}
+  .nav-tab.active{background:#1a1a1a;color:var(--accent);font-weight:600}
+  .agent-list{flex:1;overflow-y:auto;padding:0.5rem}
+  .agent-item{padding:0.6rem;border-radius:6px;cursor:pointer;margin-bottom:2px;transition:background .15s}
+  .agent-item:hover{background:#1a1a1a}
+  .agent-item.active{background:#1a1a1a;border-left:3px solid var(--accent)}
+  .agent-item .name{font-weight:600;font-size:0.85rem}
+  .agent-item .meta{font-size:0.7rem;color:var(--muted);margin-top:2px}
+  /* Main */
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .topbar{padding:0.75rem 1rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:1rem}
+  .topbar h2{font-size:1rem;white-space:nowrap}
+  .content{flex:1;overflow-y:auto;padding:1rem}
+  /* Buttons & inputs */
+  .btn{padding:0.4rem 0.8rem;border:none;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600;transition:all .15s}
+  .btn-primary{background:var(--accent);color:#000}
+  .btn-primary:hover{background:#d97706}
+  .btn-sm{padding:0.25rem 0.5rem;font-size:0.7rem}
+  .btn-danger{background:var(--red);color:#fff}
+  .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+  .btn-ghost:hover{border-color:var(--accent)}
+  input,textarea,select{padding:0.5rem;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-size:0.85rem;outline:none;width:100%}
+  input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+  textarea{resize:vertical;min-height:60px}
+  /* Chat */
+  .chat-messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:0.5rem}
+  .msg{max-width:80%;padding:0.6rem 0.8rem;border-radius:10px;font-size:0.85rem;line-height:1.5}
+  .msg-user{align-self:flex-end;background:#1e3a5f;border-bottom-right-radius:3px}
+  .msg-assistant{align-self:flex-start;background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:3px}
+  .msg-system{align-self:center;color:var(--muted);font-size:0.75rem;font-style:italic}
+  .chat-input{padding:0.75rem;border-top:1px solid var(--border);display:flex;gap:0.5rem}
+  .stats-bar{display:flex;gap:0.75rem;padding:0.4rem 0.75rem;border-top:1px solid var(--border);font-size:0.7rem;color:var(--muted);flex-wrap:wrap}
+  .stat .val{color:var(--green);font-weight:600}
+  /* Cards */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:0.75rem}
+  .card h3{font-size:0.9rem;margin-bottom:0.5rem}
+  .grid{display:grid;gap:0.75rem}
+  .grid-2{grid-template-columns:1fr 1fr}
+  .grid-3{grid-template-columns:1fr 1fr 1fr}
+  .grid-4{grid-template-columns:1fr 1fr 1fr 1fr}
+  /* Tables */
+  table{width:100%;border-collapse:collapse;font-size:0.8rem}
+  th{text-align:left;padding:0.5rem;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600;font-size:0.7rem;text-transform:uppercase}
+  td{padding:0.5rem;border-bottom:1px solid #1a1a1a}
+  tr:hover td{background:#1a1a1a}
+  /* Badges */
+  .badge{display:inline-block;padding:0.15rem 0.4rem;border-radius:4px;font-size:0.65rem;font-weight:600}
+  .badge-green{background:#064e3b;color:#10b981}
+  .badge-blue{background:#1e3a5f;color:#60a5fa}
+  .badge-amber{background:#451a03;color:#f59e0b}
+  .badge-red{background:#450a0a;color:#ef4444}
+  .badge-gray{background:#1f1f1f;color:#888}
+  /* Model card */
+  .model-row{display:flex;align-items:center;gap:0.75rem;padding:0.6rem;border-bottom:1px solid #1a1a1a}
+  .model-row:hover{background:#1a1a1a}
+  .model-rank{width:24px;text-align:center;font-weight:700;color:var(--accent);font-size:0.9rem}
+  .model-info{flex:1}
+  .model-name{font-weight:600;font-size:0.85rem}
+  .model-meta{font-size:0.7rem;color:var(--muted)}
+  .model-stats{display:flex;gap:0.75rem;font-size:0.7rem}
+  .model-stats span{color:var(--muted)}
+  .model-stats .val{color:var(--text);font-weight:600}
+  /* Router */
+  .router-result{background:#1a1a0a;border:1px solid #333;border-radius:8px;padding:1rem;margin-top:0.75rem}
+  .router-result .rec{font-size:1.1rem;font-weight:700;color:var(--accent)}
+  .router-result .reason{font-size:0.8rem;color:var(--muted);margin-top:0.25rem}
+  /* Empty */
+  .empty{display:flex;align-items:center;justify-content:center;flex:1;color:var(--muted);font-size:0.9rem;flex-direction:column;gap:0.5rem}
+  /* Form */
+  .form-group{margin-bottom:0.75rem}
+  .form-group label{display:block;font-size:0.75rem;color:var(--muted);margin-bottom:0.25rem;font-weight:600}
+  .form-row{display:flex;gap:0.5rem}
+  .form-row>*{flex:1}
+  /* Scrollbar */
+  ::-webkit-scrollbar{width:6px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
+  ::-webkit-scrollbar-thumb:hover{background:#555}
+  /* Page sections */
+  .page{display:none}
+  .page.active{display:flex;flex-direction:column;flex:1;overflow:hidden}
 </style>
 </head>
 <body>
 <div class="sidebar">
   <div class="sidebar-header">
     <h1>🐝 <span>Hive</span></h1>
-    <p style="font-size:0.75rem;color:var(--muted);margin-top:0.25rem;">Multi-agent AI platform</p>
+    <p style="font-size:0.65rem;color:var(--muted);margin-top:2px">Multi-agent AI platform · v0.2</p>
   </div>
-  <div style="padding:0.5rem;">
-    <button class="btn btn-primary" style="width:100%;" onclick="toggleNewAgent()">+ New Agent</button>
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="showPage('chat')">💬 Chat</div>
+    <div class="nav-tab" onclick="showPage('models')">🧠 Models</div>
+    <div class="nav-tab" onclick="showPage('router')">🎯 Model Router</div>
+    <div class="nav-tab" onclick="showPage('arena')">⚔️ Arena</div>
+    <div class="nav-tab" onclick="showPage('costs')">💰 Costs</div>
+    <div class="nav-tab" onclick="showPage('keys')">🔑 API Keys</div>
+    <div class="nav-tab" onclick="showPage('settings')">⚙️ Settings</div>
   </div>
-  <div class="new-agent-form" id="newAgentForm">
-    <input id="newName" placeholder="Agent name">
-    <textarea id="newPrompt" placeholder="System prompt...">You are a helpful assistant.</textarea>
-    <select id="newProvider">
-      <option value="ollama">Ollama (local)</option>
-      <option value="openai">OpenAI</option>
-      <option value="anthropic">Anthropic</option>
-      <option value="groq">Groq</option>
-      <option value="mistral">Mistral</option>
-      <option value="openrouter">OpenRouter</option>
-      <option value="gemini">Gemini</option>
-    </select>
-    <input id="newModel" placeholder="Model (leave empty for default)">
-    <button class="btn btn-primary" onclick="createAgent()">Create</button>
+  <div style="padding:0.5rem;border-top:1px solid var(--border)">
+    <button class="btn btn-primary" style="width:100%" onclick="toggleNewAgent()">+ New Agent</button>
   </div>
   <div class="agent-list" id="agentList"></div>
 </div>
 <div class="main">
-  <div class="chat-header">
+
+<!-- ═══════════ CHAT PAGE ═══════════ -->
+<div class="page active" id="page-chat">
+  <div class="topbar">
     <h2 id="chatTitle">Select an agent</h2>
     <div id="chatActions"></div>
   </div>
   <div class="chat-messages" id="messages">
     <div class="empty">🐝 Select or create an agent to start chatting</div>
   </div>
-  <div class="stats-bar" id="statsBar" style="display:none;">
-    <div class="stat">LLM calls: <span class="val" id="statCalls">0</span></div>
+  <div class="stats-bar" id="statsBar" style="display:none">
+    <div class="stat">LLM: <span class="val" id="statCalls">0</span></div>
     <div class="stat">Tools: <span class="val" id="statTools">0</span></div>
     <div class="stat">Tokens: <span class="val" id="statTokens">0</span></div>
     <div class="stat">Cost: <span class="val" id="statCost">$0</span></div>
     <div class="stat">Latency: <span class="val" id="statLatency">0ms</span></div>
   </div>
-  <div class="chat-input" id="chatInput" style="display:none;">
+  <div class="chat-input" id="chatInput" style="display:none">
     <input id="userMsg" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMessage()">
     <button class="btn btn-primary" onclick="sendMessage()">Send</button>
   </div>
 </div>
-<script>
-let currentAgent = null;
-let conversationId = null;
 
-async function loadAgents() {
-  const r = await fetch('/api/agents');
-  const agents = await r.json();
-  const list = document.getElementById('agentList');
-  list.innerHTML = agents.map(a => `
-    <div class="agent-item ${currentAgent?.id === a.id ? 'active' : ''}" onclick="selectAgent('${a.id}')">
-      <div class="name">${a.name}</div>
-      <div class="meta">${a.provider} · ${a.model || 'default'}</div>
+<!-- ═══════════ MODELS PAGE ═══════════ -->
+<div class="page" id="page-models">
+  <div class="topbar"><h2>🧠 Model Intelligence Rankings</h2><span style="font-size:0.7rem;color:var(--muted)">Artificial Analysis Aug 2026</span></div>
+  <div class="content" id="modelsList"></div>
+</div>
+
+<!-- ═══════════ ROUTER PAGE ═══════════ -->
+<div class="page" id="page-router">
+  <div class="topbar"><h2>🎯 Intelligent Model Router</h2></div>
+  <div class="content">
+    <div class="card">
+      <h3>Analyze a task</h3>
+      <div class="form-group"><label>What do you need help with?</label><textarea id="routerPrompt" placeholder="e.g., Write a Python function to sort a list, or analyze this complex architecture problem..."></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Priority</label><select id="routerPriority"><option value="balanced">Balanced</option><option value="intelligence">Maximum Intelligence</option><option value="speed">Speed</option><option value="budget">Budget</option></select></div>
+        <div class="form-group"><label>Requirements</label><div style="display:flex;gap:0.5rem;margin-top:0.25rem"><label style="font-size:0.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" id="routerVision" style="width:auto"> Vision</label><label style="font-size:0.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" id="routerPrivacy" style="width:auto"> Privacy</label></div></div>
+      </div>
+      <button class="btn btn-primary" onclick="analyzePrompt()">Analyze & Recommend</button>
+      <div id="routerResult"></div>
     </div>
-  `).join('');
+  </div>
+</div>
+
+<!-- ═══════════ ARENA PAGE ═══════════ -->
+<div class="page" id="page-arena">
+  <div class="topbar"><h2>⚔️ Model Arena</h2></div>
+  <div class="content">
+    <div class="card">
+      <h3>Compare models on the same prompt</h3>
+      <div class="form-group"><label>Prompt</label><textarea id="arenaPrompt" placeholder="Enter a prompt to test across models..."></textarea></div>
+      <div class="form-group"><label>Providers (comma-separated, or leave empty for all configured)</label><input id="arenaProviders" placeholder="e.g., ollama,openai,anthropic"></div>
+      <button class="btn btn-primary" onclick="runArena()">Run Arena</button>
+      <div id="arenaResult" style="margin-top:0.75rem"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ COSTS PAGE ═══════════ -->
+<div class="page" id="page-costs">
+  <div class="topbar"><h2>💰 Cost Optimization</h2><button class="btn btn-ghost btn-sm" onclick="loadCosts()">Refresh</button></div>
+  <div class="content" id="costsContent"></div>
+</div>
+
+<!-- ═══════════ KEYS PAGE ═══════════ -->
+<div class="page" id="page-keys">
+  <div class="topbar"><h2>🔑 API Keys</h2></div>
+  <div class="content">
+    <div class="card">
+      <h3>Create API Key</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Name</label><input id="keyName" placeholder="my-app"></div>
+        <div class="form-group"><label>Agent (optional)</label><input id="keyAgent" placeholder="agent ID"></div>
+      </div>
+      <button class="btn btn-primary" onclick="createKey()">Create Key</button>
+      <div id="keyResult" style="margin-top:0.5rem"></div>
+    </div>
+    <div class="card"><h3>Existing Keys</h3><div id="keysList"></div></div>
+  </div>
+</div>
+
+<!-- ═══════════ SETTINGS PAGE ═══════════ -->
+<div class="page" id="page-settings">
+  <div class="topbar"><h2>⚙️ Settings</h2></div>
+  <div class="content">
+    <div class="card">
+      <h3>Create New Agent</h3>
+      <div class="form-group"><label>Name</label><input id="sAgentName" placeholder="Research Assistant"></div>
+      <div class="form-group"><label>System Prompt</label><textarea id="sAgentPrompt" rows="3">You are a helpful assistant.</textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Provider</label><select id="sAgentProvider"></select></div>
+        <div class="form-group"><label>Model (empty = default)</label><input id="sAgentModel" placeholder="llama3.3"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Temperature</label><input id="sAgentTemp" type="number" value="0.7" min="0" max="2" step="0.1"></div>
+        <div class="form-group"><label>Max Tokens</label><input id="sAgentMaxTok" type="number" value="4096" min="100" max="128000"></div>
+      </div>
+      <button class="btn btn-primary" onclick="createAgentFull()">Create Agent</button>
+    </div>
+    <div class="card">
+      <h3>Provider Status</h3>
+      <div id="providerStatus"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ NEW AGENT MODAL ═══════════ -->
+<div id="newAgentModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;display:none;align-items:center;justify-content:center">
+  <div class="card" style="width:400px;max-width:90vw">
+    <h3>New Agent</h3>
+    <div class="form-group"><label>Name</label><input id="nAgentName" placeholder="My Agent"></div>
+    <div class="form-group"><label>System Prompt</label><textarea id="nAgentPrompt">You are a helpful assistant.</textarea></div>
+    <div class="form-group"><label>Provider</label><select id="nAgentProvider"></select></div>
+    <div class="form-group"><label>Model (empty = default)</label><input id="nAgentModel"></div>
+    <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
+      <button class="btn btn-primary" onclick="createAgentModal()">Create</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+<script>
+let currentAgent=null,conversationId=null;
+const $=id=>document.getElementById(id);
+
+// ── Navigation ──
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  $('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-tab')[['chat','models','router','arena','costs','keys','settings'].indexOf(name)].classList.add('active');
+  if(name==='models')loadModels();
+  if(name==='costs')loadCosts();
+  if(name==='keys')loadKeys();
+  if(name==='settings')loadProviders();
 }
 
-async function selectAgent(id) {
-  const r = await fetch('/api/agents/' + id);
-  currentAgent = await r.json();
-  conversationId = null;
-  document.getElementById('chatTitle').textContent = currentAgent.name;
-  document.getElementById('messages').innerHTML = '';
-  document.getElementById('chatInput').style.display = 'flex';
-  document.getElementById('statsBar').style.display = 'flex';
-  document.getElementById('chatActions').innerHTML = `<button class="btn btn-danger btn-sm" onclick="deleteAgent('${id}')">Delete</button>`;
-  loadAgents();
+// ── Agents ──
+async function loadAgents(){
+  const r=await fetch('/api/agents');const agents=await r.json();
+  $('agentList').innerHTML=agents.map(a=>`<div class="agent-item ${currentAgent?.id===a.id?'active':''}" onclick="selectAgent('${a.id}')"><div class="name">${a.name}</div><div class="meta">${a.provider} · ${a.model||'default'}</div></div>`).join('');
+  // Populate provider selects
+  const pr=await fetch('/api/providers');const providers=await pr.json();
+  const opts=providers.map(p=>`<option value="${p.name}">${p.name}${p.configured?'':'  (no key)'}</option>`).join('');
+  ['nAgentProvider','sAgentProvider'].forEach(id=>{const el=$(id);if(el)el.innerHTML=opts;});
+}
+async function selectAgent(id){
+  const r=await fetch('/api/agents/'+id);currentAgent=await r.json();conversationId=null;
+  $('chatTitle').textContent=currentAgent.name;$('messages').innerHTML='';$('chatInput').style.display='flex';$('statsBar').style.display='flex';
+  $('chatActions').innerHTML=`<button class="btn btn-danger btn-sm" onclick="deleteAgent('${id}')">Delete</button>`;
+  showPage('chat');loadAgents();
+}
+async function deleteAgent(id){if(!confirm('Delete?'))return;await fetch('/api/agents/'+id,{method:'DELETE'});currentAgent=null;$('chatTitle').textContent='Select an agent';$('messages').innerHTML='<div class="empty">🐝 Select an agent</div>';$('chatInput').style.display='none';$('statsBar').style.display='none';$('chatActions').innerHTML='';loadAgents();}
+function toggleNewAgent(){$('newAgentModal').style.display='flex';loadAgents();}
+function closeModal(){$('newAgentModal').style.display='none';}
+async function createAgentModal(){
+  const body={name:$('nAgentName').value,system_prompt:$('nAgentPrompt').value,provider:$('nAgentProvider').value,model:$('nAgentModel').value};
+  if(!body.name)return;await fetch('/api/agents',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});closeModal();$('nAgentName').value='';loadAgents();
+}
+async function createAgentFull(){
+  const body={name:$('sAgentName').value,system_prompt:$('sAgentPrompt').value,provider:$('sAgentProvider').value,model:$('sAgentModel').value,temperature:parseFloat($('sAgentTemp').value),max_tokens:parseInt($('sAgentMaxTok').value)};
+  if(!body.name)return;await fetch('/api/agents',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});$('sAgentName').value='';loadAgents();alert('Agent created!');
 }
 
-async function createAgent() {
-  const body = {
-    name: document.getElementById('newName').value,
-    system_prompt: document.getElementById('newPrompt').value,
-    provider: document.getElementById('newProvider').value,
-    model: document.getElementById('newModel').value,
-  };
-  if (!body.name) return;
-  await fetch('/api/agents', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
-  document.getElementById('newAgentForm').classList.remove('show');
-  document.getElementById('newName').value = '';
-  loadAgents();
+// ── Chat ──
+async function sendMessage(){
+  const input=$('userMsg');const msg=input.value.trim();if(!msg||!currentAgent)return;input.value='';
+  const msgs=$('messages');msgs.innerHTML+=`<div class="msg msg-user">${esc(msg)}</div><div class="msg msg-system">Thinking...</div>`;msgs.scrollTop=msgs.scrollHeight;
+  try{
+    const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent_id:currentAgent.id,message:msg,conversation_id:conversationId})});
+    const data=await r.json();conversationId=data.conversation_id;
+    msgs.querySelector('.msg-system:last-child')?.remove();
+    msgs.innerHTML+=`<div class="msg msg-assistant">${esc(data.response).replace(/\\n/g,'<br>')}</div>`;
+    const s=data.stats;$('statCalls').textContent=s.llm_calls;$('statTools').textContent=s.tool_executions;$('statTokens').textContent=s.tokens_in+s.tokens_out;$('statCost').textContent='$'+s.cost_usd.toFixed(4);$('statLatency').textContent=s.latency_ms+'ms';
+  }catch(e){msgs.querySelector('.msg-system:last-child')?.remove();msgs.innerHTML+=`<div class="msg msg-system" style="color:var(--red)">Error: ${e.message}</div>`;}
+  msgs.scrollTop=msgs.scrollHeight;
 }
 
-async function deleteAgent(id) {
-  if (!confirm('Delete this agent?')) return;
-  await fetch('/api/agents/' + id, { method: 'DELETE' });
-  currentAgent = null;
-  document.getElementById('chatTitle').textContent = 'Select an agent';
-  document.getElementById('messages').innerHTML = '<div class="empty">🐝 Select or create an agent</div>';
-  document.getElementById('chatInput').style.display = 'none';
-  document.getElementById('statsBar').style.display = 'none';
-  document.getElementById('chatActions').innerHTML = '';
-  loadAgents();
+// ── Models ──
+async function loadModels(){
+  const r=await fetch('/api/models');const models=await r.json();
+  $('modelsList').innerHTML=`<table><thead><tr><th>#</th><th>Model</th><th>Intelligence</th><th>Context</th><th>Speed</th><th>Cost (in/out per 1M)</th><th>Capabilities</th></tr></thead><tbody>${
+    models.map((m,i)=>`<tr><td style="color:var(--accent);font-weight:700">${i+1}</td><td style="font-weight:600">${m.model}</td><td><span class="badge ${m.intelligence>=60?'badge-green':m.intelligence>=50?'badge-blue':m.intelligence>=40?'badge-amber':'badge-gray'}">${m.intelligence}/100</span></td><td>${formatCtx(m.context_window)}</td><td><span class="badge ${m.speed_tier==='ultra'?'badge-green':m.speed_tier==='fast'?'badge-blue':'badge-gray'}">${m.speed_tier}</span></td><td>$${m.cost_in_per_m} / $${m.cost_out_per_m}</td><td>${m.vision?'👁 ':''}${m.tools?'🔧 ':''}</td></tr>`).join('')
+  }</tbody></table>`;
+}
+function formatCtx(n){if(n>=1e6)return(n/1e6).toFixed(n%1e6===0?0:1)+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return n;}
+
+// ── Router ──
+async function analyzePrompt(){
+  const body={prompt:$('routerPrompt').value,priority:$('routerPriority').value,vision:$('routerVision').checked,privacy:$('routerPrivacy').checked};
+  if(!body.prompt)return;
+  const r=await fetch('/api/router',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const d=await r.json();
+  $('routerResult').innerHTML=`<div class="router-result"><div class="rec">${d.provider} / ${d.model}</div><div class="reason">${d.reason}</div><div style="display:flex;gap:1rem;margin-top:0.5rem;font-size:0.75rem"><span>Intelligence: <b style="color:var(--green)">${d.intelligence}/100</b></span><span>Speed: <b>${d.speed_tier}</b></span><span>Cost: <b>${d.cost_tier}</b></span><span>~$${d.estimated_cost_per_1k_tokens}/1K tokens</span></div></div>`;
 }
 
-function toggleNewAgent() {
-  document.getElementById('newAgentForm').classList.toggle('show');
+// ── Arena ──
+async function runArena(){
+  const prompt=$('arenaPrompt').value;if(!prompt)return;
+  const provStr=$('arenaProviders').value;const providers=provStr?provStr.split(',').map(s=>s.trim()):[];
+  $('arenaResult').innerHTML='<div class="msg msg-system">Running arena... this may take a moment</div>';
+  try{
+    const r=await fetch('/api/arena',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt,providers})});
+    const d=await r.json();
+    $('arenaResult').innerHTML=`<table><thead><tr><th>#</th><th>Provider</th><th>Model</th><th>Latency</th><th>Tokens</th><th>Cost</th></tr></thead><tbody>${
+      d.results.map((r,i)=>`<tr><td>${i===0?'🏆':'  '}${i+1}</td><td>${r.provider}</td><td style="font-weight:600">${r.model}</td><td>${r.latency_ms}ms</td><td>${r.tokens_in+r.tokens_out}</td><td>$${r.cost_usd.toFixed(4)}</td></tr>`).join('')
+    }</tbody></table><div style="margin-top:0.75rem"><h3 style="font-size:0.85rem;margin-bottom:0.5rem">Responses</h3>${
+      d.results.map(r=>`<div class="card"><div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.25rem">${r.provider} / ${r.model} · ${r.latency_ms}ms</div><div style="font-size:0.8rem">${esc(r.response).substring(0,300).replace(/\\n/g,'<br>')}${r.response.length>300?'...':''}</div></div>`).join('')
+    }</div>`;
+  }catch(e){$('arenaResult').innerHTML=`<div class="msg msg-system" style="color:var(--red)">Error: ${e.message}</div>`;}
 }
 
-async function sendMessage() {
-  const input = document.getElementById('userMsg');
-  const msg = input.value.trim();
-  if (!msg || !currentAgent) return;
-  input.value = '';
-
-  const msgs = document.getElementById('messages');
-  msgs.innerHTML += `<div class="msg msg-user">${escHtml(msg)}</div>`;
-  msgs.innerHTML += `<div class="msg msg-system">Thinking...</div>`;
-  msgs.scrollTop = msgs.scrollHeight;
-
-  try {
-    const r = await fetch('/api/chat', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ agent_id: currentAgent.id, message: msg, conversation_id: conversationId })
-    });
-    const data = await r.json();
-    conversationId = data.conversation_id;
-
-    // Remove "Thinking..."
-    const thinking = msgs.querySelector('.msg-system:last-child');
-    if (thinking) thinking.remove();
-
-    msgs.innerHTML += `<div class="msg msg-assistant">${escHtml(data.response).replace(/\\n/g,'<br>')}</div>`;
-
-    // Update stats
-    const s = data.stats;
-    document.getElementById('statCalls').textContent = s.llm_calls;
-    document.getElementById('statTools').textContent = s.tool_executions;
-    document.getElementById('statTokens').textContent = s.tokens_in + s.tokens_out;
-    document.getElementById('statCost').textContent = '$' + s.cost_usd.toFixed(4);
-    document.getElementById('statLatency').textContent = s.latency_ms + 'ms';
-  } catch(e) {
-    const thinking = msgs.querySelector('.msg-system:last-child');
-    if (thinking) thinking.remove();
-    msgs.innerHTML += `<div class="msg msg-system" style="color:#dc2626;">Error: ${e.message}</div>`;
-  }
-  msgs.scrollTop = msgs.scrollHeight;
+// ── Costs ──
+async function loadCosts(){
+  const r=await fetch('/api/costs');const d=await r.json();
+  if(d.total_requests===0){$('costsContent').innerHTML='<div class="empty">No usage data yet. Chat with an agent to generate data.</div>';return;}
+  $('costsContent').innerHTML=`<div class="grid grid-4" style="margin-bottom:1rem"><div class="card" style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--green)">$${d.total_cost.toFixed(4)}</div><div style="font-size:0.7rem;color:var(--muted)">Total Cost</div></div><div class="card" style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--accent)">${d.total_requests}</div><div style="font-size:0.7rem;color:var(--muted)">Requests</div></div><div class="card" style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--blue)">$${d.potential_savings.toFixed(4)}</div><div style="font-size:0.7rem;color:var(--muted)">Potential Savings</div></div><div class="card" style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--red)">${d.savings_pct}%</div><div style="font-size:0.7rem;color:var(--muted)">Optimization</div></div></div>${
+    Object.entries(d.by_model).map(([m,v])=>`<div class="card"><div style="display:flex;justify-content:space-between"><strong>${m}</strong><span style="color:var(--green)">$${v.cost.toFixed(4)}</span></div><div style="font-size:0.75rem;color:var(--muted);margin-top:4px">${v.requests} requests · avg $${v.avg_cost_per_request.toFixed(4)}/req · avg ${v.avg_latency_ms}ms</div></div>`).join('')
+  }${d.recommendations.length?`<h3 style="margin:1rem 0 0.5rem;font-size:0.9rem">💡 Recommendations</h3>${d.recommendations.map(r=>`<div class="card" style="border-left:3px solid var(--accent)"><div style="font-weight:600;font-size:0.85rem">${r.type==='model_downgrade'?'Switch to cheaper model':r.type==='enable_caching'?'Enable caching':'Speed optimization'}</div><div style="font-size:0.8rem;color:var(--muted);margin-top:4px">${r.reason}</div><div style="font-size:0.75rem;color:var(--green);margin-top:4px">Save $${r.potential_savings.toFixed(4)}</div></div>`).join('')}`:''}`;
 }
 
-function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+// ── API Keys ──
+async function loadKeys(){
+  const r=await fetch('/api/keys');const keys=await r.json();
+  $('keysList').innerHTML=keys.length?`<table><thead><tr><th>Name</th><th>Requests</th><th>Last Used</th><th>Status</th><th></th></tr></thead><tbody>${keys.map(k=>`<tr><td>${k.name}</td><td>${k.request_count}</td><td>${k.last_used?new Date(k.last_used*1000).toLocaleString():'never'}</td><td><span class="badge ${k.enabled?'badge-green':'badge-red'}">${k.enabled?'active':'revoked'}</span></td><td><button class="btn btn-danger btn-sm" onclick="revokeKey('${k.name}')">Revoke</button></td></tr>`).join('')}</tbody></table>`:'<p style="color:var(--muted);font-size:0.85rem">No API keys yet.</p>';
+}
+async function createKey(){
+  const name=$('keyName').value;if(!name)return;
+  const r=await fetch('/api/keys',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,agent_id:$('keyAgent').value||null})});
+  const d=await r.json();$('keyResult').innerHTML=`<div class="card" style="border:1px solid var(--green)"><strong>Key created:</strong><code style="display:block;margin-top:0.5rem;padding:0.5rem;background:var(--bg);border-radius:4px;word-break:break-all;font-size:0.8rem">${d.key}</code><p style="font-size:0.7rem;color:var(--red);margin-top:0.25rem">⚠️ Save this key — it won't be shown again.</p></div>`;$('keyName').value='';loadKeys();
+}
+async function revokeKey(name){if(!confirm('Revoke '+name+'?'))return;await fetch('/api/keys/'+name,{method:'DELETE'});loadKeys();}
+
+// ── Providers ──
+async function loadProviders(){
+  const r=await fetch('/api/providers');const providers=await r.json();
+  $('providerStatus').innerHTML=providers.map(p=>`<div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid #1a1a1a"><span style="font-weight:600;font-size:0.85rem">${p.name}</span><span class="badge ${p.configured?'badge-green':'badge-gray'}">${p.configured?'configured':'no key'}</span></div>`).join('');
+}
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 loadAgents();
 </script>
 </body>
