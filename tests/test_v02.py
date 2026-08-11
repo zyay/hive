@@ -132,27 +132,26 @@ class TestScheduler:
 # ---------------------------------------------------------------------------
 
 class TestArena:
-    def test_arena_result_dataclass(self):
-        from hive.core.arena import ArenaResult
-        r = ArenaResult(
-            provider="ollama", model="llama3.2",
-            response="Hello!", latency_ms=200.0,
-            tokens_in=10, tokens_out=5,
-            cost_usd=0.0, finish_reason="stop",
+    def test_benchmark_result_dataclass(self):
+        from hive.core.arena import BenchmarkResult
+        r = BenchmarkResult(
+            model="test", provider="test", category="reasoning",
+            score=0.8, avg_latency_ms=200, total_cost_usd=0.01,
+            total_tokens=500, num_prompts=3,
         )
-        assert r.provider == "ollama"
-        assert r.latency_ms == 200.0
+        assert r.score == 0.8
+        assert r.model == "test"
 
-    def test_format_arena_table(self):
-        from hive.core.arena import ArenaResult, format_arena_table
+    def test_format_benchmark_table(self):
+        from hive.core.arena import BenchmarkResult, format_benchmark_table
         results = [
-            ArenaResult("ollama", "llama3.2", "Fast answer", 100.0, 10, 5, 0.0, "stop"),
-            ArenaResult("openai", "gpt-4o-mini", "Slow answer", 500.0, 10, 5, 0.001, "stop"),
+            BenchmarkResult("model-a", "prov", "cat", 0.9, 100, 0.01, 500, 3),
+            BenchmarkResult("model-b", "prov", "cat", 0.7, 200, 0.02, 600, 3),
         ]
-        table = format_arena_table(results)
-        assert "ollama" in table
-        assert "openai" in table
-        assert "🏆" in table  # fastest gets trophy
+        table = format_benchmark_table(results)
+        assert "model-a" in table
+        assert "model-b" in table
+        assert "🏆" in table
 
 
 # ---------------------------------------------------------------------------

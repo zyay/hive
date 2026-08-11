@@ -192,6 +192,71 @@ def compare_models(body: CompareRequest):
     return compare_models(body.models)
 
 
+class AnalyzeRequest(BaseModel):
+    prompt: str
+
+
+@app.post("/api/analyze")
+def analyze_task(body: AnalyzeRequest):
+    """Analyze a prompt and recommend the best model/effort level."""
+    from hive.core.adaptive import analyze_task as do_analyze
+    result = do_analyze(body.prompt)
+    return {
+        "complexity": result.complexity,
+        "category": result.category,
+        "estimated_tokens": result.estimated_tokens,
+        "recommended_effort": result.recommended_effort,
+        "recommended_provider": result.recommended_provider,
+        "recommended_model": result.recommended_model,
+    }
+
+
+@app.get("/api/costs")
+def cost_analysis():
+    """Cost optimization analysis — usage patterns and savings recommendations."""
+    from hive.core.db import get_connection
+    from hive.core.cost_optimizer import analyze_usage
+    conn = get_connection()
+    rows = conn.execute("SELECT * FROM usage_logs ORDER BY timestamp DESC LIMIT 1000").fetchall()
+    conn.close()
+    logs = [dict(r) for r in rows]
+    return analyze_usage(logs)
+
+
+class BenchmarkRequest(BaseModel):
+    models: list[str]  # list of "provider/model" strings
+    categories: list[str] = []
+
+
+@app.post("/api/benchmark")
+async def run_benchmark(body: BenchmarkRequest):
+    """Run standardized benchmarks on multiple models."""
+    from hive.core.arena import benchmark_multiple, format_benchmark_table
+    model_pairs = []
+    for m in body.models:
+        parts = m.split("/", 1)
+        if len(parts) == 2:
+            model_pairs.append((parts[0], parts[1]))
+        else:
+            model_pairs.append(("ollama", parts[0]))
+    results = await benchmark_multiple(model_pairs, body.categories or None)
+    return {
+        "results": [
+            {
+                "model": r.model,
+                "provider": r.provider,
+                "score": r.score,
+                "avg_latency_ms": r.avg_latency_ms,
+                "total_cost_usd": r.total_cost_usd,
+                "total_tokens": r.total_tokens,
+                "num_prompts": r.num_prompts,
+            }
+            for r in results
+        ],
+        "table": format_benchmark_table(results),
+    }
+
+
 @app.get("/api/tools")
 def tools():
     return [
