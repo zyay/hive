@@ -33,7 +33,11 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     init_db()
     init_routes()
-    logger.info("Hive v0.2 initialized â€” all systems ready")
+    from hive.core.skills import init_skills
+    from hive.core.files import init_uploads
+    init_skills()
+    init_uploads()
+    logger.info("Hive v0.3 initialized - all systems ready")
     # Start scheduler loop in background
     from hive.core.scheduler import scheduler_loop
     task = asyncio.create_task(scheduler_loop(interval=60))
@@ -779,6 +783,104 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
 # ---------------------------------------------------------------------------
 # Web UI
 # ---------------------------------------------------------------------------
+
+# ── Hardware Detection ──
+
+@app.get("/api/hardware")
+def hardware_report():
+    """Detect system hardware and suggest model sizes."""
+    from hive.core.hardware import get_system_report
+    return get_system_report()
+
+
+# ── Agent Skills ──
+
+class SkillRequest(BaseModel):
+    name: str
+    content: str
+    skill_type: str = "prompt"  # 'prompt', 'tool', 'knowledge'
+
+
+@app.get("/api/agents/{agent_id}/skills")
+async def get_agent_skills(agent_id: str):
+    from hive.core.skills import get_skills
+    return await get_skills(agent_id)
+
+
+@app.post("/api/agents/{agent_id}/skills")
+async def add_agent_skill(agent_id: str, body: SkillRequest):
+    from hive.core.skills import add_skill
+    return await add_skill(agent_id, body.name, body.content, body.skill_type)
+
+
+@app.delete("/api/agents/{agent_id}/skills/{skill_id}")
+async def delete_agent_skill(agent_id: str, skill_id: str):
+    from hive.core.skills import delete_skill
+    ok = await delete_skill(skill_id)
+    if not ok:
+        raise HTTPException(404, "Skill not found")
+    return {"deleted": True}
+
+
+@app.post("/api/agents/{agent_id}/upload-md")
+async def upload_agent_md(agent_id: str, filename: str, content: str):
+    """Upload an MD file as knowledge for an agent."""
+    from hive.core.skills import upload_md_file
+    return await upload_md_file(agent_id, filename, content)
+
+
+# ── File Sharing ──
+
+@app.get("/api/rooms/{room_id}/files")
+async def list_room_files(room_id: str, limit: int = 50):
+    from hive.core.files import get_room_files
+    return await get_room_files(room_id, limit)
+
+
+@app.post("/api/rooms/{room_id}/files")
+async def upload_room_file(room_id: str, user_id: str, filename: str, content: str):
+    """Upload a file to a room. Content is base64-encoded for JSON transport."""
+    import base64
+    from hive.core.files import upload_file
+    file_bytes = base64.b64decode(content)
+    result = await upload_file(room_id, user_id, filename, file_bytes)
+    # Broadcast file share event via WebSocket
+    from hive.core.ws import broadcast
+    await broadcast(room_id, {
+        "type": "file_shared",
+        "file": {
+            "id": result["id"],
+            "filename": filename,
+            "size": result["size"],
+            "uploader_id": user_id,
+            "url": result["url"],
+        }
+    })
+    return result
+
+
+@app.get("/api/files/{file_id}/download")
+async def download_file(file_id: str):
+    """Download a shared file."""
+    from fastapi.responses import FileResponse
+    from hive.core.files import get_file, get_file_path
+    meta = await get_file(file_id)
+    if not meta:
+        raise HTTPException(404, "File not found")
+    path = get_file_path(file_id)
+    if not path:
+        raise HTTPException(404, "File not found on disk")
+    return FileResponse(path, media_type=meta["mime_type"], filename=meta["filename"])
+
+
+@app.delete("/api/files/{file_id}")
+async def delete_shared_file(file_id: str):
+    from hive.core.files import delete_file
+    ok = await delete_file(file_id)
+    if not ok:
+        raise HTTPException(404, "File not found")
+    return {"deleted": True}
+
 
 @app.get("/", response_class=HTMLResponse)
 def ui():

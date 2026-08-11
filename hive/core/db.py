@@ -107,6 +107,30 @@ def init_db():
             FOREIGN KEY (room_id) REFERENCES rooms(id)
         );
         CREATE INDEX IF NOT EXISTS idx_messages_room ON messages(room_id, created_at);
+
+        CREATE TABLE IF NOT EXISTS agent_skills (
+            id TEXT PRIMARY KEY,
+            agent_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            content TEXT NOT NULL DEFAULT '',
+            skill_type TEXT NOT NULL DEFAULT 'prompt',
+            file_path TEXT NOT NULL DEFAULT '',
+            created_at REAL NOT NULL,
+            FOREIGN KEY (agent_id) REFERENCES agents(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS shared_files (
+            id TEXT PRIMARY KEY,
+            room_id TEXT NOT NULL,
+            uploader_id TEXT NOT NULL,
+            filename TEXT NOT NULL,
+            file_path TEXT NOT NULL,
+            mime_type TEXT NOT NULL DEFAULT 'application/octet-stream',
+            size INTEGER NOT NULL DEFAULT 0,
+            created_at REAL NOT NULL,
+            FOREIGN KEY (room_id) REFERENCES rooms(id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_files_room ON shared_files(room_id, created_at);
     """)
     conn.commit()
     conn.close()
