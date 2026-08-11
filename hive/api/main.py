@@ -383,6 +383,130 @@ async def usage(agent_id: Optional[str] = None, days: int = 7):
 
 
 # ---------------------------------------------------------------------------
+# Streaming chat (SSE)
+# ---------------------------------------------------------------------------
+
+@app.post("/api/chat/stream")
+async def chat_stream_endpoint(body: ChatRequest):
+    """Stream agent response as Server-Sent Events."""
+    from fastapi.responses import StreamingResponse
+    from hive.core.streaming import stream_chat_response
+    return StreamingResponse(
+        stream_chat_response(body.agent_id, body.message, body.conversation_id),
+        media_type="text/event-stream",
+    )
+
+
+# ---------------------------------------------------------------------------
+# Vector memory
+# ---------------------------------------------------------------------------
+
+class MemoryRequest(BaseModel):
+    agent_id: str
+    content: str
+    metadata: Optional[dict] = None
+
+
+@app.post("/api/memory/vector")
+def vector_remember(body: MemoryRequest):
+    """Store a memory using vector embeddings."""
+    from hive.core.vector_memory import VectorMemory
+    mem = VectorMemory(body.agent_id)
+    memory_id = mem.remember(body.content, body.metadata)
+    return {"id": memory_id, "status": "stored"}
+
+
+@app.get("/api/memory/vector/{agent_id}")
+def vector_recall(agent_id: str, q: str, limit: int = 5):
+    """Recall memories by semantic similarity."""
+    from hive.core.vector_memory import VectorMemory
+    mem = VectorMemory(agent_id)
+    return mem.recall(q, limit)
+
+
+@app.get("/api/memory/vector/{agent_id}/all")
+def vector_list(agent_id: str, limit: int = 50):
+    """List all vector memories for an agent."""
+    from hive.core.vector_memory import VectorMemory
+    mem = VectorMemory(agent_id)
+    return {"count": mem.count, "memories": mem.list_all(limit)}
+
+
+@app.delete("/api/memory/vector/{agent_id}")
+def vector_clear(agent_id: str):
+    """Clear all vector memories for an agent."""
+    from hive.core.vector_memory import VectorMemory
+    mem = VectorMemory(agent_id)
+    count = mem.clear()
+    return {"deleted": count}
+
+
+# ---------------------------------------------------------------------------
+# Auth tokens
+# ---------------------------------------------------------------------------
+
+class TokenRequest(BaseModel):
+    user_id: str
+    role: str = "user"
+
+
+@app.post("/api/auth/token")
+def create_auth_token(body: TokenRequest):
+    """Create a JWT authentication token."""
+    from hive.core.auth import create_token
+    token = create_token(body.user_id, body.role)
+    return {"token": token, "type": "Bearer"}
+
+
+@app.get("/api/auth/verify")
+def verify_auth_token(token: str):
+    """Verify a JWT token."""
+    from hive.core.auth import verify_token
+    payload = verify_token(token)
+    if not payload:
+        raise HTTPException(401, "Invalid or expired token")
+    return payload
+
+
+# ---------------------------------------------------------------------------
+# Metrics & monitoring
+# ---------------------------------------------------------------------------
+
+@app.get("/api/metrics")
+def get_metrics():
+    """Get application metrics summary."""
+    from hive.core.metrics import metrics
+    return metrics.summary()
+
+
+@app.get("/api/metrics/prometheus")
+def prometheus_metrics():
+    """Export metrics in Prometheus text format."""
+    from fastapi.responses import PlainTextResponse
+    from hive.core.metrics import metrics
+    return PlainTextResponse(metrics.prometheus_format())
+
+
+# ---------------------------------------------------------------------------
+# Cron
+# ---------------------------------------------------------------------------
+
+@app.post("/api/cron/next")
+def cron_next(expression: str):
+    """Calculate next run time for a cron expression."""
+    from hive.core.cron_parser import next_run_time, describe_cron
+    try:
+        next_time = next_run_time(expression)
+        return {
+            "expression": expression,
+            "description": describe_cron(expression),
+            "next_run": next_time.isoformat(),
+        }
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+
+# ---------------------------------------------------------------------------
 # Web UI
 # ---------------------------------------------------------------------------
 
