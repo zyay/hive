@@ -184,14 +184,17 @@ async def chat(
     tools: list[dict] = None,
     temperature: float = 0.7,
     max_tokens: int = 4096,
+    stream: bool = False,
 ) -> LLMResponse:
     """
     Unified chat interface — routes to the correct provider adapter.
 
     Usage:
-        resp = await chat(provider="ollama", model="llama3.2", messages=[...])
-        resp = await chat(provider="openai", model="gpt-4o-mini", messages=[...])
-        resp = await chat(provider="anthropic", model="claude-3-5-haiku-20241022", messages=[...])
+        resp = await chat(provider="ollama", model="llama3.3", messages=[...])
+        resp = await chat(provider="openai", model="gpt-4.1-mini", messages=[...])
+        resp = await chat(provider="anthropic", model="claude-sonnet-4-20250514", messages=[...])
+        resp = await chat(provider="deepseek", model="deepseek-chat", messages=[...])
+        resp = await chat(provider="xai", model="grok-3-mini", messages=[...])
     """
     provider = provider or settings.DEFAULT_PROVIDER
     if messages is None:
@@ -211,6 +214,56 @@ async def chat(
             provider=provider, model=model, messages=messages, tools=tools,
             temperature=temperature, max_tokens=max_tokens,
         )
+
+
+async def chat_stream(
+    provider: str = None,
+    model: str = None,
+    messages: list[dict] = None,
+    tools: list[dict] = None,
+    temperature: float = 0.7,
+    max_tokens: int = 4096,
+):
+    """
+    Streaming chat — yields content chunks as they arrive.
+    Only works with OpenAI-compatible providers.
+    """
+    provider = provider or settings.DEFAULT_PROVIDER
+    cfg = settings.PROVIDERS.get(provider)
+    if not cfg:
+        raise ValueError(f"Unknown provider: {provider}")
+    if cfg["type"] == "anthropic":
+        raise ValueError("Streaming not yet supported for Anthropic. Use chat() instead.")
+
+    url = f"{cfg['base_url'].rstrip('/')}/chat/completions"
+    headers = {"Content-Type": "application/json"}
+    if cfg["api_key"]:
+        headers["Authorization"] = f"Bearer {cfg['api_key']}"
+
+    payload = {
+        "model": model or cfg["model"],
+        "messages": messages,
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+        "stream": True,
+    }
+    if tools:
+        payload["tools"] = tools
+
+    async with httpx.AsyncClient(timeout=120) as client:
+        async with client.stream("POST", url, json=payload, headers=headers) as resp:
+            resp.raise_for_status()
+            async for line in resp.aiter_lines():
+                if line.startswith("data: ") and line != "data: [DONE]":
+                    import json
+                    try:
+                        chunk = json.loads(line[6:])
+                        delta = chunk["choices"][0].get("delta", {})
+                        content = delta.get("content", "")
+                        if content:
+                            yield content
+                    except (json.JSONDecodeError, KeyError, IndexError):
+                        continue
 
 
 async def list_models(provider: str = None) -> list[dict]:

@@ -98,18 +98,34 @@ docker compose up --build
 
 ## Supported providers
 
-| Provider | Type | Config | Cost |
-|---|---|---|---|
-| **Ollama** | 🏠 Local, free | `OLLAMA_HOST` | $0 |
-| **LM Studio** | 🏠 Local | OpenAI-compat endpoint | $0 |
-| **OpenAI** | ☁️ Cloud | `OPENAI_API_KEY` | $0.15-10/M tokens |
-| **Anthropic** | ☁️ Cloud | `ANTHROPIC_API_KEY` | $0.80-15/M tokens |
-| **Groq** | ☁️ Fast inference | `GROQ_API_KEY` | $0.59-0.79/M tokens |
-| **Mistral** | ☁️ Cloud | `MISTRAL_API_KEY` | $0.10-0.30/M tokens |
-| **OpenRouter** | ☁️ 100+ models | `OPENROUTER_API_KEY` | varies |
-| **Gemini** | ☁️ Google | `GEMINI_API_KEY` | free tier |
+> **10 providers · 30+ models · Aug 2026 pricing**
+
+| Provider | Type | Default model | Context | Cost (in/out per 1M) |
+|---|---|---|---|---|
+| **Ollama** | 🏠 Local | llama3.3 | 128K | $0 |
+| **LM Studio** | 🏠 Local | any | varies | $0 |
+| **OpenAI** | ☁️ Cloud | gpt-4.1-mini | 1M | $0.40 / $1.60 |
+| **Anthropic** | ☁️ Cloud | claude-sonnet-4 | 200K | $3.00 / $15.00 |
+| **Google Gemini** | ☁️ Cloud | gemini-2.5-flash | 1M | free tier |
+| **Groq** | ☁️ Fast | llama-3.3-70b | 128K | $0.59 / $0.79 |
+| **Mistral** | ☁️ Cloud | mistral-large | 128K | $2.00 / $6.00 |
+| **OpenRouter** | ☁️ 300+ models | claude-3.5-sonnet | varies | varies |
+| **xAI** | ☁️ Cloud | grok-3-mini | 131K | $0.30 / $0.50 |
+| **DeepSeek** | ☁️ Cloud | deepseek-chat | 128K | $0.27 / $1.10 |
 
 All OpenAI-compatible providers share the same adapter — just change `base_url` and `api_key`.
+
+### Latest models supported
+
+| Provider | Models |
+|---|---|
+| OpenAI | gpt-4.1, gpt-4.1-mini, gpt-4.1-nano, gpt-4o |
+| Anthropic | claude-opus-4, claude-sonnet-4, claude-3.5-sonnet, claude-3.5-haiku |
+| Google | gemini-2.5-pro, gemini-2.5-flash |
+| xAI | grok-3, grok-3-mini |
+| DeepSeek | deepseek-chat, deepseek-reasoner (R1) |
+| Meta | llama-3.3-70b (via Groq/OpenRouter) |
+| Mistral | mistral-large, mistral-small |
 
 ## API reference
 

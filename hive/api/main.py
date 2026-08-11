@@ -130,6 +130,24 @@ async def models(provider: str):
     return await list_models(provider)
 
 
+@app.get("/api/models")
+def all_models():
+    """List all known models with pricing and capabilities."""
+    from hive.core.config import settings
+    result = []
+    for model_name, info in settings.MODEL_INFO.items():
+        pricing = settings.PRICING.get(model_name, (0.0, 0.0))
+        result.append({
+            "model": model_name,
+            "context_window": info.get("context", 0),
+            "vision": info.get("vision", False),
+            "tools": info.get("tools", False),
+            "cost_in_per_m": pricing[0],
+            "cost_out_per_m": pricing[1],
+        })
+    return sorted(result, key=lambda x: x["cost_in_per_m"])
+
+
 @app.get("/api/tools")
 def tools():
     return [
