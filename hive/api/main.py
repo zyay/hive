@@ -142,10 +142,54 @@ def all_models():
             "context_window": info.get("context", 0),
             "vision": info.get("vision", False),
             "tools": info.get("tools", False),
+            "intelligence": info.get("intelligence", 0),
+            "speed_tier": info.get("speed_tier", "unknown"),
+            "cost_tier": info.get("cost_tier", "unknown"),
             "cost_in_per_m": pricing[0],
             "cost_out_per_m": pricing[1],
         })
-    return sorted(result, key=lambda x: x["cost_in_per_m"])
+    return sorted(result, key=lambda x: -x["intelligence"])
+
+
+class RouterRequest(BaseModel):
+    task: str = ""
+    priority: str = "balanced"  # intelligence | speed | budget | balanced
+    privacy: bool = False
+    context_length: int = 0
+    vision: bool = False
+
+
+@app.post("/api/router")
+def route_model(body: RouterRequest):
+    """Intelligent model selection — recommends the best model for your task."""
+    from hive.core.model_router import select_model
+    rec = select_model(
+        task=body.task,
+        priority=body.priority,
+        privacy=body.privacy,
+        context_length=body.context_length,
+        vision=body.vision,
+    )
+    return {
+        "provider": rec.provider,
+        "model": rec.model,
+        "reason": rec.reason,
+        "intelligence": rec.intelligence,
+        "speed_tier": rec.speed_tier,
+        "cost_tier": rec.cost_tier,
+        "estimated_cost_per_1k_tokens": rec.estimated_cost_per_1k,
+    }
+
+
+class CompareRequest(BaseModel):
+    models: list[str]
+
+
+@app.post("/api/compare")
+def compare_models(body: CompareRequest):
+    """Compare multiple models side-by-side."""
+    from hive.core.model_router import compare_models
+    return compare_models(body.models)
 
 
 @app.get("/api/tools")
