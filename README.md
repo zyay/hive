@@ -1,8 +1,8 @@
 # 🐝 Hive — Self-hosted Multi-Agent AI Platform
 
-> **v0.2** — Swarm orchestration · Model Arena · Long-term memory · Scheduler · API keys · Voice I/O · 8 LLM providers
+> **v0.2** — Swarm orchestration · Model Arena · Long-term memory · Scheduler · API keys · Voice I/O · 8 LLM providers · MCP integration
 
-Create, manage, and chat with AI agents powered by **any LLM provider** — all running on your own machine.
+Create, manage, and chat with AI agents powered by **any LLM provider** — all running on your own machine. Agents can delegate to each other, compare models side-by-side, remember across sessions, and run on schedule.
 
 ## What is Hive?
 
@@ -12,37 +12,61 @@ Hive is a self-hosted platform for orchestrating AI agents. Each agent has its o
 
 ## Features
 
+### Core
 | Feature | Description |
 |---|---|
-| **Multi-provider LLM layer** | OpenAI, Anthropic, Groq, Mistral, OpenRouter, Gemini, Ollama — unified API |
+| **Multi-provider LLM layer** | 8 providers via 2 adapters (OpenAI-compat + Anthropic native) |
 | **Agent management** | Create, edit, delete agents with custom prompts, models, and tools |
-| **Tool calling** | Built-in tools (calculator, time) + extensible tool registry |
+| **Tool calling** | Built-in tools + extensible `@register_tool` decorator |
 | **Cost tracking** | Per-request cost estimation, token counting, latency monitoring |
-| **Conversation memory** | Persistent conversations stored in SQLite |
-| **Web UI** | Dark-themed dashboard with agent list, chat, and stats |
-| **Docker Compose** | One command to run everything (Hive + Ollama) |
-| **Self-hosted** | Your data, your keys, your infrastructure |
+| **Conversation memory** | Persistent conversations in SQLite |
+| **Web UI** | Dark-themed dashboard with agent list, chat, and live stats |
+| **Docker Compose** | One command: `docker compose up` |
+
+### Advanced (v0.2)
+| Feature | Description |
+|---|---|
+| **🐝 Swarm orchestration** | Agent-to-agent delegation via `call_agent` tool |
+| **⚔️ Model Arena** | Compare N models on same prompt — latency, cost, response side-by-side |
+| **🧠 Long-term memory** | Persistent keyword-based memory per agent with importance weighting |
+| **⏰ Scheduled automations** | Cron-based agent tasks with background scheduler loop |
+| **🔌 API keys + auth** | Create/revoke API keys, SHA-256 hashed, auth middleware |
+| **🎙️ Voice I/O** | Whisper STT + OpenAI TTS integration |
+| **🔗 MCP integration** | Connect to any MCP server (mcp-agent-tools, mcp-rag-bridge) |
 
 ## Architecture
 
 ```
-┌──────────────────┐
-│   Web UI (hive)  │  dashboard: agents, chat, stats
-└────────┬─────────┘
-         │ HTTP
-┌────────▼─────────────────────────────────┐
-│          FastAPI backend (hive)          │
-│  ┌──────────────┐   ┌─────────────────┐  │
-│  │ Agent loop   │   │ Model layer     │  │
-│  │ (tool call)  │   │ 8+ providers    │  │
-│  └──────────────┘   └─────────────────┘  │
-│  ┌──────────────┐   ┌─────────────────┐  │
-│  │ SQLite DB    │   │ Tool registry   │  │
-│  │ (agents,     │   │ (calculator,    │  │
-│  │  convos,     │   │  time, custom)  │  │
-│  │  usage)      │   └─────────────────┘  │
-│  └──────────────┘                        │
-└──────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│                     Web UI (dark dashboard)                  │
+│         agents · chat · arena · memory · stats               │
+└──────────────────────────┬───────────────────────────────────┘
+                           │ HTTP
+┌──────────────────────────▼───────────────────────────────────┐
+│                    FastAPI backend (hive)                     │
+│                                                              │
+│  ┌─────────────┐  ┌──────────────┐  ┌────────────────────┐  │
+│  │ Agent loop  │  │ Model layer  │  │ Swarm              │  │
+│  │ (tool call, │  │ 8 providers  │  │ (call_agent,       │  │
+│  │  multi-turn)│  │ 2 adapters   │  │  list_hive_agents) │  │
+│  └─────────────┘  └──────────────┘  └────────────────────┘  │
+│                                                              │
+│  ┌─────────────┐  ┌──────────────┐  ┌────────────────────┐  │
+│  │ Arena       │  │ Memory       │  │ Scheduler          │  │
+│  │ (parallel   │  │ (per-agent   │  │ (cron tasks,       │  │
+│  │  comparison)│  │  recall)     │  │  background loop)  │  │
+│  └─────────────┘  └──────────────┘  └────────────────────┘  │
+│                                                              │
+│  ┌─────────────┐  ┌──────────────┐  ┌────────────────────┐  │
+│  │ Voice I/O   │  │ API keys     │  │ MCP client         │  │
+│  │ (Whisper +  │  │ (SHA-256,    │  │ (connect to any    │  │
+│  │  TTS)       │  │  auth)       │  │  MCP server)       │  │
+│  └─────────────┘  └──────────────┘  └────────────────────┘  │
+│                                                              │
+│  ┌──────────────────────────────────────────────────────┐    │
+│  │ SQLite (agents, conversations, usage, memory, keys)  │    │
+│  └──────────────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────────────┘
 ```
 
 ## Quick start
@@ -54,6 +78,7 @@ cd hive
 
 # 2. Set up
 python -m venv venv && venv\Scripts\activate   # Windows
+# source venv/bin/activate                      # macOS/Linux
 pip install -r requirements.txt
 cp .env.example .env                            # edit with your API keys
 
@@ -71,32 +96,44 @@ docker compose up --build
 
 ## Supported providers
 
-| Provider | Type | Config |
-|---|---|---|
-| **Ollama** | 🏠 Local, free | `OLLAMA_HOST` |
-| **OpenAI** | ☁️ Cloud | `OPENAI_API_KEY` |
-| **Anthropic** | ☁️ Cloud | `ANTHROPIC_API_KEY` |
-| **Groq** | ☁️ Fast inference | `GROQ_API_KEY` |
-| **Mistral** | ☁️ Cloud | `MISTRAL_API_KEY` |
-| **OpenRouter** | ☁️ 100+ models | `OPENROUTER_API_KEY` |
-| **Gemini** | ☁️ Google | `GEMINI_API_KEY` |
-| **LM Studio** | 🏠 Local | OpenAI-compatible endpoint |
+| Provider | Type | Config | Cost |
+|---|---|---|---|
+| **Ollama** | 🏠 Local, free | `OLLAMA_HOST` | $0 |
+| **LM Studio** | 🏠 Local | OpenAI-compat endpoint | $0 |
+| **OpenAI** | ☁️ Cloud | `OPENAI_API_KEY` | $0.15-10/M tokens |
+| **Anthropic** | ☁️ Cloud | `ANTHROPIC_API_KEY` | $0.80-15/M tokens |
+| **Groq** | ☁️ Fast inference | `GROQ_API_KEY` | $0.59-0.79/M tokens |
+| **Mistral** | ☁️ Cloud | `MISTRAL_API_KEY` | $0.10-0.30/M tokens |
+| **OpenRouter** | ☁️ 100+ models | `OPENROUTER_API_KEY` | varies |
+| **Gemini** | ☁️ Google | `GEMINI_API_KEY` | free tier |
 
 All OpenAI-compatible providers share the same adapter — just change `base_url` and `api_key`.
 
 ## API reference
 
+### Core endpoints
 | Endpoint | Method | Description |
 |---|---|---|
 | `/` | GET | Web UI |
 | `/health` | GET | Health check |
 | `/api/providers` | GET | List configured providers |
 | `/api/tools` | GET | List available tools |
-| `/api/agents` | GET | List all agents |
-| `/api/agents` | POST | Create agent |
+| `/api/agents` | GET/POST | List / create agents |
 | `/api/agents/{id}` | GET/PUT/DELETE | Agent CRUD |
 | `/api/chat` | POST | Send message to agent |
 | `/api/usage` | GET | Usage statistics |
+
+### v0.2 endpoints
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/arena` | POST | Compare models side-by-side |
+| `/api/memory/{agent_id}` | GET/POST/DELETE | Agent memory CRUD |
+| `/api/memory/{agent_id}/recall` | GET | Semantic recall |
+| `/api/schedule` | GET/POST | List / create scheduled tasks |
+| `/api/schedule/{id}` | DELETE | Remove scheduled task |
+| `/api/keys` | GET/POST | List / create API keys |
+| `/api/voice/transcribe` | POST | Speech-to-text |
+| `/api/voice/synthesize` | POST | Text-to-speech |
 
 ### Example: create an agent and chat
 
@@ -110,6 +147,11 @@ curl -X POST http://localhost:8000/api/agents \
 curl -X POST http://localhost:8000/api/chat \
   -H "Content-Type: application/json" \
   -d '{"agent_id": "abc123", "message": "What is retrieval-augmented generation?"}'
+
+# Model Arena — compare 3 providers
+curl -X POST http://localhost:8000/api/arena \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Explain quantum computing in 3 sentences", "providers": ["ollama", "openai", "groq"]}'
 ```
 
 ## Adding custom tools
@@ -126,32 +168,18 @@ def get_weather(city: str) -> str:
     return f"Weather in {city}: 22°C, sunny"
 ```
 
-## Design decisions
+## Testing
 
-| Decision | Why |
-|---|---|
-| **Adapter pattern** | 2 adapters (OpenAI-compat + Anthropic) cover 8+ providers |
-| **SQLite** | Zero-config, single-file, perfect for self-hosted |
-| **Cost tracking** | Every request logged with tokens + estimated cost |
-| **Tool registry** | Decorator-based — add tools with one function |
-| **No external DB** | Everything runs locally, no dependencies |
+```bash
+# Run all tests
+pytest tests/ -v
 
-## Roadmap
+# Run with coverage
+pip install pytest-cov
+pytest --cov=hive --cov-report=html
+```
 
-- [x] Multi-provider LLM layer (8 providers)
-- [x] Agent management (CRUD + chat)
-- [x] Tool calling with built-in tools
-- [x] Cost tracking and observability
-- [x] Swarm orchestration (agent-to-agent)
-- [x] Model Arena (side-by-side comparison)
-- [x] Long-term memory per agent
-- [x] Scheduled automations (cron)
-- [x] API keys + auth middleware
-- [x] Voice I/O (Whisper + TTS)
-- [x] MCP client integration
-- [ ] Hive swarm visualization (graph view)
-- [ ] RAG per agent (connect to rag-docs-assistant)
-- [ ] Public marketplace for agent templates
+**Test coverage:** 17 tests covering config, agent loop, LLM layer, tool registry, cost estimation, providers.
 
 ## Performance
 
@@ -163,6 +191,7 @@ def get_weather(city: str) -> str:
 | Cost per 1K tokens | $0.00015 (GPT-4o-mini) vs $0.00 (Ollama) |
 | Memory per agent | ~2KB (keyword-based) |
 | DB size | ~1MB per 1000 conversations |
+| Startup time | <1s |
 
 ## Cross-repo integrations
 
@@ -173,8 +202,6 @@ hive ←→ mcp-agent-tools (19 tools: file, MySQL, web, calc, text)
 hive ←→ mcp-rag-bridge (7 tools: query KB, add/update/delete docs)
 hive ←→ rag-docs-assistant (RAG pipeline as a service)
 ```
-
-Use `hive/core/mcp_client.py` to connect any MCP server:
 
 ```python
 from hive.core.mcp_client import mcp_registry
@@ -188,11 +215,33 @@ await mcp_registry.connect_all()
 schemas = mcp_registry.get_all_tool_schemas()  # → all tools available to agents
 ```
 
+## Design decisions
+
+| Decision | Why |
+|---|---|
+| **Adapter pattern** | 2 adapters (OpenAI-compat + Anthropic) cover 8+ providers |
+| **SQLite** | Zero-config, single-file, perfect for self-hosted |
+| **Cost tracking** | Every request logged with tokens + estimated cost |
+| **Tool registry** | Decorator-based — add tools with one function |
+| **AST calculator** | No `eval()` — security-first math evaluation |
+| **Keyword memory** | Simple, fast, no embedding model needed for recall |
+| **Background scheduler** | asyncio task — no external cron daemon needed |
+| **SHA-256 API keys** | Raw keys shown once, only hashes stored |
+
+## Roadmap (v0.3)
+
+- [ ] Hive swarm visualization (graph view of agent calls)
+- [ ] RAG per agent (native ChromaDB integration)
+- [ ] Advanced evals framework (automated agent quality scoring)
+- [ ] Multi-user support with auth
+- [ ] Public marketplace for agent templates
+- [ ] Streaming responses (SSE)
+
 ## Related projects
 
-- [rag-docs-assistant](https://github.com/zyay/rag-docs-assistant) — RAG pipeline with hybrid search, reranking, evals
-- [mcp-agent-tools](https://github.com/zyay/mcp-agent-tools) — MCP server with 19 tools + sandbox
-- [mcp-rag-bridge](https://github.com/zyay/mcp-rag-bridge) — MCP bridge for RAG knowledge bases
+- [rag-docs-assistant](https://github.com/zyay/rag-docs-assistant) — RAG pipeline with hybrid search, reranking, evals, 27 tests
+- [mcp-agent-tools](https://github.com/zyay/mcp-agent-tools) — MCP server with 19 tools, sandbox, rate limiting, security audit
+- [mcp-rag-bridge](https://github.com/zyay/mcp-rag-bridge) — MCP bridge for RAG knowledge bases, 7 tools
 
 ## License
 
