@@ -58,6 +58,55 @@ def init_db():
             llm_calls INTEGER DEFAULT 0,
             timestamp REAL NOT NULL
         );
+
+        CREATE TABLE IF NOT EXISTS users (
+            id TEXT PRIMARY KEY,
+            username TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            display_name TEXT NOT NULL DEFAULT '',
+            created_at REAL NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS user_api_keys (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            provider TEXT NOT NULL,
+            api_key TEXT NOT NULL DEFAULT '',
+            model TEXT NOT NULL DEFAULT '',
+            created_at REAL NOT NULL,
+            updated_at REAL NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            UNIQUE(user_id, provider)
+        );
+
+        CREATE TABLE IF NOT EXISTS rooms (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL DEFAULT '',
+            type TEXT NOT NULL DEFAULT 'group',
+            created_by TEXT NOT NULL,
+            created_at REAL NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS room_members (
+            room_id TEXT NOT NULL,
+            member_type TEXT NOT NULL,
+            member_id TEXT NOT NULL,
+            role TEXT NOT NULL DEFAULT 'member',
+            joined_at REAL NOT NULL,
+            PRIMARY KEY (room_id, member_type, member_id),
+            FOREIGN KEY (room_id) REFERENCES rooms(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS messages (
+            id TEXT PRIMARY KEY,
+            room_id TEXT NOT NULL,
+            sender_type TEXT NOT NULL,
+            sender_id TEXT NOT NULL,
+            content TEXT NOT NULL,
+            created_at REAL NOT NULL,
+            FOREIGN KEY (room_id) REFERENCES rooms(id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_messages_room ON messages(room_id, created_at);
     """)
     conn.commit()
     conn.close()

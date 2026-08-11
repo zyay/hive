@@ -4,10 +4,11 @@ v0.2: swarm, arena, memory, scheduler, API keys, voice.
 """
 
 import asyncio
+import json
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, WebSocket
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -589,6 +590,190 @@ def benchmark_categories():
         name: {"prompts": len(prompts), "sample": prompts[0]["prompt"][:80]}
         for name, prompts in BENCHMARKS.items()
     }
+
+
+# ---------------------------------------------------------------------------
+# Multi-user: Auth, Users, Rooms, WebSocket
+# ---------------------------------------------------------------------------
+
+class RegisterRequest(BaseModel):
+    username: str
+    password: str
+    display_name: Optional[str] = None
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+class UserKeyRequest(BaseModel):
+    provider: str
+    api_key: str
+    model: str = ""
+
+class CreateRoomRequest(BaseModel):
+    name: str
+    type: str = "group"  # 'dm' or 'group'
+
+class InviteRequest(BaseModel):
+    member_type: str  # 'user' or 'agent'
+    member_id: str
+
+class SendMessageRequest(BaseModel):
+    content: str
+
+
+@app.post("/api/auth/register")
+async def register_endpoint(body: RegisterRequest):
+    from hive.core.users import register
+    from hive.core.auth import create_token
+    try:
+        user = await register(body.username, body.password, body.display_name)
+        token = create_token(user["id"], role="user")
+        return {**user, "token": token}
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+
+@app.post("/api/auth/login")
+async def login_endpoint(body: LoginRequest):
+    from hive.core.users import login
+    result = await login(body.username, body.password)
+    if not result:
+        raise HTTPException(401, "Invalid credentials")
+    return result
+
+
+@app.get("/api/users/me")
+async def get_current_user(user_id: str = None):
+    """Get current user profile. Pass user_id as query param (from JWT)."""
+    from hive.core.users import get_user
+    if not user_id:
+        raise HTTPException(400, "user_id required")
+    user = await get_user(user_id)
+    if not user:
+        raise HTTPException(404, "User not found")
+    return user
+
+
+@app.get("/api/users")
+async def list_users_endpoint():
+    from hive.core.users import list_users
+    return await list_users()
+
+
+@app.get("/api/users/keys")
+async def get_user_keys(user_id: str):
+    from hive.core.user_keys import list_keys
+    return await list_keys(user_id)
+
+
+@app.post("/api/users/keys")
+async def set_user_key(user_id: str, body: UserKeyRequest):
+    from hive.core.user_keys import set_key
+    return await set_key(user_id, body.provider, body.api_key, body.model)
+
+
+@app.delete("/api/users/keys/{provider}")
+async def delete_user_key(user_id: str, provider: str):
+    from hive.core.user_keys import delete_key
+    ok = await delete_key(user_id, provider)
+    if not ok:
+        raise HTTPException(404, "Key not found")
+    return {"deleted": True}
+
+
+# ── Rooms ──
+
+@app.get("/api/rooms")
+async def list_rooms(user_id: str):
+    from hive.core.rooms import get_user_rooms
+    return await get_user_rooms(user_id)
+
+
+@app.post("/api/rooms")
+async def create_room_endpoint(user_id: str, body: CreateRoomRequest):
+    from hive.core.rooms import create_room, create_dm
+    if body.type == "dm" and body.name:
+        # For DM, name is the other user's ID
+        return await create_dm(user_id, body.name)
+    return await create_room(body.name, body.type, user_id)
+
+
+@app.get("/api/rooms/{room_id}")
+async def get_room_endpoint(room_id: str):
+    from hive.core.rooms import get_room, get_room_members
+    room = await get_room(room_id)
+    if not room:
+        raise HTTPException(404, "Room not found")
+    members = await get_room_members(room_id)
+    return {**room, "members": members}
+
+
+@app.post("/api/rooms/{room_id}/members")
+async def invite_member(room_id: str, body: InviteRequest):
+    from hive.core.rooms import add_member, invite_bot
+    if body.member_type == "agent":
+        ok = await invite_bot(room_id, body.member_id)
+    else:
+        ok = await add_member(room_id, body.member_type, body.member_id)
+    if not ok:
+        raise HTTPException(400, "Already a member or invalid")
+    return {"invited": True}
+
+
+@app.delete("/api/rooms/{room_id}/members/{member_type}/{member_id}")
+async def remove_member_endpoint(room_id: str, member_type: str, member_id: str):
+    from hive.core.rooms import remove_member
+    ok = await remove_member(room_id, member_type, member_id)
+    if not ok:
+        raise HTTPException(404, "Member not found")
+    return {"removed": True}
+
+
+@app.get("/api/rooms/{room_id}/messages")
+async def get_room_messages(room_id: str, limit: int = 50):
+    from hive.core.rooms import get_messages
+    return await get_messages(room_id, limit)
+
+
+@app.post("/api/rooms/{room_id}/messages")
+async def send_room_message(room_id: str, user_id: str, body: SendMessageRequest):
+    from hive.core.rooms import send_message
+    from hive.core.ws import broadcast
+    msg = await send_message(room_id, "user", user_id, body.content)
+    await broadcast(room_id, {"type": "new_message", "message": msg})
+    return msg
+
+
+# ── WebSocket ──
+
+@app.websocket("/ws/{room_id}")
+async def websocket_endpoint(websocket: WebSocket, room_id: str):
+    from hive.core.ws import register_connection, unregister_connection, handle_ws_message
+    from hive.core.auth import verify_token
+
+    await websocket.accept()
+
+    # Auth via query param
+    token = websocket.query_params.get("token", "")
+    payload = verify_token(token) if token else None
+    user_id = payload["sub"] if payload else "anonymous"
+
+    register_connection(room_id, websocket)
+    await websocket.send_text(json.dumps({"type": "connected", "user_id": user_id}))
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            try:
+                msg = json.loads(data)
+                await handle_ws_message(room_id, msg, user_id)
+            except json.JSONDecodeError:
+                await websocket.send_text(json.dumps({"type": "error", "message": "Invalid JSON"}))
+    except Exception:
+        pass
+    finally:
+        unregister_connection(room_id, websocket)
 
 
 # ---------------------------------------------------------------------------
