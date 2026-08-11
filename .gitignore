@@ -6,3 +6,5 @@ venv/
 *.db
 .traces/
 .pytest_cache/
+hive_memory/
+hive.db
