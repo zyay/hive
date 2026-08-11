@@ -96,6 +96,56 @@ python main.py
 docker compose up --build
 ```
 
+### Tailscale (share with team)
+
+Hive listens on `0.0.0.0` by default — accessible over Tailscale.
+
+**Quick setup (Linux/macOS):**
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+**Quick setup (Windows):**
+```
+setup.bat
+```
+
+**Manual setup:**
+```bash
+# 1. Install Tailscale
+curl -fsSL https://tailscale.com/install.sh | sh   # Linux
+# or: winget install Tailscale.Tailscale            # Windows
+# or: brew install tailscale                        # macOS
+
+# 2. Connect
+tailscale up
+
+# 3. Get your Tailscale IP
+tailscale ip -4
+# → 100.64.x.x
+
+# 4. Start Hive
+python main.py
+
+# 5. Share with team
+# Anyone on your Tailnet opens: http://100.64.x.x:8000
+```
+
+**Docker + Tailscale:**
+```bash
+# Get auth key from https://login.tailscale.com/settings/keys
+export TS_AUTHKEY=tskey-...
+docker compose -f docker-compose.tailscale.yml up
+```
+
+**How it works:**
+- Each user registers their own account (username + password)
+- Each user adds their own API keys (OpenAI, Anthropic, etc.)
+- Create group rooms → invite users → chat in real-time
+- Invite AI bots to rooms → agents see all messages and respond
+- Share files via the File button in chat
+
 ## Supported providers
 
 | Provider | Type | Default model | Context | Cost (in/out per 1M) |
