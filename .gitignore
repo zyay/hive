@@ -8,3 +8,5 @@ venv/
 .pytest_cache/
 hive_memory/
 hive.db
+skills/
+uploads/
