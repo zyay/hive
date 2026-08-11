@@ -1,10 +1,10 @@
 [build-system]
 requires = ["setuptools>=68.0", "wheel"]
-build-backend = "setuptools.backends._legacy:_Backend"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "hive"
-version = "0.1.0"
+version = "0.3.0"
 description = "Self-hosted multi-agent AI platform with multi-provider LLM layer"
 readme = "README.md"
 license = {text = "MIT"}
@@ -26,10 +26,15 @@ dependencies = [
     "requests",
     "aiosqlite",
     "jinja2",
+    "bcrypt",
+    "websockets",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "pytest-asyncio"]
+
+[tool.setuptools.packages.find]
+include = ["hive*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
