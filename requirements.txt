@@ -6,5 +6,7 @@ pyyaml
 requests
 aiosqlite
 jinja2
+bcrypt
+websockets
 pynacl
 zeroconf

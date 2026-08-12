@@ -5,12 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "hive"
 version = "0.3.0"
-description = "Self-hosted multi-agent AI platform with multi-provider LLM layer"
+description = "Decentralized P2P E2EE multi-agent AI platform"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.11"
 authors = [{name = "Marko Gorny", email = "sockagorny@gmail.com"}]
-keywords = ["ai", "agents", "llm", "multi-agent", "ollama", "openai", "mcp"]
+keywords = ["ai", "agents", "llm", "p2p", "e2ee", "mcp", "decentralized"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Programming Language :: Python :: 3.11",
@@ -28,10 +28,17 @@ dependencies = [
     "jinja2",
     "bcrypt",
     "websockets",
+    "pynacl",
+    "zeroconf",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "pytest-asyncio"]
+full = [
+    "chromadb",
+    "sentence-transformers",
+    "mysql-connector-python",
+]
 
 [tool.setuptools.packages.find]
 include = ["hive*"]
