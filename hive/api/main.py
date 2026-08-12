@@ -1297,6 +1297,21 @@ input:focus,textarea:focus,select:focus{border-color:var(--ac)}
   </div>
 </div></div>
 
+<!-- Interactive Tutorial -->
+<div id="tutorial" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;align-items:center;justify-content:center">
+  <div style="background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:32px;width:560px;max-width:92vw;max-height:80vh;overflow-y:auto">
+    <div id="tutStep"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px">
+      <div id="tutDots"></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-o" onclick="skipTutorial()">Skip</button>
+        <button class="btn btn-o" id="tutPrev" onclick="tutBack()" style="display:none">Back</button>
+        <button class="btn btn-p" id="tutNext" onclick="tutForward()">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 let token=null,userId=null,username=null,curRoom=null,ws=null;
 const $=id=>document.getElementById(id);
@@ -1350,7 +1365,71 @@ function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g
 // Check saved session
 if(localStorage.getItem('hive_token')){token=localStorage.getItem('hive_token');userId=localStorage.getItem('hive_user');username=localStorage.getItem('hive_name');enterApp();}
 // Save session on login
-const origEnter=enterApp;enterApp=function(){localStorage.setItem('hive_token',token);localStorage.setItem('hive_user',userId);localStorage.setItem('hive_name',username);origEnter();};
+const origEnter=enterApp;enterApp=function(){localStorage.setItem('hive_token',token);localStorage.setItem('hive_user',userId);localStorage.setItem('hive_name',username);origEnter();if(!localStorage.getItem('hive_tut_done')){setTimeout(showTutorial,500);}};
+
+// ── Interactive Tutorial ──
+const TUT_STEPS = [
+  {
+    title: "Welcome to Hive",
+    icon: "&#x1F41D;",
+    text: "Hive is a decentralized, end-to-end encrypted AI messenger. Your data stays on your device. No central server can read your messages.",
+    extra: "<div style='background:var(--s2);border-radius:8px;padding:12px;margin-top:12px;font-size:12px;color:var(--t2)'><b>What makes Hive different:</b><br>- E2EE with Signal Protocol (Double Ratchet)<br>- P2P networking (no central server)<br>- AI agents run locally on YOUR machine<br>- You own your data, your keys, your identity</div>"
+  },
+  {
+    title: "Your Identity",
+    icon: "&#x1F511;",
+    text: "Your identity is a cryptographic keypair (Ed25519 + X25519). No username database, no phone number. Your key IS your identity.",
+    extra: "<div style='background:var(--s2);border-radius:8px;padding:12px;margin-top:12px;font-size:12px;font-family:monospace;color:var(--gn)'>DID: hive:z6Mk... (derived from your public key)<br>Fingerprint: 5 groups of 5 chars for verification</div><p style='font-size:12px;color:var(--mt);margin-top:8px'>You can verify your identity with others using Safety Numbers (like Signal/WhatsApp).</p>"
+  },
+  {
+    title: "API Keys",
+    icon: "&#x1F512;",
+    text: "Add your own API keys in Settings. Each user has their own keys — you pay for your own AI usage. Keys are stored encrypted locally.",
+    extra: "<div style='background:var(--s2);border-radius:8px;padding:12px;margin-top:12px;font-size:12px;color:var(--t2)'><b>Supported providers:</b><br>OpenAI, Anthropic, Groq, Mistral, OpenRouter, xAI, DeepSeek, Gemini<br><br><b>Tip:</b> Go to <b>Settings</b> tab to add your first key. Start with Groq (free tier, very fast).</div>"
+  },
+  {
+    title: "AI Agents",
+    icon: "&#x1F916;",
+    text: "Create AI agents with custom personalities. Each agent has its own P2P identity and can join your chats. Agents can use local LLMs (Ollama) or cloud APIs.",
+    extra: "<div style='background:var(--s2);border-radius:8px;padding:12px;margin-top:12px;font-size:12px;color:var(--t2)'><b>How to create an agent:</b><br>1. Go to <b>Agents</b> tab<br>2. Click <b>+ New Agent</b><br>3. Give it a name and system prompt<br>4. Choose provider (ollama for local, openai for cloud)<br>5. Optionally add skills (MD knowledge files)<br><br><b>Tip:</b> Use Ollama with llama3.2 for free local AI.</div>"
+  },
+  {
+    title: "Rooms & Chat",
+    icon: "&#x1F4AC;",
+    text: "Create rooms to chat. Invite other users or AI bots. Messages are encrypted end-to-end and delivered in real-time via WebSocket.",
+    extra: "<div style='background:var(--s2);border-radius:8px;padding:12px;margin-top:12px;font-size:12px;color:var(--t2)'><b>Room types:</b><br>- <b>Group Chat</b> — multiple users + bots<br>- <b>Direct Message</b> — 1-to-1 private chat<br><br><b>In chat you can:</b><br>- Send messages (real-time)<br>- Upload files (encrypted)<br>- Invite bots (click Bot button)<br>- Invite users (click User button)</div>"
+  },
+  {
+    title: "P2P & Tailscale",
+    icon: "&#x1F310;",
+    text: "Hive listens on 0.0.0.0 — accessible over your local network or Tailscale. Share your Tailscale IP so others can connect.",
+    extra: "<div style='background:var(--s2);border-radius:8px;padding:12px;margin-top:12px;font-size:12px;color:var(--t2)'><b>To share with others:</b><br>1. Install Tailscale on your machine<br>2. Run <code>tailscale ip -4</code> to get your IP<br>3. Share: <code>http://YOUR-IP:8000</code><br>4. Others register their own account<br><br><b>Invite Codes:</b> Use <code>GET /api/p2p/invite</code> to generate a code for direct P2P connection.</div>"
+  },
+  {
+    title: "Security",
+    icon: "&#x1F6E1;",
+    text: "Your messages are protected by 5 layers of encryption. Even if someone steals your database, they can't read past messages (Forward Secrecy).",
+    extra: "<div style='background:var(--s2);border-radius:8px;padding:12px;margin-top:12px;font-size:12px;color:var(--t2)'><b>Security layers:</b><br>1. Ed25519 message signing<br>2. X25519 key exchange<br>3. Signal Protocol (Double Ratchet)<br>4. Per-message encryption keys<br>5. Encrypted local storage<br><br><b>Key properties:</b><br>- Forward Secrecy: past messages stay safe<br>- Post-Compromise Security: new keys after breach<br>- Deniability: plausible deniability built in</div>"
+  },
+  {
+    title: "You're Ready!",
+    icon: "&#x1F680;",
+    text: "That's everything you need to know. Start by adding an API key in Settings, then create your first agent and have a chat!",
+    extra: "<div style='background:var(--s2);border-radius:8px;padding:12px;margin-top:12px;font-size:12px;color:var(--t2)'><b>Quick start checklist:</b><br>&#9744; Add API key in Settings<br>&#9744; Create an agent in Agents tab<br>&#9744; Create a room<br>&#9744; Invite the bot to your room<br>&#9744; Start chatting!<br><br><b>Need help?</b> Check the README on GitHub for detailed docs.</div>"
+  }
+];
+let tutIdx=0;
+function showTutorial(){tutIdx=0;renderTutStep();$('tutorial').style.display='flex';}
+function skipTutorial(){localStorage.setItem('hive_tut_done','1');$('tutorial').style.display='none';}
+function tutForward(){if(tutIdx>=TUT_STEPS.length-1){skipTutorial();return;}tutIdx++;renderTutStep();}
+function tutBack(){if(tutIdx>0){tutIdx--;renderTutStep();}}
+function renderTutStep(){
+  const s=TUT_STEPS[tutIdx];
+  $('tutStep').innerHTML=`<div style="text-align:center;font-size:40px;margin-bottom:12px">${s.icon}</div><h2 style="font-size:20px;font-weight:700;text-align:center;margin-bottom:8px">${s.title}</h2><p style="font-size:14px;color:var(--t2);text-align:center;line-height:1.6">${s.text}</p>${s.extra||''}`;
+  $('tutDots').innerHTML=TUT_STEPS.map((_,i)=>`<span style="width:8px;height:8px;border-radius:50%;background:${i===tutIdx?'var(--ac)':'var(--bd)'};display:inline-block;margin:0 3px;transition:background .2s"></span>`).join('');
+  $('tutPrev').style.display=tutIdx>0?'inline-block':'none';
+  $('tutNext').textContent=tutIdx>=TUT_STEPS.length-1?'Get Started':'Next';
+}
 </script>
 </body>
 </html>
