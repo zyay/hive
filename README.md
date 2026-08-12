@@ -237,3 +237,102 @@ pytest --cov=hive         # with coverage
 ## License
 
 MIT
+
+---
+
+## Architecture
+
+```mermaid
+graph TB
+    subgraph "User Node"
+        UI[Web UI / CLI]
+        API[FastAPI REST + WebSocket]
+        
+        subgraph "Core"
+            ID[Identity<br/>Ed25519 + X25519]
+            CRYPTO[Crypto<br/>NaCl E2EE]
+            SIG[Signal Protocol<br/>Double Ratchet]
+            ROUTER[Model Router<br/>Intelligent Selection]
+        end
+        
+        subgraph "P2P Layer"
+            P2P[P2P Network<br/>UDP + mDNS]
+            NAT[NAT Traversal<br/>STUN + Hole Punch]
+            RELAY[Relay<br/>Store & Forward]
+        end
+        
+        subgraph "AI Layer"
+            AGENT[Agent Peer<br/>Own Identity]
+            OLLAMA[Local LLM<br/>Ollama]
+            CLOUD[Cloud API<br/>OpenAI/Anthropic]
+            VECMEM[Vector Memory<br/>ChromaDB]
+        end
+        
+        subgraph "Storage"
+            DB[(SQLCipher<br/>Encrypted DB)]
+            KS[(Keystore<br/>Key Pairs)]
+            FILES[(E2EE Files<br/>Encrypted Chunks)]
+        end
+    end
+    
+    subgraph "Network"
+        PEER1[Peer 1]
+        PEER2[Peer 2]
+        RELAYNODE[Relay Node<br/>Encrypted Only]
+    end
+    
+    UI --> API
+    API --> ID & CRYPTO & SIG
+    CRYPTO --> P2P
+    SIG --> CRYPTO
+    P2P --> NAT
+    P2P --> RELAY
+    RELAY --> RELAYNODE
+    P2P --> PEER1 & PEER2
+    AGENT --> OLLAMA & CLOUD
+    AGENT --> SIG
+    SIG --> DB
+    ID --> KS
+    CRYPTO --> FILES
+    AGENT --> VECMEM
+```
+
+## Security Model
+
+### Defense in Depth — 5 Layers
+
+| Layer | Technology | Protection |
+|---|---|---|
+| **Network** | UDP + Noise Protocol | Transport encryption, NAT traversal |
+| **Transport** | TLS 1.3 (relay) | Relay cannot read content |
+| **Application** | Signal Protocol (Double Ratchet) | E2EE, Forward Secrecy, Post-Compromise Security |
+| **Storage** | SQLCipher (AES-256) | Encrypted database at rest |
+| **Identity** | Ed25519 + X25519 | Cryptographic identity, message signing |
+
+### Threat Model
+
+| Threat | Mitigation |
+|---|---|
+| **Eavesdropping** | All messages E2EE with per-message keys (Double Ratchet) |
+| **Message tampering** | Ed25519 signatures on every message |
+| **Identity spoofing** | Safety Number verification (OOB fingerprint check) |
+| **Database theft** | SQLCipher encryption, keystore protected by password |
+| **Relay compromise** | Relay sees only ciphertext, cannot decrypt |
+| **Key theft (today)** | Forward Secrecy — past messages remain secure |
+| **Key theft + recovery** | Post-Compromise Security — new messages secure after ratchet |
+| **MITM attack** | Safety Number comparison via QR code or voice |
+
+### What Hive Does NOT Have (By Design)
+
+- ❌ No central server that can read your messages
+- ❌ No phone number or email required
+- ❌ No data sent to Hive developers
+- ❌ No messages stored on any server you don't control
+- ❌ No way for admins to read your chats
+
+### Key Properties
+
+- **Forward Secrecy**: If your key is compromised today, yesterday's messages are safe
+- **Post-Compromise Security**: After a key compromise, the next ratchet step creates new secure keys
+- **Deniability**: Messages are signed but the protocol allows plausible deniability
+- **Minimal Metadata**: Relay nodes see only encrypted blobs, not content or sender identity
