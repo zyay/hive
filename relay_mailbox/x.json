@@ -1,0 +1,11 @@
+[
+  {
+    "id": "m1",
+    "sender_did": "a",
+    "recipient_did": "x",
+    "ciphertext": "c",
+    "nonce": "n",
+    "timestamp": 1786520180.3306496,
+    "delivered": false
+  }
+]

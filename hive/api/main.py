@@ -882,6 +882,186 @@ async def delete_shared_file(file_id: str):
     return {"deleted": True}
 
 
+# ---------------------------------------------------------------------------
+# P2P: Identity, Peers, Encrypted Chat
+# ---------------------------------------------------------------------------
+
+class IdentitySetup(BaseModel):
+    display_name: str = ""
+    password: str = ""
+
+class PeerConnect(BaseModel):
+    invite_code: str = ""
+    public_signing_key: str = ""
+    public_encryption_key: str = ""
+    display_name: str = ""
+
+class EncryptedChat(BaseModel):
+    recipient_did: str
+    content: str
+
+
+@app.get("/api/p2p/identity")
+def get_identity():
+    """Get current P2P identity (creates one if none exists)."""
+    from hive.core.identity import load_identity, identity_exists
+    if not identity_exists():
+        return {"status": "no_identity", "message": "No identity configured. POST to /api/p2p/identity to create one."}
+    identity = load_identity()
+    if not identity:
+        return {"status": "error", "message": "Failed to load identity"}
+    return {"status": "ok", **identity.to_dict()}
+
+
+@app.post("/api/p2p/identity")
+def create_identity(body: IdentitySetup):
+    """Create a new P2P identity."""
+    from hive.core.identity import generate_identity, save_identity, identity_exists
+    if identity_exists():
+        raise HTTPException(400, "Identity already exists. Delete keystore/ to reset.")
+    identity = generate_identity(body.display_name)
+    save_identity(identity, body.password)
+    return identity.to_dict()
+
+
+@app.get("/api/p2p/peers")
+def list_peers():
+    """List known P2P peers."""
+    from hive.core.db import get_connection
+    conn = get_connection()
+    rows = conn.execute("SELECT * FROM p2p_peers ORDER BY last_seen DESC").fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+@app.post("/api/p2p/peers/connect")
+def connect_peer(body: PeerConnect):
+    """Connect to a peer via invite code or public keys."""
+    from hive.core.identity import import_peer
+    from hive.core.db import get_connection
+    import time, json, base64
+
+    if body.invite_code:
+        data = json.loads(base64.urlsafe_b64decode(body.invite_code))
+        peer = import_peer(data["signing_key"], data["encryption_key"], data.get("name", ""))
+    elif body.public_signing_key and body.public_encryption_key:
+        peer = import_peer(body.public_signing_key, body.public_encryption_key, body.display_name)
+    else:
+        raise HTTPException(400, "Provide invite_code or public keys")
+
+    conn = get_connection()
+    conn.execute(
+        "INSERT OR REPLACE INTO p2p_peers (did, peer_id, display_name, address, public_signing_key, public_encryption_key, last_seen, is_online, added_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (peer["did"], peer["did"][5:21], peer.get("display_name", ""), "", peer.get("public_signing_key", body.public_signing_key), peer.get("public_encryption_key", body.public_encryption_key), time.time(), 1, time.time())
+    )
+    conn.commit()
+    conn.close()
+    return {"status": "connected", "did": peer["did"]}
+
+
+@app.delete("/api/p2p/peers/{did}")
+def remove_peer(did: str):
+    """Remove a peer."""
+    from hive.core.db import get_connection
+    conn = get_connection()
+    conn.execute("DELETE FROM p2p_peers WHERE did = ?", (did,))
+    conn.commit()
+    conn.close()
+    return {"deleted": True}
+
+
+@app.get("/api/p2p/sessions")
+def list_sessions():
+    """List active encrypted sessions."""
+    from hive.core.signal_protocol import SessionManager
+    mgr = SessionManager()
+    return mgr.list_sessions()
+
+
+@app.post("/api/p2p/send")
+def send_encrypted(body: EncryptedChat):
+    """Send an encrypted message to a peer."""
+    from hive.core.identity import load_identity
+    from hive.core.signal_protocol import SessionManager
+    from hive.core.db import get_connection
+    from hive.core.relay import relay, RelayMessage
+    import uuid, json, time
+
+    identity = load_identity()
+    if not identity:
+        raise HTTPException(400, "No identity configured")
+
+    conn = get_connection()
+    peer = conn.execute("SELECT * FROM p2p_peers WHERE did = ?", (body.recipient_did,)).fetchone()
+    if not peer:
+        conn.close()
+        raise HTTPException(404, "Peer not found")
+
+    mgr = SessionManager()
+    session = mgr.get_or_create_session(body.recipient_did, identity.encryption_key, peer["public_encryption_key"])
+    encrypted = session.encrypt(body.content)
+
+    msg_id = str(uuid.uuid4())[:12]
+    conn.execute(
+        "INSERT INTO encrypted_messages (id, sender_did, recipient_did, ciphertext, nonce, counter, message_type, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (msg_id, identity.did, body.recipient_did, encrypted["ciphertext"], encrypted["nonce"], encrypted["counter"], "text", time.time())
+    )
+    conn.commit()
+    conn.close()
+
+    # Store in relay for offline delivery
+    relay.store(RelayMessage(
+        id=msg_id, sender_did=identity.did, recipient_did=body.recipient_did,
+        ciphertext=encrypted["ciphertext"], nonce=encrypted["nonce"],
+        timestamp=time.time(),
+    ))
+
+    return {"status": "sent", "id": msg_id, "counter": encrypted["counter"]}
+
+
+@app.get("/api/p2p/inbox")
+def get_inbox(recipient_did: str = ""):
+    """Get pending encrypted messages from relay."""
+    from hive.core.identity import load_identity
+    from hive.core.relay import relay
+
+    if not recipient_did:
+        identity = load_identity()
+        if identity:
+            recipient_did = identity.did
+
+    messages = relay.fetch(recipient_did)
+    return {
+        "count": len(messages),
+        "messages": [m.to_dict() for m in messages],
+    }
+
+
+@app.get("/api/p2p/invite")
+def generate_invite():
+    """Generate an invite code for this node."""
+    from hive.core.identity import load_identity
+    identity = load_identity()
+    if not identity:
+        raise HTTPException(400, "No identity configured")
+
+    import json, base64
+    data = json.dumps({
+        "did": identity.did,
+        "name": identity.display_name,
+        "signing_key": identity.public_signing_key_hex,
+        "encryption_key": identity.public_encryption_key_hex,
+    })
+    return {"invite_code": base64.urlsafe_b64encode(data.encode()).decode()}
+
+
+@app.get("/api/p2p/relay/status")
+def relay_status():
+    """Get relay mailbox status."""
+    from hive.core.relay import relay
+    return {"pending": relay.all_pending()}
+
+
 @app.get("/", response_class=HTMLResponse)
 def ui():
     return HTML_PAGE
