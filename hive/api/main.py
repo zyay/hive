@@ -1062,6 +1062,122 @@ def relay_status():
     return {"pending": relay.all_pending()}
 
 
+# ---------------------------------------------------------------------------
+# Danger Zone — destructive actions
+# ---------------------------------------------------------------------------
+
+@app.delete("/api/danger/user")
+def delete_user(user_id: str):
+    """Permanently delete user account and all associated data."""
+    from hive.core.db import get_connection
+    conn = get_connection()
+    conn.execute("DELETE FROM messages WHERE sender_id = ?", (user_id,))
+    conn.execute("DELETE FROM room_members WHERE member_id = ?", (user_id,))
+    conn.execute("DELETE FROM user_api_keys WHERE user_id = ?", (user_id,))
+    conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+    return {"deleted": True, "message": "User account and all data permanently deleted"}
+
+
+@app.delete("/api/danger/agents")
+def delete_all_agents():
+    """Delete all agents."""
+    from hive.core.db import get_connection
+    conn = get_connection()
+    conn.execute("DELETE FROM agent_skills")
+    conn.execute("DELETE FROM agents")
+    conn.execute("DELETE FROM agent_peers")
+    conn.commit()
+    conn.close()
+    return {"deleted": True, "message": "All agents deleted"}
+
+
+@app.delete("/api/danger/rooms")
+def delete_all_rooms():
+    """Delete all rooms and messages."""
+    from hive.core.db import get_connection
+    conn = get_connection()
+    conn.execute("DELETE FROM messages")
+    conn.execute("DELETE FROM encrypted_messages")
+    conn.execute("DELETE FROM room_members")
+    conn.execute("DELETE FROM rooms")
+    conn.commit()
+    conn.close()
+    return {"deleted": True, "message": "All rooms and messages deleted"}
+
+
+@app.delete("/api/danger/keys")
+def delete_all_keys(user_id: str):
+    """Delete all API keys for a user."""
+    from hive.core.db import get_connection
+    conn = get_connection()
+    conn.execute("DELETE FROM user_api_keys WHERE user_id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+    return {"deleted": True, "message": "All API keys deleted"}
+
+
+@app.delete("/api/danger/identity")
+def delete_identity():
+    """Delete P2P identity (keystore)."""
+    import shutil
+    from hive.core.identity import KEYSTORE_DIR
+    if KEYSTORE_DIR.exists():
+        shutil.rmtree(KEYSTORE_DIR)
+    return {"deleted": True, "message": "P2P identity deleted. Restart to generate new identity."}
+
+
+@app.delete("/api/danger/sessions")
+def delete_all_sessions():
+    """Delete all Signal Protocol sessions."""
+    import os
+    if os.path.exists("sessions.json"):
+        os.remove("sessions.json")
+    return {"deleted": True, "message": "All encrypted sessions deleted"}
+
+
+@app.delete("/api/danger/relay")
+def clear_relay():
+    """Clear all relay mailboxes."""
+    import shutil
+    from hive.core.relay import RELAY_DIR
+    if RELAY_DIR.exists():
+        shutil.rmtree(RELAY_DIR)
+        RELAY_DIR.mkdir(exist_ok=True)
+    return {"deleted": True, "message": "All relay mailboxes cleared"}
+
+
+@app.delete("/api/danger/everything")
+def delete_everything():
+    """Nuclear option — delete everything: DB, keystore, sessions, relay, uploads."""
+    import shutil, os
+    from hive.core.db import get_connection
+    from hive.core.identity import KEYSTORE_DIR
+    from hive.core.relay import RELAY_DIR
+
+    # Clear DB
+    conn = get_connection()
+    for table in ["messages", "encrypted_messages", "room_members", "rooms",
+                  "user_api_keys", "agent_skills", "agents", "agent_peers",
+                  "p2p_sessions", "p2p_peers", "shared_files", "users"]:
+        conn.execute(f"DELETE FROM {table}")
+    conn.commit()
+    conn.close()
+
+    # Delete files
+    for path in [KEYSTORE_DIR, RELAY_DIR, Path("sessions.json"), Path("hive.db"), Path("uploads")]:
+        try:
+            if path.is_dir():
+                shutil.rmtree(path)
+            elif path.is_file():
+                path.unlink()
+        except Exception:
+            pass
+
+    return {"deleted": True, "message": "EVERYTHING deleted. Full reset. Restart required."}
+
+
 @app.get("/", response_class=HTMLResponse)
 def ui():
     return HTML_PAGE

@@ -146,6 +146,45 @@ input:focus,textarea:focus{border-color:var(--ac)}
         <h4 style="font-size:14px;font-weight:600;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bd)">Profile</h4>
         <div id="pInfo"></div>
       </div>
+      <div style="margin-top:32px">
+        <h4 style="font-size:14px;font-weight:600;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--rd);color:var(--rd)">Danger Zone</h4>
+        <p style="font-size:12px;color:var(--mt);margin-bottom:12px">Irreversible actions. Proceed with caution.</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:500">Delete All API Keys</div><div style="font-size:11px;color:var(--mt)">Remove all stored API keys</div></div>
+            <button class="btn btn-d btn-s" onclick="dangerAction('keys','Delete all API keys?')">Delete Keys</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:500">Delete All Agents</div><div style="font-size:11px;color:var(--mt)">Remove all AI agents and their skills</div></div>
+            <button class="btn btn-d btn-s" onclick="dangerAction('agents','Delete ALL agents?')">Delete Agents</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:500">Delete All Rooms</div><div style="font-size:11px;color:var(--mt)">Remove all rooms, messages, and chat history</div></div>
+            <button class="btn btn-d btn-s" onclick="dangerAction('rooms','Delete ALL rooms and messages?')">Delete Rooms</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:500">Reset P2P Identity</div><div style="font-size:11px;color:var(--mt)">Delete cryptographic identity. Requires restart.</div></div>
+            <button class="btn btn-d btn-s" onclick="dangerAction('identity','Delete your P2P identity? You will need to restart.')">Reset Identity</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:500">Clear Sessions</div><div style="font-size:11px;color:var(--mt)">Delete all encrypted Signal Protocol sessions</div></div>
+            <button class="btn btn-d btn-s" onclick="dangerAction('sessions','Clear all encrypted sessions?')">Clear Sessions</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:500">Clear Relay Mailboxes</div><div style="font-size:11px;color:var(--mt)">Delete all offline message queues</div></div>
+            <button class="btn btn-d btn-s" onclick="dangerAction('relay','Clear all relay mailboxes?')">Clear Relay</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#1a0505;border:1px solid var(--rd);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:600;color:var(--rd)">Delete Everything</div><div style="font-size:11px;color:var(--mt)">Nuclear reset — all data, identity, keys, messages, agents. Requires restart.</div></div>
+            <button class="btn btn-d btn-s" onclick="dangerAction('everything','DELETE EVERYTHING? This cannot be undone!')">Reset All</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#1a0505;border:1px solid var(--rd);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:600;color:var(--rd)">Delete Account</div><div style="font-size:11px;color:var(--mt)">Permanently delete your user account and all data</div></div>
+            <button class="btn btn-d btn-s" onclick="dangerAction('user','DELETE YOUR ACCOUNT? This is permanent!')">Delete Account</button>
+          </div>
+        </div>
+        <div id="dangerMsg" style="margin-top:8px;font-size:12px"></div>
+      </div>
     </div>
   </div>
   <div id="vSystem" style="display:none;flex-direction:column;flex:1">
@@ -247,6 +286,8 @@ function delAgent(id){fetch('/api/agents/'+id,{method:'DELETE'}).then(function()
 function loadKeys(){api('/api/users/keys?user_id='+U).then(function(k){$('kList').innerHTML=k.map(function(x){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--s2)"><span style="font-size:13px">'+x.provider+(x.model?' ('+x.model+')':'')+'</span><button class="btn btn-d btn-s" onclick="delKey(\''+x.provider+'\')">Remove</button></div>'}).join('')||'<div style="color:var(--mt);font-size:13px">No keys. Add one below.</div>';$('pInfo').innerHTML='<div style="font-size:13px">User: <strong>'+N+'</strong></div><div style="font-size:12px;color:var(--mt)">ID: '+U+'</div>'})}
 function saveKey(){var p=$('kProv').value,k=$('kVal').value;if(!k)return;api('/api/users/keys?user_id='+U,{method:'POST',body:JSON.stringify({provider:p,api_key:k})}).then(function(){$('kVal').value='';loadKeys()})}
 function delKey(p){fetch('/api/users/keys/'+p+'?user_id='+U,{method:'DELETE'}).then(function(){loadKeys()})}
+
+function dangerAction(action,confirmMsg){if(!confirm(confirmMsg))return;var url='/api/danger/'+action;if(action==='keys'||action==='user')url+='?user_id='+U;fetch(url,{method:'DELETE'}).then(function(r){return r.json()}).then(function(d){$('dangerMsg').innerHTML='<span style="color:var(--gn)">'+d.message+'</span>';if(action==='user'){setTimeout(function(){logout()},1500)}if(action==='everything'){setTimeout(function(){location.reload()},2000)}loadKeys();loadAgents();loadRooms()}).catch(function(e){$('dangerMsg').innerHTML='<span style="color:var(--rd)">Error: '+e+'</span>'})}
 
 function loadHW(){api('/api/hardware').then(function(r){var h=r.hardware;$('hwC').innerHTML='<div class="card"><h4>Hardware</h4><div class="stat"><span>OS</span><span class="v">'+h.os+'</span></div><div class="stat"><span>CPU</span><span class="v">'+h.cpu_cores+' cores</span></div><div class="stat"><span>RAM</span><span class="v">'+h.ram_gb+' GB</span></div><div class="stat"><span>GPU</span><span class="v">'+h.gpu+'</span></div><div class="stat"><span>VRAM</span><span class="v">'+h.gpu_vram_gb+' GB</span></div></div><div class="card"><h4>Recommendation</h4><p style="font-size:13px;color:var(--t2)">'+r.recommendation+'</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+r.suggested_models.map(function(m){return '<div style="background:var(--s1);border:1px solid var(--bd);border-radius:6px;padding:4px 10px;font-size:12px">'+m.size+' '+(m.quant||'')+'</div>'}).join('')+'</div></div>'})}
 
