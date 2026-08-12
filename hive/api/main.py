@@ -1192,361 +1192,324 @@ HTML_PAGE = r"""
 <title>Hive</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#09090b;--s1:#18181b;--s2:#1f1f23;--bd:#27272a;--t1:#fafafa;--t2:#a1a1aa;--mt:#52525b;--ac:#6366f1;--ac2:#818cf8;--gn:#22c55e;--rd:#ef4444;--bl:#3b82f6;--am:#f59e0b;--r:8px}
-body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--bg);color:var(--t1);height:100vh;display:flex;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+:root{--bg:#09090b;--s1:#18181b;--s2:#1f1f23;--bd:#27272a;--t1:#fafafa;--t2:#a1a1aa;--mt:#52525b;--ac:#6366f1;--gn:#22c55e;--rd:#ef4444;--bl:#3b82f6}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--t1);height:100vh;display:flex;font-size:14px}
 input,textarea,select,button{font-family:inherit;font-size:inherit}
 input,textarea,select{padding:8px 12px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--t1);outline:none;width:100%}
-input:focus,textarea:focus,select:focus{border-color:var(--ac)}
-.btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-weight:500;transition:all .15s}
-.btn-p{background:var(--ac);color:#fff}.btn-p:hover{background:var(--ac2)}
-.btn-o{background:transparent;border:1px solid var(--bd);color:var(--t2)}.btn-o:hover{border-color:var(--t2)}
-.btn-d{background:var(--rd);color:#fff}
-.btn-s{padding:4px 10px;font-size:12px}
-.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
-.tag-g{background:#052e16;color:#4ade80}.tag-r{background:#450a0a;color:#f87171}
-.tag-b{background:#172554;color:#60a5fa}.tag-gr{background:#27272a;color:#a1a1aa}
+input:focus,textarea:focus{border-color:var(--ac)}
+.btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-weight:500}
+.btn-p{background:var(--ac);color:#fff}.btn-o{background:transparent;border:1px solid var(--bd);color:var(--t2)}
+.btn-d{background:var(--rd);color:#fff}.btn-s{padding:4px 10px;font-size:12px}
 
-/* Auth screen */
 #auth{display:flex;align-items:center;justify-content:center;width:100vw;height:100vh}
 #auth .card{width:380px;padding:32px;background:var(--s1);border:1px solid var(--bd);border-radius:12px}
 #auth h1{font-size:24px;font-weight:700;margin-bottom:4px}
-#auth .sub{color:var(--mt);font-size:12px;margin-bottom:24px}
-#auth .fg{margin-bottom:12px}
-#auth label{display:block;font-size:12px;color:var(--t2);margin-bottom:4px;font-weight:500}
-#auth .tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--bd)}
-#auth .tab{padding:8px 16px;cursor:pointer;color:var(--mt);font-size:13px;border-bottom:2px solid transparent}
-#auth .tab.active{color:var(--ac);border-bottom-color:var(--ac)}
+#auth .sub{color:var(--mt);font-size:12px;margin-bottom:20px}
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:12px;color:var(--t2);margin-bottom:4px}
+.tabs{display:flex;margin-bottom:20px;border-bottom:1px solid var(--bd)}
+.tab{padding:8px 16px;cursor:pointer;color:var(--mt);font-size:13px;border-bottom:2px solid transparent}
+.tab.on{color:var(--ac);border-color:var(--ac)}
 
-/* Main app */
 #app{display:none;width:100vw;height:100vh}
-.sidebar{width:260px;border-right:1px solid var(--bd);display:flex;flex-direction:column;background:var(--s1);flex-shrink:0}
-.sb-head{padding:16px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
-.sb-head h2{font-size:15px;font-weight:700}
-.sb-user{padding:8px 16px;border-bottom:1px solid var(--bd);font-size:12px;color:var(--t2)}
-.sb-nav{padding:8px}
-.sb-nav-item{padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--t2);display:flex;align-items:center;gap:8px}
-.sb-nav-item:hover{background:var(--s2);color:var(--t1)}
-.sb-nav-item.active{background:var(--ac);color:#fff}
-.sb-rooms{flex:1;overflow-y:auto;border-top:1px solid var(--bd);padding:8px}
-.sb-rooms-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--mt);padding:8px 12px 4px;font-weight:600}
-.room-item{padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;margin-bottom:2px}
-.room-item:hover{background:var(--s2)}
-.room-item.active{background:var(--s2);box-shadow:inset 3px 0 0 var(--ac)}
-.room-name{font-weight:500}.room-meta{font-size:11px;color:var(--mt)}
+.sb{width:250px;border-right:1px solid var(--bd);display:flex;flex-direction:column;background:var(--s1)}
+.sb-h{padding:14px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
+.sb-h h2{font-size:15px;font-weight:700}
+.sb-u{padding:8px 14px;border-bottom:1px solid var(--bd);font-size:12px;color:var(--t2)}
+.nav{padding:6px}
+.nav-i{padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--t2);margin-bottom:2px}
+.nav-i:hover{background:var(--s2);color:var(--t1)}
+.nav-i.on{background:var(--ac);color:#fff}
+.rooms{flex:1;overflow-y:auto;border-top:1px solid var(--bd);padding:6px}
+.rooms-l{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--mt);padding:8px 12px 4px;font-weight:600}
+.rm{padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;margin-bottom:2px}
+.rm:hover{background:var(--s2)}
+.rm.on{background:var(--s2);box-shadow:inset 3px 0 0 var(--ac)}
 
-/* Main content */
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.topbar{padding:12px 20px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
-.topbar h3{font-size:15px;font-weight:600}
-.content{flex:1;overflow-y:auto;padding:20px}
-
-/* Chat */
-.chat-msgs{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:6px}
+.mn{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.tb{padding:12px 20px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
+.tb h3{font-size:15px;font-weight:600}
+.ct{flex:1;overflow-y:auto;padding:20px}
+.msgs{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:6px}
 .msg{max-width:75%;padding:8px 12px;border-radius:10px;font-size:13px;line-height:1.5}
-.msg-me{align-self:flex-end;background:var(--ac);color:#fff;border-bottom-right-radius:2px}
-.msg-other{align-self:flex-start;background:var(--s1);border:1px solid var(--bd);border-bottom-left-radius:2px}
-.msg-bot{align-self:flex-start;background:var(--s2);border:1px solid var(--bd);border-bottom-left-radius:2px}
-.msg-file{align-self:flex-start;background:var(--s2);border:1px solid var(--bl);border-radius:8px;padding:8px 12px;font-size:12px}
-.msg-sender{font-size:11px;color:var(--mt);margin-bottom:2px}
-.chat-bar{padding:12px 20px;border-top:1px solid var(--bd);display:flex;gap:8px;align-items:center}
-.chat-bar input{flex:1}
+.msg-me{align-self:flex-end;background:var(--ac);color:#fff}
+.msg-them{align-self:flex-start;background:var(--s1);border:1px solid var(--bd)}
+.cbar{padding:12px 20px;border-top:1px solid var(--bd);display:flex;gap:8px}
+.cbar input{flex:1}
 
-/* Settings */
-.settings-section{margin-bottom:24px}
-.settings-section h4{font-size:14px;font-weight:600;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bd)}
-.key-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--s2)}
-
-/* Modal */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center}
 .modal-bg.show{display:flex}
-.modal{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:24px;width:480px;max-width:90vw}
+.modal{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:24px;width:460px;max-width:90vw}
 .modal h3{font-size:16px;font-weight:600;margin-bottom:16px}
-.fg{margin-bottom:12px}
-.fg label{display:block;font-size:12px;color:var(--t2);margin-bottom:4px;font-weight:500}
 
-/* Hardware */
-.hw-card{background:var(--s2);border-radius:8px;padding:16px;margin-bottom:12px}
-.hw-stat{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}
-.hw-stat .val{font-weight:600;color:var(--gn)}
-.model-sug{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-.model-chip{background:var(--s1);border:1px solid var(--bd);border-radius:6px;padding:6px 12px;font-size:12px}
+.card{background:var(--s2);border-radius:8px;padding:16px;margin-bottom:12px}
+.card h4{font-size:13px;font-weight:600;margin-bottom:8px}
+.stat{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}
+.stat .v{font-weight:600;color:var(--gn)}
+
+#tut{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;align-items:center;justify-content:center}
+#tut .box{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:32px;width:520px;max-width:92vw}
+#tut .icon{color:var(--ac);text-align:center;margin-bottom:12px}
+#tut h2{font-size:18px;font-weight:700;text-align:center;margin-bottom:8px}
+#tut p{font-size:13px;color:var(--t2);text-align:center;line-height:1.7;margin-bottom:16px}
+#tut .info{background:var(--s2);border-radius:8px;padding:14px;font-size:12px;color:var(--t2);line-height:1.8}
+#tut .dots{display:flex;gap:6px;justify-content:center;margin-top:16px}
+#tut .dot{width:8px;height:8px;border-radius:50%;background:var(--bd)}
+#tut .dot.on{background:var(--ac)}
 </style>
 </head>
 <body>
 
-<!-- AUTH SCREEN -->
 <div id="auth">
 <div class="card">
   <h1>Hive</h1>
-  <div class="sub">Multi-agent AI platform</div>
+  <div class="sub">Decentralized AI Messenger</div>
   <div class="tabs">
-    <div class="tab active" onclick="showAuthTab('login')">Login</div>
-    <div class="tab" onclick="showAuthTab('register')">Register</div>
+    <div class="tab on" onclick="authTab(0)">Login</div>
+    <div class="tab" onclick="authTab(1)">Register</div>
   </div>
-  <div id="auth-login">
-    <div class="fg"><label>Username</label><input id="loginUser" placeholder="yourname"></div>
-    <div class="fg"><label>Password</label><input id="loginPass" type="password" placeholder="password"></div>
+  <div id="aLogin">
+    <div class="fg"><label>Username</label><input id="lU" placeholder="yourname"></div>
+    <div class="fg"><label>Password</label><input id="lP" type="password" placeholder="password"></div>
     <button class="btn btn-p" style="width:100%;margin-top:8px" onclick="doLogin()">Login</button>
-    <div id="loginErr" style="color:var(--rd);font-size:12px;margin-top:8px"></div>
+    <div id="lErr" style="color:var(--rd);font-size:12px;margin-top:8px"></div>
   </div>
-  <div id="auth-register" style="display:none">
-    <div class="fg"><label>Username</label><input id="regUser" placeholder="yourname"></div>
-    <div class="fg"><label>Display Name</label><input id="regName" placeholder="Your Name"></div>
-    <div class="fg"><label>Password</label><input id="regPass" type="password" placeholder="min 4 chars"></div>
-    <button class="btn btn-p" style="width:100%;margin-top:8px" onclick="doRegister()">Create Account</button>
-    <div id="regErr" style="color:var(--rd);font-size:12px;margin-top:8px"></div>
+  <div id="aReg" style="display:none">
+    <div class="fg"><label>Username</label><input id="rU" placeholder="yourname"></div>
+    <div class="fg"><label>Display Name</label><input id="rN" placeholder="Your Name"></div>
+    <div class="fg"><label>Password</label><input id="rP" type="password" placeholder="min 4 chars"></div>
+    <button class="btn btn-p" style="width:100%;margin-top:8px" onclick="doReg()">Create Account</button>
+    <div id="rErr" style="color:var(--rd);font-size:12px;margin-top:8px"></div>
   </div>
 </div>
 </div>
 
-<!-- MAIN APP -->
 <div id="app">
-<div class="sidebar">
-  <div class="sb-head"><h2>Hive</h2><button class="btn btn-o btn-s" onclick="doLogout()">Logout</button></div>
-  <div class="sb-user" id="sbUser"></div>
-  <div class="sb-nav">
-    <div class="sb-nav-item active" data-view="chat" onclick="switchView('chat')">Chat</div>
-    <div class="sb-nav-item" data-view="agents" onclick="switchView('agents')">Agents</div>
-    <div class="sb-nav-item" data-view="settings" onclick="switchView('settings')">Settings</div>
-    <div class="sb-nav-item" data-view="hardware" onclick="switchView('hardware')">System</div>
+<div class="sb">
+  <div class="sb-h"><h2>Hive</h2><button class="btn btn-o btn-s" onclick="logout()">Logout</button></div>
+  <div class="sb-u" id="sbU"></div>
+  <div class="nav">
+    <div class="nav-i on" data-v="chat" onclick="view('chat')">Chat</div>
+    <div class="nav-i" data-v="agents" onclick="view('agents')">Agents</div>
+    <div class="nav-i" data-v="settings" onclick="view('settings')">Settings</div>
+    <div class="nav-i" data-v="system" onclick="view('system')">System</div>
   </div>
-  <div class="sb-rooms" id="sbRooms">
-    <div class="sb-rooms-label">Rooms</div>
-    <div id="roomList"></div>
-    <div style="padding:8px"><button class="btn btn-o btn-s" style="width:100%" onclick="showModal('newRoom')">+ New Room</button></div>
+  <div class="rooms">
+    <div class="rooms-l">Rooms</div>
+    <div id="rList"></div>
+    <div style="padding:6px"><button class="btn btn-o btn-s" style="width:100%" onclick="modal('mRoom')">+ New Room</button></div>
   </div>
 </div>
-<div class="main">
-  <!-- Chat view -->
-  <div id="view-chat" class="view" style="display:flex;flex-direction:column;flex:1">
-    <div class="topbar"><h3 id="chatTitle">Select a room</h3><div id="chatActions"></div></div>
-    <div class="chat-msgs" id="chatMsgs"><div style="display:flex;align-items:center;justify-content:center;flex:1;color:var(--mt)">Select or create a room to start chatting</div></div>
-    <div class="chat-bar" id="chatBar" style="display:none">
-      <input id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMsg()">
-      <button class="btn btn-o btn-s" onclick="showModal('uploadFile')" title="Upload file">File</button>
-      <button class="btn btn-o btn-s" onclick="showModal('inviteBot')" title="Invite bot">Bot</button>
-      <button class="btn btn-o btn-s" onclick="showModal('inviteUser')" title="Invite user">User</button>
-      <button class="btn btn-p" onclick="sendMsg()">Send</button>
+<div class="mn">
+  <div id="vChat" style="display:flex;flex-direction:column;flex:1">
+    <div class="tb"><h3 id="cTitle">Select a room</h3></div>
+    <div class="msgs" id="cMsgs"><div style="display:flex;align-items:center;justify-content:center;flex:1;color:var(--mt)">Create or select a room</div></div>
+    <div class="cbar" id="cBar" style="display:none">
+      <input id="cIn" placeholder="Type a message..." onkeydown="if(event.key==='Enter')send()">
+      <button class="btn btn-o btn-s" onclick="modal('mBot')">Bot</button>
+      <button class="btn btn-o btn-s" onclick="modal('mUser')">User</button>
+      <button class="btn btn-p" onclick="send()">Send</button>
     </div>
   </div>
-  <!-- Agents view -->
-  <div id="view-agents" class="view" style="display:none;flex-direction:column;flex:1">
-    <div class="topbar"><h3>Agents</h3><button class="btn btn-p btn-s" onclick="showModal('newAgent')">+ New Agent</button></div>
-    <div class="content" id="agentsList"></div>
+  <div id="vAgents" style="display:none;flex-direction:column;flex:1">
+    <div class="tb"><h3>Agents</h3><button class="btn btn-p btn-s" onclick="modal('mAgent')">+ New Agent</button></div>
+    <div class="ct" id="aList"></div>
   </div>
-  <!-- Settings view -->
-  <div id="view-settings" class="view" style="display:none;flex-direction:column;flex:1">
-    <div class="topbar"><h3>Settings</h3></div>
-    <div class="content">
-      <div class="settings-section">
-        <h4>API Keys</h4>
-        <p style="font-size:12px;color:var(--mt);margin-bottom:12px">Add your own API keys. Each user has their own keys — you pay for your own usage.</p>
-        <div id="keysList"></div>
+  <div id="vSettings" style="display:none;flex-direction:column;flex:1">
+    <div class="tb"><h3>Settings</h3></div>
+    <div class="ct">
+      <div style="margin-bottom:24px">
+        <h4 style="font-size:14px;font-weight:600;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bd)">API Keys</h4>
+        <p style="font-size:12px;color:var(--mt);margin-bottom:12px">Your keys, your usage. Stored encrypted locally.</p>
+        <div id="kList"></div>
         <div style="margin-top:12px;display:flex;gap:8px">
-          <select id="keyProvider" style="width:160px"><option value="openai">OpenAI</option><option value="anthropic">Anthropic</option><option value="groq">Groq</option><option value="mistral">Mistral</option><option value="openrouter">OpenRouter</option><option value="xai">xAI</option><option value="deepseek">DeepSeek</option><option value="gemini">Gemini</option></select>
-          <input id="keyValue" placeholder="sk-..." style="flex:1">
+          <select id="kProv" style="width:150px"><option>openai</option><option>anthropic</option><option>groq</option><option>mistral</option><option>openrouter</option><option>xai</option><option>deepseek</option><option>gemini</option></select>
+          <input id="kVal" placeholder="sk-..." style="flex:1">
           <button class="btn btn-p btn-s" onclick="saveKey()">Save</button>
         </div>
       </div>
-      <div class="settings-section">
-        <h4>Profile</h4>
-        <div id="profileInfo"></div>
+      <div>
+        <h4 style="font-size:14px;font-weight:600;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bd)">Profile</h4>
+        <div id="pInfo"></div>
+      </div>
+      <div style="margin-top:32px">
+        <h4 style="font-size:14px;font-weight:600;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--rd);color:var(--rd)">Danger Zone</h4>
+        <p style="font-size:12px;color:var(--mt);margin-bottom:12px">Irreversible actions. Proceed with caution.</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:500">Delete All API Keys</div><div style="font-size:11px;color:var(--mt)">Remove all stored API keys</div></div>
+            <button class="btn btn-d btn-s" onclick="dangerAction('keys','Delete all API keys?')">Delete Keys</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:500">Delete All Agents</div><div style="font-size:11px;color:var(--mt)">Remove all AI agents and their skills</div></div>
+            <button class="btn btn-d btn-s" onclick="dangerAction('agents','Delete ALL agents?')">Delete Agents</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:500">Delete All Rooms</div><div style="font-size:11px;color:var(--mt)">Remove all rooms, messages, and chat history</div></div>
+            <button class="btn btn-d btn-s" onclick="dangerAction('rooms','Delete ALL rooms and messages?')">Delete Rooms</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:500">Reset P2P Identity</div><div style="font-size:11px;color:var(--mt)">Delete cryptographic identity. Requires restart.</div></div>
+            <button class="btn btn-d btn-s" onclick="dangerAction('identity','Delete your P2P identity? You will need to restart.')">Reset Identity</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:500">Clear Sessions</div><div style="font-size:11px;color:var(--mt)">Delete all encrypted Signal Protocol sessions</div></div>
+            <button class="btn btn-d btn-s" onclick="dangerAction('sessions','Clear all encrypted sessions?')">Clear Sessions</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:500">Clear Relay Mailboxes</div><div style="font-size:11px;color:var(--mt)">Delete all offline message queues</div></div>
+            <button class="btn btn-d btn-s" onclick="dangerAction('relay','Clear all relay mailboxes?')">Clear Relay</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#1a0505;border:1px solid var(--rd);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:600;color:var(--rd)">Delete Everything</div><div style="font-size:11px;color:var(--mt)">Nuclear reset — all data, identity, keys, messages, agents. Requires restart.</div></div>
+            <button class="btn btn-d btn-s" onclick="dangerAction('everything','DELETE EVERYTHING? This cannot be undone!')">Reset All</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#1a0505;border:1px solid var(--rd);border-radius:8px">
+            <div><div style="font-size:13px;font-weight:600;color:var(--rd)">Delete Account</div><div style="font-size:11px;color:var(--mt)">Permanently delete your user account and all data</div></div>
+            <button class="btn btn-d btn-s" onclick="dangerAction('user','DELETE YOUR ACCOUNT? This is permanent!')">Delete Account</button>
+          </div>
+        </div>
+        <div id="dangerMsg" style="margin-top:8px;font-size:12px"></div>
       </div>
     </div>
   </div>
-  <!-- Hardware view -->
-  <div id="view-hardware" class="view" style="display:none;flex-direction:column;flex:1">
-    <div class="topbar"><h3>System Info</h3><button class="btn btn-o btn-s" onclick="loadHardware()">Refresh</button></div>
-    <div class="content" id="hwContent"></div>
+  <div id="vSystem" style="display:none;flex-direction:column;flex:1">
+    <div class="tb"><h3>System</h3><button class="btn btn-o btn-s" onclick="loadHW()">Refresh</button></div>
+    <div class="ct" id="hwC"></div>
   </div>
 </div>
 </div>
 
-<!-- MODALS -->
-<div class="modal-bg" id="modal-newRoom"><div class="modal">
+<!-- Modals -->
+<div class="modal-bg" id="mRoom"><div class="modal">
   <h3>New Room</h3>
-  <div class="fg"><label>Room Name</label><input id="nrName" placeholder="General"></div>
-  <div class="fg"><label>Type</label><select id="nrType"><option value="group">Group Chat</option><option value="dm">Direct Message</option></select></div>
+  <div class="fg"><label>Name</label><input id="nrN" placeholder="General"></div>
+  <div class="fg"><label>Type</label><select id="nrT"><option value="group">Group</option><option value="dm">DM</option></select></div>
   <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
-    <button class="btn btn-o" onclick="hideModal('newRoom')">Cancel</button>
-    <button class="btn btn-p" onclick="createRoom()">Create</button>
+    <button class="btn btn-o" onclick="hideM('mRoom')">Cancel</button>
+    <button class="btn btn-p" onclick="mkRoom()">Create</button>
   </div>
 </div></div>
 
-<div class="modal-bg" id="modal-newAgent"><div class="modal">
+<div class="modal-bg" id="mAgent"><div class="modal">
   <h3>New Agent</h3>
-  <div class="fg"><label>Name</label><input id="naName" placeholder="Research Assistant"></div>
-  <div class="fg"><label>System Prompt</label><textarea id="naPrompt" rows="3">You are a helpful assistant.</textarea></div>
-  <div class="fg"><label>Provider</label><select id="naProvider"></select></div>
-  <div class="fg"><label>Model (empty = default)</label><input id="naModel" placeholder="gpt-4.1-mini"></div>
-  <div class="fg"><label>Skills (MD content, optional)</label><textarea id="naSkills" rows="2" placeholder="Additional instructions or knowledge..."></textarea></div>
+  <div class="fg"><label>Name</label><input id="naN" placeholder="Assistant"></div>
+  <div class="fg"><label>Prompt</label><textarea id="naP" rows="3">You are a helpful assistant.</textarea></div>
+  <div class="fg"><label>Provider</label><select id="naPr"></select></div>
+  <div class="fg"><label>Model</label><input id="naM" placeholder="empty = default"></div>
   <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
-    <button class="btn btn-o" onclick="hideModal('newAgent')">Cancel</button>
-    <button class="btn btn-p" onclick="createAgent()">Create</button>
+    <button class="btn btn-o" onclick="hideM('mAgent')">Cancel</button>
+    <button class="btn btn-p" onclick="mkAgent()">Create</button>
   </div>
 </div></div>
 
-<div class="modal-bg" id="modal-inviteBot"><div class="modal">
-  <h3>Invite Bot to Room</h3>
-  <div class="fg"><label>Select Agent</label><select id="ibAgent"></select></div>
+<div class="modal-bg" id="mBot"><div class="modal">
+  <h3>Invite Bot</h3>
+  <div class="fg"><label>Agent</label><select id="ibA"></select></div>
   <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
-    <button class="btn btn-o" onclick="hideModal('inviteBot')">Cancel</button>
-    <button class="btn btn-p" onclick="inviteBot()">Invite</button>
+    <button class="btn btn-o" onclick="hideM('mBot')">Cancel</button>
+    <button class="btn btn-p" onclick="invBot()">Invite</button>
   </div>
 </div></div>
 
-<div class="modal-bg" id="modal-inviteUser"><div class="modal">
-  <h3>Invite User to Room</h3>
-  <div class="fg"><label>Select User</label><select id="iuUser"></select></div>
+<div class="modal-bg" id="mUser"><div class="modal">
+  <h3>Invite User</h3>
+  <div class="fg"><label>User</label><select id="iuU"></select></div>
   <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
-    <button class="btn btn-o" onclick="hideModal('inviteUser')">Cancel</button>
-    <button class="btn btn-p" onclick="inviteUser()">Invite</button>
+    <button class="btn btn-o" onclick="hideM('mUser')">Cancel</button>
+    <button class="btn btn-p" onclick="invUser()">Invite</button>
   </div>
 </div></div>
 
-<div class="modal-bg" id="modal-uploadFile"><div class="modal">
-  <h3>Upload File</h3>
-  <div class="fg"><label>File</label><input type="file" id="ufFile"></div>
-  <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
-    <button class="btn btn-o" onclick="hideModal('uploadFile')">Cancel</button>
-    <button class="btn btn-p" onclick="uploadFile()">Upload</button>
-  </div>
-</div></div>
-
-<!-- Interactive Tutorial -->
-<div id="tutorial" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;align-items:center;justify-content:center">
-  <div style="background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:32px;width:560px;max-width:92vw;max-height:80vh;overflow-y:auto">
-    <div id="tutStep"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px">
-      <div id="tutDots"></div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-o" onclick="skipTutorial()">Skip</button>
-        <button class="btn btn-o" id="tutPrev" onclick="tutBack()" style="display:none">Back</button>
-        <button class="btn btn-p" id="tutNext" onclick="tutForward()">Next</button>
-      </div>
+<!-- Tutorial -->
+<div id="tut">
+<div class="box">
+  <div class="icon" id="tIcon"></div>
+  <h2 id="tTitle"></h2>
+  <p id="tText"></p>
+  <div class="info" id="tInfo"></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">
+    <div class="dots" id="tDots"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-o" onclick="skipTut()">Skip</button>
+      <button class="btn btn-o" id="tPrev" onclick="tutBack()" style="display:none">Back</button>
+      <button class="btn btn-p" id="tNext" onclick="tutNext()">Next</button>
     </div>
   </div>
+</div>
 </div>
 
 <script>
-let token=null,userId=null,username=null,curRoom=null,ws=null;
-const $=id=>document.getElementById(id);
-const api=(url,opts={})=>fetch(url,{...opts,headers:{'Content-Type':'application/json',...opts.headers}}).then(r=>r.json());
+var T=null,U=null,N=null,room=null,ws=null;
+var $=function(id){return document.getElementById(id)};
+var api=function(u,o){o=o||{};o.headers=o.headers||{};o.headers['Content-Type']='application/json';return fetch(u,o).then(function(r){return r.json()})};
 
-// Auth
-function showAuthTab(t){document.querySelectorAll('#auth .tab').forEach((el,i)=>el.classList.toggle('active',i===(t==='login'?0:1)));$('auth-login').style.display=t==='login'?'block':'none';$('auth-register').style.display=t==='register'?'block':'none';}
-async function doRegister(){const u=$('regUser').value,p=$('regPass').value,n=$('regName').value;if(!u||!p){$('regErr').textContent='Fill all fields';return;}const r=await api('/api/auth/register',{method:'POST',body:JSON.stringify({username:u,password:p,display_name:n})});if(r.token){token=r.token;userId=r.id;username=r.username;enterApp();}else{$('regErr').textContent=r.detail||'Error';}}
-async function doLogin(){const u=$('loginUser').value,p=$('loginPass').value;if(!u||!p){$('loginErr').textContent='Fill all fields';return;}const r=await api('/api/auth/login',{method:'POST',body:JSON.stringify({username:u,password:p})});if(r.token){token=r.token;userId=r.id;username=r.username;enterApp();}else{$('loginErr').textContent=r.detail||'Invalid credentials';}}
-function doLogout(){token=null;userId=null;username=null;if(ws)ws.close();$('app').style.display='none';$('auth').style.display='flex';}
-function enterApp(){$('auth').style.display='none';$('app').style.display='flex';$('sbUser').textContent=username;loadRooms();loadProviders();loadHardware();}
+function authTab(i){document.querySelectorAll('.tab').forEach(function(e,j){e.classList.toggle('on',j===i)});$('aLogin').style.display=i?'none':'block';$('aReg').style.display=i?'block':'none'}
 
-// Views
-function switchView(v){document.querySelectorAll('.view').forEach(el=>el.style.display='none');$('view-'+v).style.display='flex';document.querySelectorAll('.sb-nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view===v));if(v==='agents')loadAgents();if(v==='settings')loadKeys();if(v==='hardware')loadHardware();}
+function doReg(){var u=$('rU').value,p=$('rP').value,n=$('rN').value;if(!u||!p){$('rErr').textContent='Fill all fields';return}api('/api/auth/register',{method:'POST',body:JSON.stringify({username:u,password:p,display_name:n})}).then(function(r){if(r.token){T=r.token;U=r.id;N=r.username;enter()}else{$('rErr').textContent=r.detail||'Error'}})}
 
-// Rooms
-async function loadRooms(){const rooms=await api('/api/rooms?user_id='+userId);$('roomList').innerHTML=rooms.map(r=>`<div class="room-item ${curRoom===r.id?'active':''}" onclick="openRoom('${r.id}','${r.name}','${r.type}')"><div class="room-name">${r.name||r.id}</div><div class="room-meta">${r.type}</div></div>`).join('')||'<div style="padding:8px 12px;font-size:12px;color:var(--mt)">No rooms yet</div>';}
-async function openRoom(id,name,type){curRoom=id;$('chatTitle').textContent=name;loadRooms();$('chatBar').style.display='flex';connectWS(id);const msgs=await api('/api/rooms/'+id+'/messages');$('chatMsgs').innerHTML=msgs.map(m=>renderMsg(m)).join('')||'<div style="display:flex;align-items:center;justify-content:center;flex:1;color:var(--mt)">No messages yet</div>';$('chatMsgs').scrollTop=$('chatMsgs').scrollHeight;}
-function renderMsg(m){const cls=m.sender_type==='agent'?'msg-bot':(m.sender_id===userId?'msg-me':'msg-other');const sender=m.sender_type==='agent'?'bot':'user';return `<div class="msg ${cls}"><div class="msg-sender">${sender}: ${m.sender_id}</div>${esc(m.content)}</div>`;}
+function doLogin(){var u=$('lU').value,p=$('lP').value;if(!u||!p){$('lErr').textContent='Fill all fields';return}api('/api/auth/login',{method:'POST',body:JSON.stringify({username:u,password:p})}).then(function(r){if(r.token){T=r.token;U=r.id;N=r.username;enter()}else{$('lErr').textContent=r.detail||'Invalid credentials'}})}
 
-// WebSocket
-function connectWS(roomId){if(ws)ws.close();ws=new WebSocket('ws://'+location.host+'/ws/'+roomId+'?token='+token);ws.onmessage=e=>{const d=JSON.parse(e.data);if(d.type==='new_message'){$('chatMsgs').innerHTML+=renderMsg(d.message);$('chatMsgs').scrollTop=$('chatMsgs').scrollHeight;}if(d.type==='file_shared'){$('chatMsgs').innerHTML+=`<div class="msg-file">File: <a href="${d.file.url}" style="color:var(--bl)">${d.file.filename}</a> (${d.file.size} bytes)</div>`;$('chatMsgs').scrollTop=$('chatMsgs').scrollHeight;}};}
-async function sendMsg(){const inp=$('chatInput');const c=inp.value.trim();if(!c||!curRoom)return;inp.value='';await api('/api/rooms/'+curRoom+'/messages?user_id='+userId,{method:'POST',body:JSON.stringify({content:c})});}
+function logout(){T=null;U=null;N=null;if(ws)ws.close();$('app').style.display='none';$('auth').style.display='flex'}
 
-// Agents
-async function loadAgents(){const agents=await api('/api/agents');$('agentsList').innerHTML=agents.map(a=>`<div class="hw-card"><div style="display:flex;justify-content:space-between"><strong>${a.name}</strong><span class="tag tag-gr">${a.provider}</span></div><div style="font-size:12px;color:var(--mt);margin-top:4px">${a.system_prompt.substring(0,100)}...</div><div style="margin-top:8px;display:flex;gap:8px"><button class="btn btn-o btn-s" onclick="showAgentSkills('${a.id}')">Skills</button><button class="btn btn-d btn-s" onclick="deleteAgent('${a.id}')">Delete</button></div></div>`).join('')||'<div style="color:var(--mt)">No agents yet. Create one!</div>';}
-async function createAgent(){const n=$('naName').value,p=$('naPrompt').value,pr=$('naProvider').value,m=$('naModel').value,sk=$('naSkills').value;if(!n)return;const r=await api('/api/agents',{method:'POST',body:JSON.stringify({name:n,system_prompt:p,provider:pr,model:m})});if(sk&&r.id){await api('/api/agents/'+r.id+'/skills',{method:'POST',body:JSON.stringify({name:'custom',content:sk,skill_type:'prompt'})});}hideModal('newAgent');loadAgents();}
-async function deleteAgent(id){await fetch('/api/agents/'+id,{method:'DELETE'});loadAgents();}
-async function showAgentSkills(id){const skills=await api('/api/agents/'+id+'/skills');alert('Skills: '+(skills.length?skills.map(s=>s.name+' ('+s.skill_type+')').join(', '):'none'));}
+function enter(){localStorage.setItem('ht',T);localStorage.setItem('hu',U);localStorage.setItem('hn',N);$('auth').style.display='none';$('app').style.display='flex';$('sbU').textContent=N;loadRooms();loadProv();loadHW();if(!localStorage.getItem('htut'))setTimeout(showTut,600)}
 
-// Keys
-async function loadKeys(){const keys=await api('/api/users/keys?user_id='+userId);$('keysList').innerHTML=keys.map(k=>`<div class="key-row"><span>${k.provider} ${k.model?'('+k.model+')':''}</span><button class="btn btn-d btn-s" onclick="deleteKey('${k.provider}')">Remove</button></div>`).join('')||'<div style="color:var(--mt);font-size:13px">No API keys configured. Add one below.</div>';$('profileInfo').innerHTML=`<div style="font-size:13px">Username: <strong>${username}</strong></div><div style="font-size:13px;color:var(--mt)">ID: ${userId}</div>`;}
-async function saveKey(){const p=$('keyProvider').value,k=$('keyValue').value;if(!k)return;await api('/api/users/keys?user_id='+userId,{method:'POST',body:JSON.stringify({provider:p,api_key:k})});$('keyValue').value='';loadKeys();}
-async function deleteKey(p){await fetch('/api/users/keys/'+p+'?user_id='+userId,{method:'DELETE'});loadKeys();}
+function view(v){document.querySelectorAll('[id^=v]').forEach(function(e){e.style.display='none'});$('v'+v.charAt(0).toUpperCase()+v.slice(1)).style.display='flex';document.querySelectorAll('.nav-i').forEach(function(e){e.classList.toggle('on',e.dataset.v===v)});if(v==='agents')loadAgents();if(v==='settings')loadKeys();if(v==='system')loadHW()}
 
-// Hardware
-async function loadHardware(){const r=await api('/api/hardware');const h=r.hardware;$('hwContent').innerHTML=`<div class="hw-card"><h4 style="margin-bottom:8px">Hardware</h4><div class="hw-stat"><span>OS</span><span class="val">${h.os}</span></div><div class="hw-stat"><span>CPU Cores</span><span class="val">${h.cpu_cores}</span></div><div class="hw-stat"><span>RAM</span><span class="val">${h.ram_gb} GB</span></div><div class="hw-stat"><span>GPU</span><span class="val">${h.gpu}</span></div><div class="hw-stat"><span>VRAM</span><span class="val">${h.gpu_vram_gb} GB</span></div></div><div class="hw-card"><h4 style="margin-bottom:8px">Recommendation</h4><p style="font-size:13px;color:var(--t2)">${r.recommendation}</p><div class="model-sug">${r.suggested_models.map(m=>`<div class="model-chip">${m.size} ${m.quant||''} ${m.fits?'<span class="tag tag-g">fits</span>':'<span class="tag tag-r">wont fit</span>'}</div>`).join('')}</div></div>`;}
+function loadRooms(){api('/api/rooms?user_id='+U).then(function(r){$('rList').innerHTML=r.map(function(x){return '<div class="rm'+(room===x.id?' on':'')+'" onclick="openR(\''+x.id+'\',\''+(x.name||x.id)+'\')"><div style="font-weight:500">'+(x.name||x.id)+'</div><div style="font-size:11px;color:var(--mt)">'+x.type+'</div></div>'}).join('')||'<div style="padding:8px 12px;font-size:12px;color:var(--mt)">No rooms</div>'})}
 
-// Room/Agent creation helpers
-async function createRoom(){const n=$('nrName').value,t=$('nrType').value;if(!n)return;await api('/api/rooms?user_id='+userId,{method:'POST',body:JSON.stringify({name:n,type:t})});hideModal('newRoom');loadRooms();}
-async function loadProviders(){const p=await api('/api/providers');const opts=p.map(x=>`<option value="${x.name}">${x.name}${x.configured?'':' (no key)'}</option>`).join('');$('naProvider').innerHTML=opts;}
-async function inviteBot(){const a=$('ibAgent').value;if(!a||!curRoom)return;await api('/api/rooms/'+curRoom+'/members',{method:'POST',body:JSON.stringify({member_type:'agent',member_id:a})});hideModal('inviteBot');openRoom(curRoom,$('chatTitle').textContent,'group');}
-async function inviteUser(){const u=$('iuUser').value;if(!u||!curRoom)return;await api('/api/rooms/'+curRoom+'/members',{method:'POST',body:JSON.stringify({member_type:'user',member_id:u})});hideModal('inviteUser');openRoom(curRoom,$('chatTitle').textContent,'group');}
-async function uploadFile(){const f=$('ufFile').files[0];if(!f||!curRoom)return;const reader=new FileReader();reader.onload=async()=>{const b64=reader.result.split(',')[1];await api('/api/rooms/'+curRoom+'/files?user_id='+userId+'&filename='+f.name,{method:'POST',body:JSON.stringify({content:b64})});hideModal('uploadFile');};reader.readAsDataURL(f);}
+function openR(id,name){room=id;$('cTitle').textContent=name;loadRooms();$('cBar').style.display='flex';connectWS(id);api('/api/rooms/'+id+'/messages').then(function(m){$('cMsgs').innerHTML=m.map(function(x){var c=x.sender_id===U?'msg-me':'msg-them';return '<div class="msg '+c+'"><div style="font-size:11px;color:'+(x.sender_id===U?'rgba(255,255,255,.6)':'var(--mt)')+';margin-bottom:2px">'+(x.sender_type==='agent'?'bot':'you')+'</div>'+esc(x.content)+'</div>'}).join('')||'<div style="display:flex;align-items:center;justify-content:center;flex:1;color:var(--mt)">No messages yet</div>';$('cMsgs').scrollTop=$('cMsgs').scrollHeight})}
 
-// Modals
-function showModal(id){$('modal-'+id).classList.add('show');if(id==='inviteBot'){api('/api/agents').then(a=>$('ibAgent').innerHTML=a.map(x=>`<option value="${x.id}">${x.name}</option>`).join(''));}if(id==='inviteUser'){api('/api/users').then(u=>$('iuUser').innerHTML=u.filter(x=>x.id!==userId).map(x=>`<option value="${x.id}">${x.display_name||x.username}</option>`).join('')||'<option value="">No other users</option>');}}
-function hideModal(id){$('modal-'+id).classList.remove('show');}
-function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function connectWS(id){if(ws)ws.close();ws=new WebSocket('ws://'+location.host+'/ws/'+id+'?token='+T);ws.onmessage=function(e){var d=JSON.parse(e.data);if(d.type==='new_message'){$('cMsgs').innerHTML+='<div class="msg '+(d.message.sender_id===U?'msg-me':'msg-them')+'">'+esc(d.message.content)+'</div>';$('cMsgs').scrollTop=$('cMsgs').scrollHeight}}}
 
-// Check saved session
-if(localStorage.getItem('hive_token')){token=localStorage.getItem('hive_token');userId=localStorage.getItem('hive_user');username=localStorage.getItem('hive_name');enterApp();}
-// Save session on login
-const origEnter=enterApp;enterApp=function(){localStorage.setItem('hive_token',token);localStorage.setItem('hive_user',userId);localStorage.setItem('hive_name',username);origEnter();if(!localStorage.getItem('hive_tut_done')){setTimeout(showTutorial,500);}};
+function send(){var v=$('cIn').value.trim();if(!v||!room)return;$('cIn').value='';api('/api/rooms/'+room+'/messages?user_id='+U,{method:'POST',body:JSON.stringify({content:v})})}
 
-// ── Interactive Tutorial ──
-const TUT_STEPS = [
-  {
-    title: "Welcome to Hive",
-    icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
-    text: "Hive is a decentralized, end-to-end encrypted AI messenger. Your data stays on your device. No central server can read your messages.",
-    extra: "<div style='background:var(--s2);border-radius:8px;padding:16px;margin-top:16px;font-size:13px;color:var(--t2);line-height:1.8'><div style='display:flex;align-items:center;gap:8px;margin-bottom:8px;color:var(--t1);font-weight:600'><svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/></svg> Core Principles</div>End-to-end encryption with Signal Protocol<br>Peer-to-peer networking — no central server<br>AI agents run locally on your machine<br>You own your data, your keys, your identity</div>"
-  },
-  {
-    title: "Your Identity",
-    icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
-    text: "Your identity is a cryptographic keypair — Ed25519 for signing, X25519 for encryption. No username database, no phone number. Your key IS your identity.",
-    extra: "<div style='background:var(--s2);border-radius:8px;padding:16px;margin-top:16px;font-size:12px;font-family:monospace;color:var(--gn);line-height:1.8'>DID: hive:z6Mk...<br>Fingerprint: 5 groups of 5 characters</div><div style='background:var(--s2);border-radius:8px;padding:16px;margin-top:8px;font-size:13px;color:var(--t2);line-height:1.8'><div style='display:flex;align-items:center;gap:8px;margin-bottom:8px;color:var(--t1);font-weight:600'><svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/><circle cx='12' cy='12' r='3'/></svg> Verification</div>Compare Safety Numbers with peers via QR code or voice call to prevent man-in-the-middle attacks.</div>"
-  },
-  {
-    title: "API Keys",
-    icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>',
-    text: "Add your own API keys in Settings. Each user has their own keys — you pay for your own AI usage. Keys are stored encrypted locally.",
-    extra: "<div style='background:var(--s2);border-radius:8px;padding:16px;margin-top:16px;font-size:13px;color:var(--t2);line-height:1.8'><div style='display:flex;align-items:center;gap:8px;margin-bottom:12px;color:var(--t1);font-weight:600'><svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><rect x='2' y='3' width='20' height='14' rx='2' ry='2'/><line x1='8' y1='21' x2='16' y2='21'/><line x1='12' y1='17' x2='12' y2='21'/></svg> Supported Providers</div><div style='display:grid;grid-template-columns:1fr 1fr;gap:4px'>OpenAI (GPT-4.1)<br>Anthropic (Claude 4)<br>Groq (fastest)<br>Mistral<br>OpenRouter (300+ models)<br>xAI (Grok 3)<br>DeepSeek<br>Gemini (free tier)</div></div><div style='background:var(--s2);border-radius:8px;padding:16px;margin-top:8px;font-size:13px;color:var(--t2)'><span style='color:var(--am)'>Tip:</span> Start with Groq — free tier, extremely fast inference.</div>"
-  },
-  {
-    title: "AI Agents",
-    icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>',
-    text: "Create AI agents with custom personalities. Each agent has its own P2P identity and can join your chats. Agents can use local LLMs or cloud APIs.",
-    extra: "<div style='background:var(--s2);border-radius:8px;padding:16px;margin-top:16px;font-size:13px;color:var(--t2);line-height:2'><div style='display:flex;align-items:center;gap:8px;margin-bottom:12px;color:var(--t1);font-weight:600'><svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><polyline points='9 11 12 14 22 4'/><path d='M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'/></svg> How to Create</div><span style='color:var(--ac)'>1.</span> Go to <b>Agents</b> tab<br><span style='color:var(--ac)'>2.</span> Click <b>+ New Agent</b><br><span style='color:var(--ac)'>3.</span> Name + system prompt<br><span style='color:var(--ac)'>4.</span> Choose provider<br><span style='color:var(--ac)'>5.</span> Add skills (optional MD files)</div><div style='background:var(--s2);border-radius:8px;padding:16px;margin-top:8px;font-size:13px;color:var(--t2)'><span style='color:var(--am)'>Tip:</span> Use Ollama with llama3.3 for free local AI. No API key needed.</div>"
-  },
-  {
-    title: "Rooms & Chat",
-    icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
-    text: "Create rooms to chat. Invite other users or AI bots. Messages are encrypted end-to-end and delivered in real-time via WebSocket.",
-    extra: "<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px'><div style='background:var(--s2);border-radius:8px;padding:16px'><div style='display:flex;align-items:center;gap:8px;margin-bottom:8px;color:var(--t1);font-weight:600;font-size:13px'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='4'/><path d='M23 21v-2a4 4 0 0 0-3-3.87'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/></svg> Group Chat</div><div style='font-size:12px;color:var(--t2);line-height:1.6'>Multiple users + bots<br>Shared encrypted history<br>Real-time WebSocket</div></div><div style='background:var(--s2);border-radius:8px;padding:16px'><div style='display:flex;align-items:center;gap:8px;margin-bottom:8px;color:var(--t1);font-weight:600;font-size:13px'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z'/></svg> Direct Message</div><div style='font-size:12px;color:var(--t2);line-height:1.6'>1-to-1 private chat<br>Forward secrecy<br>Only you + recipient</div></div></div><div style='background:var(--s2);border-radius:8px;padding:16px;margin-top:8px;font-size:13px;color:var(--t2);line-height:1.8'><b>In chat:</b> Send messages, upload encrypted files, invite bots, invite users</div>"
-  },
-  {
-    title: "P2P & Sharing",
-    icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
-    text: "Hive listens on all interfaces — accessible over your local network or Tailscale. Share your IP so others can connect and register.",
-    extra: "<div style='background:var(--s2);border-radius:8px;padding:16px;margin-top:16px;font-size:13px;color:var(--t2);line-height:2'><div style='display:flex;align-items:center;gap:8px;margin-bottom:12px;color:var(--t1);font-weight:600'><svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/><path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/></svg> Share with Others</div><span style='color:var(--ac)'>1.</span> Install Tailscale<br><span style='color:var(--ac)'>2.</span> Run <code style='background:var(--bg);padding:2px 6px;border-radius:4px'>tailscale ip -4</code><br><span style='color:var(--ac)'>3.</span> Share: <code style='background:var(--bg);padding:2px 6px;border-radius:4px'>http://YOUR-IP:8000</code><br><span style='color:var(--ac)'>4.</span> Others register their own account</div><div style='background:var(--s2);border-radius:8px;padding:16px;margin-top:8px;font-size:13px;color:var(--t2)'><div style='display:flex;align-items:center;gap:8px;margin-bottom:8px;color:var(--t1);font-weight:600'><svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><rect x='3' y='3' width='18' height='18' rx='2' ry='2'/><line x1='3' y1='9' x2='21' y2='9'/><line x1='9' y1='21' x2='9' y2='9'/></svg> Invite Codes</div>Use <code style='background:var(--bg);padding:2px 6px;border-radius:4px'>GET /api/p2p/invite</code> for direct P2P connection via QR code.</div>"
-  },
-  {
-    title: "Security Model",
-    icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
-    text: "Five layers of encryption protect your messages. Even if someone steals your device, past messages remain secure (Forward Secrecy).",
-    extra: "<div style='background:var(--s2);border-radius:8px;padding:16px;margin-top:16px'><div style='display:flex;align-items:center;gap:8px;margin-bottom:12px;color:var(--t1);font-weight:600;font-size:13px'><svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/></svg> Defense in Depth</div><div style='font-size:12px;color:var(--t2);line-height:2'><div style='display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bd)'><span>Identity</span><span style='color:var(--gn)'>Ed25519 + X25519</span></div><div style='display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bd)'><span>Transport</span><span style='color:var(--gn)'>Noise Protocol</span></div><div style='display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bd)'><span>Application</span><span style='color:var(--gn)'>Signal Protocol</span></div><div style='display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bd)'><span>Storage</span><span style='color:var(--gn)'>AES-256 encrypted</span></div><div style='display:flex;justify-content:space-between;padding:4px 0'><span>Keys</span><span style='color:var(--gn)'>Per-message ratcheting</span></div></div></div><div style='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px'><div style='background:var(--s2);border-radius:8px;padding:12px;font-size:12px;color:var(--t2)'><b style='color:var(--gn)'>Forward Secrecy</b><br>Compromised key today cannot decrypt yesterday's messages</div><div style='background:var(--s2);border-radius:8px;padding:12px;font-size:12px;color:var(--t2)'><b style='color:var(--gn)'>Post-Compromise</b><br>Next ratchet step creates new secure keys automatically</div></div>"
-  },
-  {
-    title: "You Are Ready",
-    icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
-    text: "Everything you need to know. Start by adding an API key, creating an agent, and having your first encrypted chat.",
-    extra: "<div style='background:var(--s2);border-radius:8px;padding:16px;margin-top:16px'><div style='display:flex;align-items:center;gap:8px;margin-bottom:12px;color:var(--t1);font-weight:600;font-size:13px'><svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><polyline points='9 11 12 14 22 4'/><path d='M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'/></svg> Quick Start</div><div style='font-size:13px;color:var(--t2);line-height:2.2'><label style='display:flex;align-items:center;gap:8px;cursor:pointer'><input type='checkbox' style='width:auto;accent-color:var(--ac)'> Add API key in <b>Settings</b></label><label style='display:flex;align-items:center;gap:8px;cursor:pointer'><input type='checkbox' style='width:auto;accent-color:var(--ac)'> Create agent in <b>Agents</b></label><label style='display:flex;align-items:center;gap:8px;cursor:pointer'><input type='checkbox' style='width:auto;accent-color:var(--ac)'> Create a room</label><label style='display:flex;align-items:center;gap:8px;cursor:pointer'><input type='checkbox' style='width:auto;accent-color:var(--ac)'> Invite bot to room</label><label style='display:flex;align-items:center;gap:8px;cursor:pointer'><input type='checkbox' style='width:auto;accent-color:var(--ac)'> Start chatting</label></div></div><div style='text-align:center;margin-top:16px;font-size:12px;color:var(--mt)'>Full documentation on <a href='https://github.com/zyay/hive' style='color:var(--ac);text-decoration:none'>GitHub</a></div>"
-  }
+function loadAgents(){api('/api/agents').then(function(a){$('aList').innerHTML=a.map(function(x){return '<div class="card"><div style="display:flex;justify-content:space-between"><strong>'+x.name+'</strong><span style="font-size:11px;color:var(--mt)">'+x.provider+'</span></div><div style="font-size:12px;color:var(--t2);margin-top:4px">'+esc(x.system_prompt.substring(0,100))+'</div><div style="margin-top:8px"><button class="btn btn-d btn-s" onclick="delAgent(\''+x.id+'\')">Delete</button></div></div>'}).join('')||'<div style="color:var(--mt)">No agents. Create one!</div>'})}
+
+function mkAgent(){var n=$('naN').value,p=$('naP').value,pr=$('naPr').value,m=$('naM').value;if(!n)return;api('/api/agents',{method:'POST',body:JSON.stringify({name:n,system_prompt:p,provider:pr,model:m})}).then(function(){hideM('mAgent');loadAgents()})}
+function delAgent(id){fetch('/api/agents/'+id,{method:'DELETE'}).then(function(){loadAgents()})}
+
+function loadKeys(){api('/api/users/keys?user_id='+U).then(function(k){$('kList').innerHTML=k.map(function(x){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--s2)"><span style="font-size:13px">'+x.provider+(x.model?' ('+x.model+')':'')+'</span><button class="btn btn-d btn-s" onclick="delKey(\''+x.provider+'\')">Remove</button></div>'}).join('')||'<div style="color:var(--mt);font-size:13px">No keys. Add one below.</div>';$('pInfo').innerHTML='<div style="font-size:13px">User: <strong>'+N+'</strong></div><div style="font-size:12px;color:var(--mt)">ID: '+U+'</div>'})}
+function saveKey(){var p=$('kProv').value,k=$('kVal').value;if(!k)return;api('/api/users/keys?user_id='+U,{method:'POST',body:JSON.stringify({provider:p,api_key:k})}).then(function(){$('kVal').value='';loadKeys()})}
+function delKey(p){fetch('/api/users/keys/'+p+'?user_id='+U,{method:'DELETE'}).then(function(){loadKeys()})}
+
+function dangerAction(action,confirmMsg){if(!confirm(confirmMsg))return;var url='/api/danger/'+action;if(action==='keys'||action==='user')url+='?user_id='+U;fetch(url,{method:'DELETE'}).then(function(r){return r.json()}).then(function(d){$('dangerMsg').innerHTML='<span style="color:var(--gn)">'+d.message+'</span>';if(action==='user'){setTimeout(function(){logout()},1500)}if(action==='everything'){setTimeout(function(){location.reload()},2000)}loadKeys();loadAgents();loadRooms()}).catch(function(e){$('dangerMsg').innerHTML='<span style="color:var(--rd)">Error: '+e+'</span>'})}
+
+function loadHW(){api('/api/hardware').then(function(r){var h=r.hardware;$('hwC').innerHTML='<div class="card"><h4>Hardware</h4><div class="stat"><span>OS</span><span class="v">'+h.os+'</span></div><div class="stat"><span>CPU</span><span class="v">'+h.cpu_cores+' cores</span></div><div class="stat"><span>RAM</span><span class="v">'+h.ram_gb+' GB</span></div><div class="stat"><span>GPU</span><span class="v">'+h.gpu+'</span></div><div class="stat"><span>VRAM</span><span class="v">'+h.gpu_vram_gb+' GB</span></div></div><div class="card"><h4>Recommendation</h4><p style="font-size:13px;color:var(--t2)">'+r.recommendation+'</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+r.suggested_models.map(function(m){return '<div style="background:var(--s1);border:1px solid var(--bd);border-radius:6px;padding:4px 10px;font-size:12px">'+m.size+' '+(m.quant||'')+'</div>'}).join('')+'</div></div>'})}
+
+function loadProv(){api('/api/providers').then(function(p){$('naPr').innerHTML=p.map(function(x){return '<option value="'+x.name+'">'+x.name+'</option>'}).join('')})}
+
+function mkRoom(){var n=$('nrN').value,t=$('nrT').value;if(!n)return;api('/api/rooms?user_id='+U,{method:'POST',body:JSON.stringify({name:n,type:t})}).then(function(){hideM('mRoom');loadRooms()})}
+
+function invBot(){var a=$('ibA').value;if(!a||!room)return;api('/api/rooms/'+room+'/members',{method:'POST',body:JSON.stringify({member_type:'agent',member_id:a})}).then(function(){hideM('mBot')})}
+function invUser(){var u=$('iuU').value;if(!u||!room)return;api('/api/rooms/'+room+'/members',{method:'POST',body:JSON.stringify({member_type:'user',member_id:u})}).then(function(){hideM('mUser')})}
+
+function modal(id){$(id).classList.add('show');if(id==='mBot')api('/api/agents').then(function(a){$('ibA').innerHTML=a.map(function(x){return '<option value="'+x.id+'">'+x.name+'</option>'}).join('')});if(id==='mUser')api('/api/users').then(function(u){$('iuU').innerHTML=u.filter(function(x){return x.id!==U}).map(function(x){return '<option value="'+x.id+'">'+(x.display_name||x.username)+'</option>'}).join('')||'<option>No users</option>'})}
+function hideM(id){$(id).classList.remove('show')}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+// Session restore
+if(localStorage.getItem('ht')){T=localStorage.getItem('ht');U=localStorage.getItem('hu');N=localStorage.getItem('hn');enter()}
+
+// Tutorial
+var STEPS=[
+{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',t:'Welcome to Hive',p:'Decentralized, end-to-end encrypted AI messenger. Your data stays on your device.',x:'<b>Core:</b> E2EE with Signal Protocol, P2P networking, local AI agents, you own your keys'},
+{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',t:'Your Identity',p:'Cryptographic keypair (Ed25519 + X25519). No username database. Your key IS your identity.',x:'<b>DID:</b> hive:z6Mk... derived from your public key<br><b>Verify:</b> Compare Safety Numbers via QR code'},
+{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>',t:'API Keys',p:'Add your own API keys in Settings. You pay for your own AI usage. Keys stored encrypted locally.',x:'<b>Providers:</b> OpenAI, Anthropic, Groq, Mistral, OpenRouter, xAI, DeepSeek, Gemini<br><b>Tip:</b> Start with Groq (free, fast)'},
+{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>',t:'AI Agents',p:'Create agents with custom personalities. Each has its own P2P identity. Local or cloud LLM.',x:'<b>Steps:</b> Agents tab, + New Agent, name + prompt, choose provider<br><b>Tip:</b> Ollama + llama3.3 = free local AI'},
+{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',t:'Rooms and Chat',p:'Create rooms, invite users and bots. E2EE messages, real-time WebSocket delivery.',x:'<b>Group:</b> Multiple users + bots, shared history<br><b>DM:</b> 1-to-1 private, forward secrecy<br><b>In chat:</b> Messages, files, invite bots/users'},
+{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',t:'P2P and Sharing',p:'Accessible over local network or Tailscale. Share your IP so others can connect.',x:'<b>Steps:</b> Install Tailscale, run tailscale ip -4, share http://YOUR-IP:8000<br><b>Invite:</b> GET /api/p2p/invite for QR code'},
+{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',t:'Security',p:'5 layers of encryption. Forward Secrecy — compromised key today cannot read yesterday messages.',x:'<b>Layers:</b> Ed25519 identity, Noise transport, Signal Protocol, AES-256 storage, per-message keys<br><b>Properties:</b> Forward Secrecy, Post-Compromise Security, Deniability'},
+{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',t:'You Are Ready',p:'Add an API key, create an agent, create a room, start chatting.',x:'<b>Checklist:</b> Add API key in Settings, Create agent in Agents, Create room, Invite bot, Chat!<br><b>Docs:</b> github.com/zyay/hive'}
 ];
-let tutIdx=0;
-function showTutorial(){tutIdx=0;renderTutStep();$('tutorial').style.display='flex';}
-function skipTutorial(){localStorage.setItem('hive_tut_done','1');$('tutorial').style.display='none';}
-function tutForward(){if(tutIdx>=TUT_STEPS.length-1){skipTutorial();return;}tutIdx++;renderTutStep();}
-function tutBack(){if(tutIdx>0){tutIdx--;renderTutStep();}}
-function renderTutStep(){
-  const s=TUT_STEPS[tutIdx];
-  $('tutStep').innerHTML=`<div style="text-align:center;color:var(--ac);margin-bottom:16px">${s.icon}</div><h2 style="font-size:20px;font-weight:700;text-align:center;margin-bottom:8px;letter-spacing:-0.01em">${s.title}</h2><p style="font-size:14px;color:var(--t2);text-align:center;line-height:1.7;max-width:440px;margin:0 auto">${s.text}</p>${s.extra||''}`;
-  $('tutDots').innerHTML=TUT_STEPS.map((_,i)=>`<span style="width:8px;height:8px;border-radius:50%;background:${i===tutIdx?'var(--ac)':'var(--bd)'};display:inline-block;margin:0 3px;transition:background .2s"></span>`).join('');
-  $('tutPrev').style.display=tutIdx>0?'inline-block':'none';
-  $('tutNext').textContent=tutIdx>=TUT_STEPS.length-1?'Get Started':'Next';
-}
+var ti=0;
+function showTut(){ti=0;renderT();$('tut').style.display='flex'}
+function skipTut(){localStorage.setItem('htut','1');$('tut').style.display='none'}
+function tutNext(){if(ti>=STEPS.length-1){skipTut();return}ti++;renderT()}
+function tutBack(){if(ti>0){ti--;renderT()}}
+function renderT(){var s=STEPS[ti];$('tIcon').innerHTML=s.i;$('tTitle').textContent=s.t;$('tText').textContent=s.p;$('tInfo').innerHTML=s.x;$('tDots').innerHTML=STEPS.map(function(_,i){return '<div class="dot'+(i===ti?' on':'')+'"></div>'}).join('');$('tPrev').style.display=ti>0?'inline-block':'none';$('tNext').textContent=ti>=STEPS.length-1?'Get Started':'Next'}
 </script>
 </body>
 </html>
+
 """
