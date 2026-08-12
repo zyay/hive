@@ -131,6 +131,53 @@ def init_db():
             FOREIGN KEY (room_id) REFERENCES rooms(id)
         );
         CREATE INDEX IF NOT EXISTS idx_files_room ON shared_files(room_id, created_at);
+
+        CREATE TABLE IF NOT EXISTS p2p_peers (
+            did TEXT PRIMARY KEY,
+            peer_id TEXT NOT NULL,
+            display_name TEXT NOT NULL DEFAULT '',
+            address TEXT NOT NULL DEFAULT '',
+            public_signing_key TEXT NOT NULL DEFAULT '',
+            public_encryption_key TEXT NOT NULL DEFAULT '',
+            last_seen REAL NOT NULL DEFAULT 0,
+            is_online INTEGER NOT NULL DEFAULT 0,
+            added_at REAL NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS p2p_sessions (
+            peer_did TEXT PRIMARY KEY,
+            root_key TEXT NOT NULL,
+            sending_chain_key TEXT NOT NULL,
+            receiving_chain_key TEXT NOT NULL,
+            sending_counter INTEGER NOT NULL DEFAULT 0,
+            receiving_counter INTEGER NOT NULL DEFAULT 0,
+            their_public_key TEXT NOT NULL DEFAULT '',
+            established_at REAL NOT NULL,
+            FOREIGN KEY (peer_did) REFERENCES p2p_peers(did)
+        );
+
+        CREATE TABLE IF NOT EXISTS encrypted_messages (
+            id TEXT PRIMARY KEY,
+            room_id TEXT,
+            sender_did TEXT NOT NULL,
+            recipient_did TEXT NOT NULL,
+            ciphertext TEXT NOT NULL,
+            nonce TEXT NOT NULL,
+            counter INTEGER NOT NULL DEFAULT 0,
+            message_type TEXT NOT NULL DEFAULT 'text',
+            created_at REAL NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_enc_messages_room ON encrypted_messages(room_id);
+
+        CREATE TABLE IF NOT EXISTS agent_peers (
+            did TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            system_prompt TEXT NOT NULL DEFAULT '',
+            provider TEXT NOT NULL DEFAULT 'ollama',
+            model TEXT NOT NULL DEFAULT '',
+            use_local INTEGER NOT NULL DEFAULT 1,
+            created_at REAL NOT NULL
+        );
     """)
     conn.commit()
     conn.close()

@@ -8,7 +8,7 @@ from hive.core.llm import estimate_cost, get_providers
 
 class TestConfig:
     def test_settings_loads(self):
-        assert settings.HOST == "127.0.0.1"
+        assert settings.HOST == "0.0.0.0"
         assert settings.PORT == 8000
 
     def test_providers_defined(self):
