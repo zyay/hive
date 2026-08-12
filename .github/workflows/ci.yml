@@ -34,6 +34,7 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest pytest-asyncio
+          pip install chromadb sentence-transformers
           pip install -e .
 
       - name: Run tests
@@ -49,6 +50,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install package
+        run: pip install -e .
+
       - name: Check syntax
         run: |
           python -m py_compile hive/core/identity.py
@@ -57,5 +61,12 @@ jobs:
           python -m py_compile hive/core/p2p_network.py
           python -m py_compile hive/core/agent_peer.py
           python -m py_compile hive/core/relay.py
+          python -m py_compile hive/core/db.py
+          python -m py_compile hive/core/users.py
+          python -m py_compile hive/core/rooms.py
+          python -m py_compile hive/core/ws.py
+          python -m py_compile hive/core/auth.py
+          python -m py_compile hive/core/llm.py
+          python -m py_compile hive/core/config.py
           python -m py_compile hive/api/main.py
           echo "All files compile OK"
