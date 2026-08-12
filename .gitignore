@@ -11,3 +11,5 @@ hive.db
 skills/
 uploads/
 hive.egg-info/
+keystore/
+relay_mailbox/
