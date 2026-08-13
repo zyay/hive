@@ -1265,146 +1265,161 @@ HTML_PAGE = r"""
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hive</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Hive — AI Knowledge Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #ffffff; --bg-subtle: #f9fafb; --bg-muted: #f3f4f6;
-  --border: #e5e7eb; --border-subtle: #f3f4f6;
-  --text: #111827; --text-secondary: #6b7280; --text-muted: #9ca3af;
-  --accent: #6366f1; --accent-light: #eef2ff; --accent-dark: #4f46e5;
-  --success: #10b981; --error: #ef4444; --warning: #f59e0b;
-  --radius: 8px; --radius-lg: 12px;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-  --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
-  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
-  --transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --bg: #fafbff; --bg-white: #ffffff; --bg-subtle: #f5f7fb;
+  --border: #e8ecf4; --border-light: #f0f3f9;
+  --text: #1a1f36; --text-secondary: #5a6178; --text-muted: #8b92a8;
+  --primary: #6366f1; --primary-light: #eef2ff; --primary-dark: #4f46e5;
+  --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  --success: #10b981; --success-light: #d1fae5;
+  --error: #ef4444; --error-light: #fee2e2;
+  --warning: #f59e0b; --warning-light: #fef3c7;
+  --radius: 12px; --radius-sm: 8px; --radius-lg: 16px; --radius-xl: 24px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.1);
+  --shadow-glow: 0 0 40px rgba(99,102,241,0.15);
+  --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; font-size: 14px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
 input, textarea, select, button { font-family: inherit; font-size: inherit; }
-input, textarea, select { padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--text); outline: none; width: 100%; transition: border-color var(--transition); }
-input:focus, textarea:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
-button { cursor: pointer; }
-.btn { padding: 8px 16px; border: none; border-radius: var(--radius); font-weight: 500; transition: all var(--transition); display: inline-flex; align-items: center; gap: 6px; }
-.btn-primary { background: var(--accent); color: #fff; }
-.btn-primary:hover { background: var(--accent-dark); }
-.btn-secondary { background: var(--bg); border: 1px solid var(--border); color: var(--text-secondary); }
-.btn-secondary:hover { background: var(--bg-subtle); color: var(--text); }
+input, textarea, select { padding: 12px 16px; border: 1.5px solid var(--border); border-radius: var(--radius); background: var(--bg-white); color: var(--text); outline: none; width: 100%; transition: all var(--transition); }
+input:focus, textarea:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-light); }
+input::placeholder, textarea::placeholder { color: var(--text-muted); }
+button { cursor: pointer; border: none; }
+.btn { padding: 10px 20px; border-radius: var(--radius); font-weight: 600; font-size: 13px; transition: all var(--transition); display: inline-flex; align-items: center; justify-content: center; gap: 8px; letter-spacing: 0.01em; }
+.btn-primary { background: var(--primary-gradient); color: #fff; box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,0.4); }
+.btn-secondary { background: var(--bg-white); border: 1.5px solid var(--border); color: var(--text-secondary); }
+.btn-secondary:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
 .btn-danger { background: var(--error); color: #fff; }
 .btn-danger:hover { background: #dc2626; }
-.btn-ghost { background: transparent; color: var(--text-secondary); padding: 6px 10px; }
-.btn-ghost:hover { background: var(--bg-muted); color: var(--text); }
-.btn-sm { padding: 4px 10px; font-size: 12px; }
-.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 100px; font-size: 11px; font-weight: 600; }
-.badge-success { background: #d1fae5; color: #065f46; }
-.badge-error { background: #fee2e2; color: #991b1b; }
-.badge-info { background: var(--accent-light); color: var(--accent-dark); }
-.badge-neutral { background: var(--bg-muted); color: var(--text-secondary); }
+.btn-ghost { background: transparent; color: var(--text-secondary); padding: 8px 12px; }
+.btn-ghost:hover { background: var(--bg-subtle); color: var(--text); }
+.btn-sm { padding: 6px 14px; font-size: 12px; }
+.chip { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 100px; font-size: 11px; font-weight: 600; letter-spacing: 0.02em; }
+.chip-primary { background: var(--primary-light); color: var(--primary-dark); }
+.chip-success { background: var(--success-light); color: #065f46; }
+.chip-error { background: var(--error-light); color: #991b1b; }
+.chip-neutral { background: var(--bg-subtle); color: var(--text-secondary); }
 
 /* Auth */
-#auth { display: flex; align-items: center; justify-content: center; width: 100vw; height: 100vh; background: var(--bg-subtle); }
-.auth-card { width: 400px; padding: 40px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); }
-.auth-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.auth-logo svg { color: var(--accent); }
-.auth-logo h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
-.auth-sub { color: var(--text-muted); font-size: 13px; margin-bottom: 28px; }
-.form-group { margin-bottom: 16px; }
-.form-group label { display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; }
-.auth-tabs { display: flex; gap: 0; margin-bottom: 24px; border-bottom: 1px solid var(--border); }
-.auth-tab { padding: 10px 20px; cursor: pointer; color: var(--text-muted); font-size: 13px; font-weight: 500; border-bottom: 2px solid transparent; transition: all var(--transition); }
+#auth { display: flex; align-items: center; justify-content: center; width: 100vw; height: 100vh; background: linear-gradient(135deg, #fafbff 0%, #f0f3ff 100%); position: relative; overflow: hidden; }
+#auth::before { content: ''; position: absolute; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%); top: -200px; right: -200px; }
+#auth::after { content: ''; position: absolute; width: 400px; height: 400px; border-radius: 50%; background: radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%); bottom: -100px; left: -100px; }
+.auth-card { width: 420px; padding: 48px; background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); position: relative; z-index: 1; }
+.auth-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.auth-logo-icon { width: 40px; height: 40px; background: var(--primary-gradient); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+.auth-logo-icon svg { color: #fff; }
+.auth-logo h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.auth-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 32px; }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+.auth-tabs { display: flex; gap: 4px; margin-bottom: 28px; background: var(--bg-subtle); padding: 4px; border-radius: var(--radius); }
+.auth-tab { padding: 10px 20px; cursor: pointer; color: var(--text-muted); font-size: 13px; font-weight: 600; border-radius: var(--radius-sm); transition: all var(--transition); flex: 1; text-align: center; }
 .auth-tab:hover { color: var(--text-secondary); }
-.auth-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-.auth-error { color: var(--error); font-size: 12px; margin-top: 10px; }
+.auth-tab.active { background: var(--bg-white); color: var(--primary); box-shadow: var(--shadow-sm); }
+.auth-error { color: var(--error); font-size: 12px; margin-top: 12px; padding: 8px 12px; background: var(--error-light); border-radius: var(--radius-sm); }
 
-/* App layout */
+/* App */
 #app { display: none; width: 100vw; height: 100vh; }
-.sidebar { width: 260px; border-right: 1px solid var(--border); display: flex; flex-direction: column; background: var(--bg); }
-.sidebar-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-.sidebar-header h2 { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; letter-spacing: -0.01em; }
-.user-info { padding: 12px 20px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 10px; }
-.user-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-light); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; }
-.nav { padding: 8px; }
-.nav-item { padding: 8px 12px; border-radius: var(--radius); cursor: pointer; font-size: 13px; color: var(--text-secondary); margin-bottom: 2px; display: flex; align-items: center; gap: 10px; transition: all var(--transition); font-weight: 500; }
+.sidebar { width: 280px; border-right: 1px solid var(--border); display: flex; flex-direction: column; background: var(--bg-white); }
+.sidebar-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.sidebar-logo { display: flex; align-items: center; gap: 10px; }
+.sidebar-logo-icon { width: 32px; height: 32px; background: var(--primary-gradient); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; }
+.sidebar-logo h2 { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.user-card { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+.user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary-gradient); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-status { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; }
+.status-dot.online { background: var(--success); }
+.status-dot.offline { background: var(--text-muted); }
+.nav { padding: 12px; }
+.nav-item { padding: 10px 14px; border-radius: var(--radius); cursor: pointer; font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; display: flex; align-items: center; gap: 12px; transition: all var(--transition); font-weight: 500; }
 .nav-item:hover { background: var(--bg-subtle); color: var(--text); }
-.nav-item.active { background: var(--accent-light); color: var(--accent-dark); }
-.nav-item svg { opacity: 0.7; }
+.nav-item.active { background: var(--primary-light); color: var(--primary-dark); font-weight: 600; }
+.nav-item svg { opacity: 0.6; }
 .nav-item.active svg { opacity: 1; }
-.rooms-section { flex: 1; overflow-y: auto; border-top: 1px solid var(--border); padding: 8px; }
-.rooms-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); padding: 8px 12px 6px; font-weight: 600; }
-.room-item { padding: 10px 12px; border-radius: var(--radius); cursor: pointer; font-size: 13px; margin-bottom: 2px; position: relative; transition: all var(--transition); }
+.rooms-section { flex: 1; overflow-y: auto; border-top: 1px solid var(--border); padding: 12px; }
+.rooms-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); padding: 8px 14px 8px; font-weight: 700; }
+.room-item { padding: 12px 14px; border-radius: var(--radius); cursor: pointer; margin-bottom: 4px; position: relative; transition: all var(--transition); }
 .room-item:hover { background: var(--bg-subtle); }
-.room-item.active { background: var(--accent-light); }
-.room-item .room-name { font-weight: 500; color: var(--text); }
+.room-item.active { background: var(--primary-light); }
+.room-item .room-name { font-size: 13px; font-weight: 600; color: var(--text); }
 .room-item .room-type { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-.room-item .unread-badge { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: var(--accent); color: #fff; font-size: 10px; padding: 1px 6px; border-radius: 100px; font-weight: 600; }
+.room-item .unread-badge { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: var(--primary-gradient); color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 100px; font-weight: 700; }
 
-/* Main content */
+/* Main */
 .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
-.topbar { padding: 14px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-.topbar h3 { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
-.content { flex: 1; overflow-y: auto; padding: 24px; }
+.topbar { padding: 16px 28px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--bg-white); }
+.topbar h3 { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+.content { flex: 1; overflow-y: auto; padding: 28px; }
 
 /* Chat */
-.messages { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 4px; }
-.message { max-width: 70%; padding: 10px 14px; border-radius: 16px; font-size: 13px; line-height: 1.5; position: relative; }
-.message-sent { align-self: flex-end; background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
-.message-received { align-self: flex-start; background: var(--bg-muted); color: var(--text); border-bottom-left-radius: 4px; }
-.message .sender { font-size: 11px; font-weight: 600; margin-bottom: 3px; opacity: 0.7; }
-.message .time { font-size: 10px; opacity: 0.5; margin-top: 4px; }
-.typing-indicator { align-self: flex-start; color: var(--text-muted); font-size: 12px; font-style: italic; padding: 6px 14px; }
-.chat-input-bar { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center; background: var(--bg); }
-.chat-input-bar input { flex: 1; border-radius: 100px; padding: 10px 18px; background: var(--bg-subtle); border: 1px solid var(--border); }
-.search-bar { padding: 10px 24px; border-bottom: 1px solid var(--border); display: none; background: var(--bg-subtle); }
-.search-bar input { background: var(--bg); font-size: 13px; border-radius: 100px; }
+.messages { flex: 1; overflow-y: auto; padding: 28px; display: flex; flex-direction: column; gap: 8px; }
+.message { max-width: 65%; padding: 12px 18px; font-size: 14px; line-height: 1.6; position: relative; }
+.message-sent { align-self: flex-end; background: var(--primary-gradient); color: #fff; border-radius: 20px 20px 4px 20px; box-shadow: 0 4px 12px rgba(99,102,241,0.2); }
+.message-received { align-self: flex-start; background: var(--bg-white); color: var(--text); border-radius: 20px 20px 20px 4px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+.message .sender { font-size: 11px; font-weight: 700; margin-bottom: 4px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.04em; }
+.message .time { font-size: 10px; opacity: 0.5; margin-top: 6px; }
+.typing-indicator { align-self: flex-start; color: var(--text-muted); font-size: 13px; font-style: italic; padding: 8px 18px; }
+.chat-input-bar { padding: 16px 28px; border-top: 1px solid var(--border); display: flex; gap: 12px; align-items: center; background: var(--bg-white); }
+.chat-input-bar input { flex: 1; border-radius: 100px; padding: 14px 24px; background: var(--bg-subtle); border: 1.5px solid transparent; font-size: 14px; }
+.chat-input-bar input:focus { background: var(--bg-white); border-color: var(--primary); }
+.search-bar { padding: 12px 28px; border-bottom: 1px solid var(--border); display: none; background: var(--bg-white); }
+.search-bar input { background: var(--bg-subtle); border-radius: 100px; font-size: 13px; }
 .conn-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-.conn-dot.online { background: var(--success); }
-.conn-dot.offline { background: var(--text-muted); }
 
 /* Cards */
-.card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px; transition: box-shadow var(--transition); }
-.card:hover { box-shadow: var(--shadow-sm); }
-.card h4 { font-size: 14px; font-weight: 600; margin-bottom: 12px; letter-spacing: -0.01em; }
-.stat-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 13px; border-bottom: 1px solid var(--border-subtle); }
+.card { background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 20px; transition: all var(--transition); }
+.card:hover { box-shadow: var(--shadow); border-color: var(--border-light); }
+.card h4 { font-size: 15px; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.01em; }
+.stat-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-light); font-size: 13px; }
 .stat-row:last-child { border: none; }
-.stat-row .value { font-weight: 600; color: var(--accent); }
-.peer-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-subtle); }
+.stat-row .value { font-weight: 700; color: var(--primary); }
+.peer-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border-light); }
 .peer-row:last-child { border: none; }
 
 /* Modal */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(4px); z-index: 100; align-items: center; justify-content: center; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(26,31,54,0.4); backdrop-filter: blur(8px); z-index: 100; align-items: center; justify-content: center; }
 .modal-overlay.show { display: flex; }
-.modal { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px; width: 440px; max-width: 90vw; box-shadow: var(--shadow-lg); }
-.modal h3 { font-size: 17px; font-weight: 600; margin-bottom: 20px; letter-spacing: -0.01em; }
+.modal { background: var(--bg-white); border-radius: var(--radius-xl); padding: 32px; width: 460px; max-width: 90vw; box-shadow: var(--shadow-lg); }
+.modal h3 { font-size: 20px; font-weight: 700; margin-bottom: 24px; letter-spacing: -0.02em; }
 
 /* Tutorial */
-#tut { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: 300; align-items: center; justify-content: center; }
-#tut .tut-box { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 40px; width: 520px; max-width: 92vw; box-shadow: var(--shadow-lg); text-align: center; }
-#tut .tut-icon { color: var(--accent); margin-bottom: 16px; }
-#tut h2 { font-size: 20px; font-weight: 700; margin-bottom: 10px; letter-spacing: -0.02em; }
-#tut p { font-size: 14px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 20px; }
-#tut .tut-info { background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; font-size: 13px; color: var(--text-secondary); line-height: 1.8; text-align: left; }
-#tut .tut-dots { display: flex; gap: 6px; justify-content: center; margin-top: 24px; }
-#tut .tut-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: background var(--transition); }
-#tut .tut-dot.active { background: var(--accent); }
+#tut { display: none; position: fixed; inset: 0; background: rgba(26,31,54,0.6); backdrop-filter: blur(12px); z-index: 300; align-items: center; justify-content: center; }
+#tut .tut-box { background: var(--bg-white); border-radius: var(--radius-xl); padding: 48px; width: 540px; max-width: 92vw; box-shadow: var(--shadow-lg); text-align: center; }
+#tut .tut-icon { color: var(--primary); margin-bottom: 20px; }
+#tut h2 { font-size: 24px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.02em; }
+#tut p { font-size: 15px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 24px; }
+#tut .tut-info { background: var(--bg-subtle); border-radius: var(--radius); padding: 20px; font-size: 14px; color: var(--text-secondary); line-height: 1.8; text-align: left; }
+#tut .tut-dots { display: flex; gap: 8px; justify-content: center; margin-top: 28px; }
+#tut .tut-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: all var(--transition); }
+#tut .tut-dot.active { background: var(--primary); width: 24px; border-radius: 4px; }
 
-/* Danger zone */
-.danger-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; transition: all var(--transition); }
-.danger-item:hover { border-color: var(--error); }
-.danger-item.critical { border-color: var(--error); background: #fef2f2; }
-.danger-item .danger-title { font-size: 13px; font-weight: 500; }
-.danger-item .danger-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+/* Danger */
+.danger-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--bg-white); border: 1.5px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; transition: all var(--transition); }
+.danger-item:hover { border-color: var(--error); background: #fffbfb; }
+.danger-item.critical { border-color: var(--error); background: var(--error-light); }
+.danger-item .danger-title { font-size: 14px; font-weight: 600; }
+.danger-item .danger-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* Empty state */
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; color: var(--text-muted); gap: 12px; padding: 40px; }
+.empty-state svg { opacity: 0.2; }
+.empty-state span { font-size: 14px; }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
-
-/* Empty state */
-.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; color: var(--text-muted); gap: 8px; }
-.empty-state svg { opacity: 0.3; }
 </style>
 </head>
 <body>
@@ -1413,26 +1428,28 @@ button { cursor: pointer; }
 <div id="auth">
 <div class="auth-card">
   <div class="auth-logo">
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    <div class="auth-logo-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    </div>
     <h1>Hive</h1>
   </div>
-  <div class="auth-sub">Decentralized, end-to-end encrypted AI messenger</div>
+  <div class="auth-sub">AI Knowledge Platform — Decentralized, Encrypted, Intelligent</div>
   <div class="auth-tabs">
     <div class="auth-tab active" onclick="authTab(0)">Sign in</div>
     <div class="auth-tab" onclick="authTab(1)">Create account</div>
   </div>
   <div id="aLogin">
-    <div class="form-group"><label>Username</label><input id="lU" placeholder="Enter username"></div>
-    <div class="form-group"><label>Password</label><input id="lP" type="password" placeholder="Enter password"></div>
-    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" onclick="doLogin()">Sign in</button>
-    <div id="lErr" class="auth-error"></div>
+    <div class="form-group"><label>Username</label><input id="lU" placeholder="Enter your username"></div>
+    <div class="form-group"><label>Password</label><input id="lP" type="password" placeholder="Enter your password"></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="doLogin()">Sign in</button>
+    <div id="lErr" class="auth-error" style="display:none"></div>
   </div>
   <div id="aReg" style="display:none">
-    <div class="form-group"><label>Username</label><input id="rU" placeholder="Choose username"></div>
-    <div class="form-group"><label>Display name</label><input id="rN" placeholder="Your name"></div>
-    <div class="form-group"><label>Password</label><input id="rP" type="password" placeholder="Min 4 characters"></div>
-    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" onclick="doReg()">Create account</button>
-    <div id="rErr" class="auth-error"></div>
+    <div class="form-group"><label>Username</label><input id="rU" placeholder="Choose a username"></div>
+    <div class="form-group"><label>Display name</label><input id="rN" placeholder="Your display name"></div>
+    <div class="form-group"><label>Password</label><input id="rP" type="password" placeholder="Minimum 4 characters"></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="doReg()">Create account</button>
+    <div id="rErr" class="auth-error" style="display:none"></div>
   </div>
 </div>
 </div>
@@ -1441,34 +1458,40 @@ button { cursor: pointer; }
 <div id="app">
 <div class="sidebar">
   <div class="sidebar-header">
-    <h2><span id="connDot" class="conn-dot offline"></span>
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-    Hive</h2>
-    <button class="btn btn-ghost btn-sm" onclick="logout()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <h2>Hive</h2>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="logout()" title="Sign out">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
     </button>
   </div>
-  <div class="user-info">
+  <div class="user-card">
     <div class="user-avatar" id="userAvatar"></div>
-    <span id="sbU"></span>
+    <div class="user-info">
+      <div class="user-name" id="sbU"></div>
+      <div class="user-status"><span id="connDot" class="status-dot offline"></span> <span id="connText">Connecting...</span></div>
+    </div>
   </div>
   <div class="nav">
     <div class="nav-item active" data-v="chat" onclick="view('chat')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Chat</div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Chat</div>
     <div class="nav-item" data-v="agents" onclick="view('agents')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg> Agents</div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg> AI Agents</div>
     <div class="nav-item" data-v="network" onclick="view('network')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10"/></svg> Network</div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10"/></svg> Network</div>
     <div class="nav-item" data-v="settings" onclick="view('settings')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</div>
     <div class="nav-item" data-v="system" onclick="view('system')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> System</div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> System</div>
   </div>
   <div class="rooms-section">
-    <div class="rooms-label">Rooms</div>
+    <div class="rooms-label">Conversations</div>
     <div id="rList"></div>
-    <div style="padding:8px"><button class="btn btn-secondary btn-sm" style="width:100%;justify-content:center" onclick="modal('mRoom')">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New room</button></div>
+    <div style="padding:8px"><button class="btn btn-secondary btn-sm" style="width:100%" onclick="modal('mRoom')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New conversation</button></div>
   </div>
 </div>
 
@@ -1476,76 +1499,75 @@ button { cursor: pointer; }
   <!-- Chat -->
   <div id="vChat" style="display:flex;flex-direction:column;flex:1">
     <div class="topbar">
-      <h3 id="cTitle">Select a room</h3>
-      <div style="display:flex;gap:6px">
-        <button class="btn btn-ghost btn-sm" onclick="toggleSearch()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search</button>
-      </div>
+      <h3 id="cTitle">Select a conversation</h3>
+      <button class="btn btn-ghost btn-sm" onclick="toggleSearch()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search</button>
     </div>
     <div class="search-bar" id="searchBar"><input id="searchIn" placeholder="Search messages..." oninput="doSearch()"></div>
     <div class="messages" id="cMsgs">
       <div class="empty-state">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        <span>Create or select a room to start chatting</span>
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>Start a new conversation to begin</span>
       </div>
     </div>
     <div id="typingArea"></div>
     <div class="chat-input-bar" id="cBar" style="display:none">
-      <button class="btn btn-ghost btn-sm" onclick="modal('mFile')" title="Upload file">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
-      <input id="cIn" placeholder="Type a message..." onkeydown="if(event.key==='Enter')send()" oninput="sendTyping()">
-      <button class="btn btn-ghost btn-sm" onclick="modal('mBot')" title="Invite bot">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/></svg></button>
-      <button class="btn btn-ghost btn-sm" onclick="modal('mUser')" title="Invite user">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></button>
-      <button class="btn btn-primary btn-sm" onclick="send()">Send</button>
+      <button class="btn btn-ghost" onclick="modal('mFile')" title="Attach file">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
+      <input id="cIn" placeholder="Type your message..." onkeydown="if(event.key==='Enter')send()" oninput="sendTyping()">
+      <button class="btn btn-ghost" onclick="modal('mBot')" title="Invite AI agent">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/></svg></button>
+      <button class="btn btn-ghost" onclick="modal('mUser')" title="Invite user">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></button>
+      <button class="btn btn-primary" onclick="send()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send</button>
     </div>
   </div>
   <!-- Agents -->
   <div id="vAgents" style="display:none;flex-direction:column;flex:1">
-    <div class="topbar"><h3>Agents</h3><button class="btn btn-primary btn-sm" onclick="modal('mAgent')">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New agent</button></div>
+    <div class="topbar"><h3>AI Agents</h3><button class="btn btn-primary btn-sm" onclick="modal('mAgent')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Create agent</button></div>
     <div class="content" id="aList"></div>
   </div>
   <!-- Network -->
   <div id="vNetwork" style="display:none;flex-direction:column;flex:1">
-    <div class="topbar"><h3>Network</h3><button class="btn btn-secondary btn-sm" onclick="loadNet()">Refresh</button></div>
+    <div class="topbar"><h3>P2P Network</h3><button class="btn btn-secondary btn-sm" onclick="loadNet()">Refresh</button></div>
     <div class="content" id="netC"></div>
   </div>
   <!-- Settings -->
   <div id="vSettings" style="display:none;flex-direction:column;flex:1">
     <div class="topbar"><h3>Settings</h3></div>
     <div class="content">
-      <div style="margin-bottom:32px">
-        <h4 style="font-size:15px;font-weight:600;margin-bottom:4px">API Keys</h4>
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Your keys, your usage. Stored encrypted locally.</p>
+      <div style="margin-bottom:36px">
+        <h4 style="font-size:16px;font-weight:700;margin-bottom:4px">API Keys</h4>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px">Configure your AI provider credentials. Keys are encrypted and stored locally.</p>
         <div id="kList"></div>
-        <div style="margin-top:16px;display:flex;gap:8px">
-          <select id="kProv" style="width:160px"><option>openai</option><option>anthropic</option><option>groq</option><option>mistral</option><option>openrouter</option><option>xai</option><option>deepseek</option><option>gemini</option></select>
-          <input id="kVal" placeholder="sk-..." style="flex:1">
-          <button class="btn btn-primary btn-sm" onclick="saveKey()">Save key</button>
+        <div style="margin-top:20px;display:flex;gap:10px">
+          <select id="kProv" style="width:170px"><option>openai</option><option>anthropic</option><option>groq</option><option>mistral</option><option>openrouter</option><option>xai</option><option>deepseek</option><option>gemini</option></select>
+          <input id="kVal" placeholder="Enter API key..." style="flex:1">
+          <button class="btn btn-primary btn-sm" onclick="saveKey()">Save</button>
         </div>
       </div>
-      <div style="margin-bottom:32px">
-        <h4 style="font-size:15px;font-weight:600;margin-bottom:4px">Profile</h4>
+      <div style="margin-bottom:36px">
+        <h4 style="font-size:16px;font-weight:700;margin-bottom:4px">Profile</h4>
         <div id="pInfo" style="font-size:13px;color:var(--text-secondary)"></div>
       </div>
       <div>
-        <h4 style="font-size:15px;font-weight:600;margin-bottom:4px;color:var(--error)">Danger Zone</h4>
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Irreversible actions. Proceed with caution.</p>
-        <div class="danger-item"><div><div class="danger-title">Delete API Keys</div><div class="danger-desc">Remove all stored API keys</div></div><button class="btn btn-danger btn-sm" onclick="dangerAction('keys','Delete all API keys?')">Delete</button></div>
-        <div class="danger-item"><div><div class="danger-title">Delete Agents</div><div class="danger-desc">Remove all AI agents and skills</div></div><button class="btn btn-danger btn-sm" onclick="dangerAction('agents','Delete ALL agents?')">Delete</button></div>
-        <div class="danger-item"><div><div class="danger-title">Delete Rooms</div><div class="danger-desc">Remove all rooms and messages</div></div><button class="btn btn-danger btn-sm" onclick="dangerAction('rooms','Delete ALL rooms?')">Delete</button></div>
-        <div class="danger-item"><div><div class="danger-title">Reset Identity</div><div class="danger-desc">Delete P2P cryptographic identity</div></div><button class="btn btn-danger btn-sm" onclick="dangerAction('identity','Reset identity?')">Reset</button></div>
-        <div class="danger-item critical"><div><div class="danger-title" style="color:var(--error)">Delete Everything</div><div class="danger-desc">Nuclear reset — all data, identity, keys</div></div><button class="btn btn-danger btn-sm" onclick="dangerAction('everything','DELETE EVERYTHING?')">Reset All</button></div>
+        <h4 style="font-size:16px;font-weight:700;margin-bottom:4px;color:var(--error)">Danger Zone</h4>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px">Irreversible actions. Proceed with caution.</p>
+        <div class="danger-item"><div><div class="danger-title">Delete API Keys</div><div class="danger-desc">Remove all stored credentials</div></div><button class="btn btn-danger btn-sm" onclick="dangerAction('keys','Delete all API keys?')">Delete</button></div>
+        <div class="danger-item"><div><div class="danger-title">Delete Agents</div><div class="danger-desc">Remove all AI agents and configurations</div></div><button class="btn btn-danger btn-sm" onclick="dangerAction('agents','Delete ALL agents?')">Delete</button></div>
+        <div class="danger-item"><div><div class="danger-title">Delete Conversations</div><div class="danger-desc">Remove all rooms and message history</div></div><button class="btn btn-danger btn-sm" onclick="dangerAction('rooms','Delete ALL conversations?')">Delete</button></div>
+        <div class="danger-item"><div><div class="danger-title">Reset Identity</div><div class="danger-desc">Delete your P2P cryptographic identity</div></div><button class="btn btn-danger btn-sm" onclick="dangerAction('identity','Reset your identity?')">Reset</button></div>
+        <div class="danger-item critical"><div><div class="danger-title" style="color:var(--error)">Delete Everything</div><div class="danger-desc">Complete factory reset — all data, identity, keys</div></div><button class="btn btn-danger btn-sm" onclick="dangerAction('everything','DELETE EVERYTHING?')">Reset All</button></div>
         <div class="danger-item critical"><div><div class="danger-title" style="color:var(--error)">Delete Account</div><div class="danger-desc">Permanently delete your account</div></div><button class="btn btn-danger btn-sm" onclick="dangerAction('user','DELETE ACCOUNT?')">Delete</button></div>
-        <div id="dangerMsg" style="margin-top:8px;font-size:12px"></div>
+        <div id="dangerMsg" style="margin-top:12px;font-size:12px"></div>
       </div>
     </div>
   </div>
   <!-- System -->
   <div id="vSystem" style="display:none;flex-direction:column;flex:1">
-    <div class="topbar"><h3>System</h3><button class="btn btn-secondary btn-sm" onclick="loadHW()">Refresh</button></div>
+    <div class="topbar"><h3>System Information</h3><button class="btn btn-secondary btn-sm" onclick="loadHW()">Refresh</button></div>
     <div class="content" id="hwC"></div>
   </div>
 </div>
@@ -1553,37 +1575,37 @@ button { cursor: pointer; }
 
 <!-- Modals -->
 <div class="modal-overlay" id="mRoom"><div class="modal">
-  <h3>New Room</h3>
-  <div class="form-group"><label>Name</label><input id="nrN" placeholder="General"></div>
+  <h3>New Conversation</h3>
+  <div class="form-group"><label>Name</label><input id="nrN" placeholder="e.g., Project Discussion"></div>
   <div class="form-group"><label>Type</label><select id="nrT"><option value="group">Group chat</option><option value="dm">Direct message</option></select></div>
-  <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end">
+  <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end">
     <button class="btn btn-secondary" onclick="hideM('mRoom')">Cancel</button>
-    <button class="btn btn-primary" onclick="mkRoom()">Create room</button>
+    <button class="btn btn-primary" onclick="mkRoom()">Create</button>
   </div>
 </div></div>
 <div class="modal-overlay" id="mAgent"><div class="modal">
-  <h3>New Agent</h3>
-  <div class="form-group"><label>Name</label><input id="naN" placeholder="Research Assistant"></div>
-  <div class="form-group"><label>System prompt</label><textarea id="naP" rows="3">You are a helpful assistant.</textarea></div>
+  <h3>Create AI Agent</h3>
+  <div class="form-group"><label>Name</label><input id="naN" placeholder="e.g., Research Assistant"></div>
+  <div class="form-group"><label>System prompt</label><textarea id="naP" rows="3" placeholder="Define the agent's behavior...">You are a helpful assistant.</textarea></div>
   <div class="form-group"><label>Provider</label><select id="naPr"></select></div>
   <div class="form-group"><label>Model</label><input id="naM" placeholder="Leave empty for default"></div>
-  <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end">
+  <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end">
     <button class="btn btn-secondary" onclick="hideM('mAgent')">Cancel</button>
     <button class="btn btn-primary" onclick="mkAgent()">Create agent</button>
   </div>
 </div></div>
 <div class="modal-overlay" id="mBot"><div class="modal">
-  <h3>Invite Bot</h3>
-  <div class="form-group"><label>Agent</label><select id="ibA"></select></div>
-  <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end">
+  <h3>Invite AI Agent</h3>
+  <div class="form-group"><label>Select agent</label><select id="ibA"></select></div>
+  <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end">
     <button class="btn btn-secondary" onclick="hideM('mBot')">Cancel</button>
     <button class="btn btn-primary" onclick="invBot()">Invite</button>
   </div>
 </div></div>
 <div class="modal-overlay" id="mUser"><div class="modal">
   <h3>Invite User</h3>
-  <div class="form-group"><label>User</label><select id="iuU"></select></div>
-  <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end">
+  <div class="form-group"><label>Select user</label><select id="iuU"></select></div>
+  <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end">
     <button class="btn btn-secondary" onclick="hideM('mUser')">Cancel</button>
     <button class="btn btn-primary" onclick="invUser()">Invite</button>
   </div>
@@ -1591,7 +1613,7 @@ button { cursor: pointer; }
 <div class="modal-overlay" id="mFile"><div class="modal">
   <h3>Upload File</h3>
   <div class="form-group"><label>Choose file</label><input type="file" id="fileIn"></div>
-  <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end">
+  <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end">
     <button class="btn btn-secondary" onclick="hideM('mFile')">Cancel</button>
     <button class="btn btn-primary" onclick="uploadFile()">Upload</button>
   </div>
@@ -1603,10 +1625,10 @@ button { cursor: pointer; }
   <h2 id="tTitle"></h2>
   <p id="tText"></p>
   <div class="tut-info" id="tInfo"></div>
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:24px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:28px">
     <div class="tut-dots" id="tDots"></div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-secondary" onclick="skipTut()">Skip</button>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-secondary" onclick="skipTut()">Skip tour</button>
       <button class="btn btn-secondary" id="tPrev" onclick="tutBack()" style="display:none">Back</button>
       <button class="btn btn-primary" id="tNext" onclick="tutNext()">Next</button>
     </div>
@@ -1619,19 +1641,19 @@ var $=function(id){return document.getElementById(id)};
 var api=function(u,o){o=o||{};o.headers=o.headers||{};o.headers['Content-Type']='application/json';return fetch(u,o).then(function(r){return r.json()})};
 
 function authTab(i){document.querySelectorAll('.auth-tab').forEach(function(e,j){e.classList.toggle('active',j===i)});$('aLogin').style.display=i?'none':'block';$('aReg').style.display=i?'block':'none'}
-function doReg(){var u=$('rU').value,p=$('rP').value,n=$('rN').value;if(!u||!p){$('rErr').textContent='Please fill all fields';return}api('/api/auth/register',{method:'POST',body:JSON.stringify({username:u,password:p,display_name:n})}).then(function(r){if(r.token){T=r.token;U=r.id;N=r.username;enter()}else{$('rErr').textContent=r.detail||'Error'}})}
-function doLogin(){var u=$('lU').value,p=$('lP').value;if(!u||!p){$('lErr').textContent='Please fill all fields';return}api('/api/auth/login',{method:'POST',body:JSON.stringify({username:u,password:p})}).then(function(r){if(r.token){T=r.token;U=r.id;N=r.username;enter()}else{$('lErr').textContent=r.detail||'Invalid credentials'}})}
+function doReg(){var u=$('rU').value,p=$('rP').value,n=$('rN').value;if(!u||!p){$('rErr').textContent='Please fill all fields';$('rErr').style.display='block';return}api('/api/auth/register',{method:'POST',body:JSON.stringify({username:u,password:p,display_name:n})}).then(function(r){if(r.token){T=r.token;U=r.id;N=r.username;enter()}else{$('rErr').textContent=r.detail||'Error';$('rErr').style.display='block'}})}
+function doLogin(){var u=$('lU').value,p=$('lP').value;if(!u||!p){$('lErr').textContent='Please fill all fields';$('lErr').style.display='block';return}api('/api/auth/login',{method:'POST',body:JSON.stringify({username:u,password:p})}).then(function(r){if(r.token){T=r.token;U=r.id;N=r.username;enter()}else{$('lErr').textContent=r.detail||'Invalid credentials';$('lErr').style.display='block'}})}
 function logout(){T=null;U=null;N=null;if(ws)ws.close();$('app').style.display='none';$('auth').style.display='flex'}
 
-function enter(){localStorage.setItem('ht',T);localStorage.setItem('hu',U);localStorage.setItem('hn',N);$('auth').style.display='none';$('app').style.display='flex';$('sbU').textContent=N;$('userAvatar').textContent=N.charAt(0).toUpperCase();loadRooms();loadProv();loadHW();loadNet();if(!localStorage.getItem('htut'))setTimeout(showTut,600)}
+function enter(){localStorage.setItem('ht',T);localStorage.setItem('hu',U);localStorage.setItem('hn',N);$('auth').style.display='none';$('app').style.display='flex';$('sbU').textContent=N;$('userAvatar').textContent=N.charAt(0).toUpperCase();loadRooms();loadProv();loadHW();loadNet();if(!localStorage.getItem('htut'))setTimeout(showTut,800)}
 
 function view(v){document.querySelectorAll('[id^=v]').forEach(function(e){e.style.display='none'});var el=$('v'+v.charAt(0).toUpperCase()+v.slice(1));if(el)el.style.display='flex';document.querySelectorAll('.nav-item').forEach(function(e){e.classList.toggle('active',e.dataset.v===v)});if(v==='agents')loadAgents();if(v==='settings')loadKeys();if(v==='system')loadHW();if(v==='network')loadNet()}
 
-function loadRooms(){api('/api/rooms?user_id='+U).then(function(r){$('rList').innerHTML=r.map(function(x){var b=unread[x.id]?'<span class="unread-badge">'+unread[x.id]+'</span>':'';return '<div class="room-item'+(room===x.id?' active':'')+'" onclick="openR(\''+x.id+'\',\''+(x.name||x.id)+'\')"><div class="room-name">'+(x.name||x.id)+'</div><div class="room-type">'+x.type+'</div>'+b+'</div>'}).join('')||'<div style="padding:12px;font-size:13px;color:var(--text-muted)">No rooms yet</div>'})}
+function loadRooms(){api('/api/rooms?user_id='+U).then(function(r){$('rList').innerHTML=r.map(function(x){var b=unread[x.id]?'<span class="unread-badge">'+unread[x.id]+'</span>':'';return '<div class="room-item'+(room===x.id?' active':'')+'" onclick="openR(\''+x.id+'\',\''+(x.name||x.id)+'\')"><div class="room-name">'+(x.name||x.id)+'</div><div class="room-type">'+x.type+'</div>'+b+'</div>'}).join('')||'<div style="padding:16px;font-size:13px;color:var(--text-muted);text-align:center">No conversations yet</div>'})}
 
-function openR(id,name){room=id;unread[id]=0;$('cTitle').textContent=name;loadRooms();$('cBar').style.display='flex';connectWS(id);api('/api/rooms/'+id+'/messages').then(function(m){$('cMsgs').innerHTML=m.map(function(x){var c=x.sender_id===U?'message-sent':'message-received';var t=new Date(x.created_at*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});return '<div class="message '+c+'"><div class="sender">'+(x.sender_type==='agent'?'Bot':'You')+'</div>'+esc(x.content)+'<div class="time">'+t+'</div></div>'}).join('')||'<div class="empty-state"><span>No messages yet</span></div>';$('cMsgs').scrollTop=$('cMsgs').scrollHeight})}
+function openR(id,name){room=id;unread[id]=0;$('cTitle').textContent=name;loadRooms();$('cBar').style.display='flex';connectWS(id);api('/api/rooms/'+id+'/messages').then(function(m){$('cMsgs').innerHTML=m.map(function(x){var c=x.sender_id===U?'message-sent':'message-received';var t=new Date(x.created_at*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});return '<div class="message '+c+'"><div class="sender">'+(x.sender_type==='agent'?'AI Agent':'You')+'</div>'+esc(x.content)+'<div class="time">'+t+'</div></div>'}).join('')||'<div class="empty-state"><span>No messages yet. Start the conversation!</span></div>';$('cMsgs').scrollTop=$('cMsgs').scrollHeight})}
 
-function connectWS(id){if(ws)ws.close();ws=new WebSocket('ws://'+location.host+'/ws/'+id+'?token='+T);ws.onopen=function(){wsRetry=0;$('connDot').className='conn-dot online'};ws.onclose=function(){$('connDot').className='conn-dot offline';if(T&&room){var d=Math.min(1000*Math.pow(2,wsRetry),30000);wsRetry++;setTimeout(function(){if(room)connectWS(room)},d)}};ws.onmessage=function(e){var d=JSON.parse(e.data);if(d.type==='new_message'){if(d.message.sender_id!==U&&room!==id){unread[id]=(unread[id]||0)+1;loadRooms();beep()}var c=d.message.sender_id===U?'message-sent':'message-received';var t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});$('cMsgs').innerHTML+='<div class="message '+c+'"><div class="sender">'+(d.message.sender_type==='agent'?'Bot':'You')+'</div>'+esc(d.message.content)+'<div class="time">'+t+'</div></div>';$('cMsgs').scrollTop=$('cMsgs').scrollHeight}else if(d.type==='typing'&&d.user_id!==U){$('typingArea').innerHTML='<div class="typing-indicator">'+(d.is_bot?'Bot':'Someone')+' is typing...</div>';clearTimeout(typingTimer);typingTimer=setTimeout(function(){$('typingArea').innerHTML=''},3000)}}}
+function connectWS(id){if(ws)ws.close();ws=new WebSocket('ws://'+location.host+'/ws/'+id+'?token='+T);ws.onopen=function(){wsRetry=0;$('connDot').className='status-dot online';$('connText').textContent='Connected'};ws.onclose=function(){$('connDot').className='status-dot offline';$('connText').textContent='Reconnecting...';if(T&&room){var d=Math.min(1000*Math.pow(2,wsRetry),30000);wsRetry++;setTimeout(function(){if(room)connectWS(room)},d)}};ws.onmessage=function(e){var d=JSON.parse(e.data);if(d.type==='new_message'){if(d.message.sender_id!==U&&room!==id){unread[id]=(unread[id]||0)+1;loadRooms();beep()}var c=d.message.sender_id===U?'message-sent':'message-received';var t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});$('cMsgs').innerHTML+='<div class="message '+c+'"><div class="sender">'+(d.message.sender_type==='agent'?'AI Agent':'You')+'</div>'+esc(d.message.content)+'<div class="time">'+t+'</div></div>';$('cMsgs').scrollTop=$('cMsgs').scrollHeight}else if(d.type==='typing'&&d.user_id!==U){$('typingArea').innerHTML='<div class="typing-indicator">'+(d.is_bot?'AI is':'Someone is')+' typing...</div>';clearTimeout(typingTimer);typingTimer=setTimeout(function(){$('typingArea').innerHTML=''},3000)}}}
 
 function send(){var v=$('cIn').value.trim();if(!v||!room)return;$('cIn').value='';api('/api/rooms/'+room+'/messages?user_id='+U,{method:'POST',body:JSON.stringify({content:v})})}
 function sendTyping(){if(ws&&ws.readyState===1)ws.send(JSON.stringify({type:'typing'}))}
@@ -1640,22 +1662,22 @@ function toggleSearch(){var b=$('searchBar');b.style.display=b.style.display==='
 function doSearch(){var q=$('searchIn').value.trim();if(!q){loadRoomMsgs();return}api('/api/messages/search?room_id='+room+'&q='+encodeURIComponent(q)).then(function(m){$('cMsgs').innerHTML=m.map(function(x){return '<div class="message message-received">'+esc(x.content)+'</div>'}).join('')||'<div class="empty-state"><span>No results found</span></div>'})}
 function loadRoomMsgs(){if(room)api('/api/rooms/'+room+'/messages').then(function(m){$('cMsgs').innerHTML=m.map(function(x){var c=x.sender_id===U?'message-sent':'message-received';return '<div class="message '+c+'">'+esc(x.content)+'</div>'}).join('')})}
 
-function beep(){try{var c=new(window.AudioContext||window.webkitAudioContext)();var o=c.createOscillator();var g=c.createGain();o.connect(g);g.connect(c.destination);g.gain.value=0.08;o.frequency.value=880;o.start();o.stop(c.currentTime+0.08)}catch(e){}}
+function beep(){try{var c=new(window.AudioContext||window.webkitAudioContext)();var o=c.createOscillator();var g=c.createGain();o.connect(g);g.connect(c.destination);g.gain.value=0.06;o.frequency.value=880;o.start();o.stop(c.currentTime+0.06)}catch(e){}}
 
-function loadAgents(){api('/api/agents').then(function(a){$('aList').innerHTML=a.map(function(x){return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:start"><div><div style="font-weight:600;font-size:14px">'+x.name+'</div><div style="display:flex;gap:6px;margin-top:6px"><span class="badge badge-info">'+x.provider+'</span></div></div><button class="btn btn-danger btn-sm" onclick="delAgent(\''+x.id+'\')">Delete</button></div><div style="font-size:13px;color:var(--text-secondary);margin-top:10px;line-height:1.5">'+esc(x.system_prompt.substring(0,120))+(x.system_prompt.length>120?'...':'')+'</div></div>'}).join('')||'<div class="empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/></svg><span>No agents yet. Create one to get started.</span></div>'})}
+function loadAgents(){api('/api/agents').then(function(a){$('aList').innerHTML=a.map(function(x){return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:start"><div><div style="font-weight:700;font-size:15px">'+x.name+'</div><div style="display:flex;gap:6px;margin-top:8px"><span class="chip chip-primary">'+x.provider+'</span></div></div><button class="btn btn-danger btn-sm" onclick="delAgent(\''+x.id+'\')">Delete</button></div><div style="font-size:13px;color:var(--text-secondary);margin-top:14px;line-height:1.6">'+esc(x.system_prompt.substring(0,150))+(x.system_prompt.length>150?'...':'')+'</div></div>'}).join('')||'<div class="empty-state"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/></svg><span>No agents yet. Create your first AI agent.</span></div>'})}
 function mkAgent(){var n=$('naN').value,p=$('naP').value,pr=$('naPr').value,m=$('naM').value;if(!n)return;api('/api/agents',{method:'POST',body:JSON.stringify({name:n,system_prompt:p,provider:pr,model:m})}).then(function(){hideM('mAgent');loadAgents()})}
 function delAgent(id){fetch('/api/agents/'+id,{method:'DELETE'}).then(function(){loadAgents()})}
 
-function loadNet(){api('/api/network/status').then(function(s){if(s.status==='stopped'){$('netC').innerHTML='<div class="card"><h4>Network Offline</h4><p style="color:var(--text-muted)">P2P network is not running.</p></div>';return}var i=s.identity||{};var peers=s.peers||[];$('netC').innerHTML='<div class="card"><h4>Your Identity</h4><div class="stat-row"><span>DID</span><span class="value" style="font-size:11px;word-break:break-all;max-width:250px;text-align:right">'+i.did+'</span></div><div class="stat-row"><span>Peer ID</span><span class="value">'+i.peer_id+'</span></div><div class="stat-row"><span>Fingerprint</span><span class="value" style="font-size:11px">'+i.fingerprint+'</span></div></div><div class="card"><h4>Connection</h4><div class="stat-row"><span>Status</span><span class="badge badge-success">'+s.status+'</span></div><div class="stat-row"><span>Port</span><span class="value">'+s.port+'</span></div><div class="stat-row"><span>Peers</span><span class="value">'+s.total_peers+'</span></div></div><div class="card"><h4>Invite Code</h4><div style="font-size:11px;word-break:break-all;color:var(--text-secondary);margin-bottom:12px;font-family:monospace;background:var(--bg-subtle);padding:10px;border-radius:var(--radius)">'+s.invite_code+'</div><button class="btn btn-secondary btn-sm" onclick="navigator.clipboard.writeText(\''+s.invite_code+'\');this.textContent=\'Copied!\';setTimeout(function(){this.textContent=\'Copy code\'},2000)">Copy code</button></div><div class="card"><h4>Connect to Peer</h4><div style="display:flex;gap:8px"><input id="connCode" placeholder="Paste invite code..." style="flex:1"><button class="btn btn-primary btn-sm" onclick="connectPeer()">Connect</button></div><div id="connMsg" style="margin-top:8px;font-size:12px"></div></div>'+(peers.length?'<div class="card"><h4>Connected Peers</h4>'+peers.map(function(p){return '<div class="peer-row"><div><div style="font-weight:500">'+(p.display_name||p.peer_id)+'</div><div style="font-size:11px;color:var(--text-muted)">'+p.address+'</div></div><span class="badge badge-success">online</span></div>'}).join('')+'</div>':'')})}
+function loadNet(){api('/api/network/status').then(function(s){if(s.status==='stopped'){$('netC').innerHTML='<div class="card"><h4>Network Offline</h4><p style="color:var(--text-muted)">P2P network is not running.</p></div>';return}var i=s.identity||{};var peers=s.peers||[];$('netC').innerHTML='<div class="card"><h4>Your Identity</h4><div class="stat-row"><span>Decentralized ID</span><span class="value" style="font-size:11px;word-break:break-all;max-width:280px;text-align:right">'+i.did+'</span></div><div class="stat-row"><span>Peer ID</span><span class="value">'+i.peer_id+'</span></div><div class="stat-row"><span>Safety Fingerprint</span><span class="value" style="font-size:11px">'+i.fingerprint+'</span></div></div><div class="card"><h4>Connection Status</h4><div class="stat-row"><span>Status</span><span class="chip chip-success">'+s.status+'</span></div><div class="stat-row"><span>Port</span><span class="value">'+s.port+'</span></div><div class="stat-row"><span>Connected Peers</span><span class="value">'+s.total_peers+'</span></div></div><div class="card"><h4>Invite Code</h4><div style="font-size:11px;word-break:break-all;color:var(--text-secondary);margin-bottom:16px;font-family:monospace;background:var(--bg-subtle);padding:14px;border-radius:var(--radius)">'+s.invite_code+'</div><button class="btn btn-secondary btn-sm" onclick="navigator.clipboard.writeText(\''+s.invite_code+'\');this.innerHTML=\'<svg width=14 height=14 viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><polyline points=&quot;20 6 9 17 4 12&quot;/></svg> Copied!\';setTimeout(function(){this.innerHTML=\'Copy code\'},2000)">Copy code</button></div><div class="card"><h4>Connect to Peer</h4><div style="display:flex;gap:10px"><input id="connCode" placeholder="Paste invite code..." style="flex:1"><button class="btn btn-primary btn-sm" onclick="connectPeer()">Connect</button></div><div id="connMsg" style="margin-top:12px;font-size:12px"></div></div>'+(peers.length?'<div class="card"><h4>Connected Peers</h4>'+peers.map(function(p){return '<div class="peer-row"><div><div style="font-weight:600">'+(p.display_name||p.peer_id)+'</div><div style="font-size:11px;color:var(--text-muted)">'+p.address+'</div></div><span class="chip chip-success">online</span></div>'}).join('')+'</div>':'')})}
 function connectPeer(){var c=$('connCode').value.trim();if(!c)return;api('/api/network/connect?invite_code='+encodeURIComponent(c),{method:'POST'}).then(function(r){$('connMsg').innerHTML='<span style="color:var(--success)">Connected to '+(r.display_name||r.peer_id)+'</span>';loadNet()}).catch(function(){$('connMsg').innerHTML='<span style="color:var(--error)">Connection failed</span>'})}
 
-function loadKeys(){api('/api/users/keys?user_id='+U).then(function(k){$('kList').innerHTML=k.map(function(x){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-subtle)"><div style="font-size:13px"><span style="font-weight:500">'+x.provider+'</span>'+(x.model?' <span style="color:var(--text-muted)">('+x.model+')</span>':'')+'</div><button class="btn btn-danger btn-sm" onclick="delKey(\''+x.provider+'\')">Remove</button></div>'}).join('')||'<div style="color:var(--text-muted);font-size:13px;padding:8px 0">No API keys configured</div>';$('pInfo').innerHTML='<div style="margin-bottom:4px"><span style="color:var(--text-muted)">User:</span> <strong>'+N+'</strong></div><div style="font-size:12px;color:var(--text-muted)">ID: '+U+'</div>'})}
+function loadKeys(){api('/api/users/keys?user_id='+U).then(function(k){$('kList').innerHTML=k.map(function(x){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border-light)"><div style="font-size:13px"><span style="font-weight:600">'+x.provider+'</span>'+(x.model?' <span style="color:var(--text-muted)">('+x.model+')</span>':'')+'</div><button class="btn btn-danger btn-sm" onclick="delKey(\''+x.provider+'\')">Remove</button></div>'}).join('')||'<div style="color:var(--text-muted);font-size:13px;padding:12px 0">No API keys configured</div>';$('pInfo').innerHTML='<div style="margin-bottom:6px"><span style="color:var(--text-muted)">Username:</span> <strong>'+N+'</strong></div><div style="font-size:12px;color:var(--text-muted)">User ID: '+U+'</div>'})}
 function saveKey(){var p=$('kProv').value,k=$('kVal').value;if(!k)return;api('/api/users/keys?user_id='+U,{method:'POST',body:JSON.stringify({provider:p,api_key:k})}).then(function(){$('kVal').value='';loadKeys()})}
 function delKey(p){fetch('/api/users/keys/'+p+'?user_id='+U,{method:'DELETE'}).then(function(){loadKeys()})}
 
 function dangerAction(action,msg){if(!confirm(msg))return;var url='/api/danger/'+action;if(action==='keys'||action==='user')url+='?user_id='+U;fetch(url,{method:'DELETE'}).then(function(r){return r.json()}).then(function(d){$('dangerMsg').innerHTML='<span style="color:var(--success)">'+d.message+'</span>';if(action==='user')setTimeout(function(){logout()},1500);if(action==='everything')setTimeout(function(){location.reload()},2000);loadKeys();loadAgents();loadRooms()}).catch(function(){$('dangerMsg').innerHTML='<span style="color:var(--error)">Error</span>'})}
 
-function loadHW(){api('/api/hardware').then(function(r){var h=r.hardware;$('hwC').innerHTML='<div class="card"><h4>Hardware</h4><div class="stat-row"><span>Operating System</span><span class="value">'+h.os+'</span></div><div class="stat-row"><span>CPU Cores</span><span class="value">'+h.cpu_cores+'</span></div><div class="stat-row"><span>RAM</span><span class="value">'+h.ram_gb+' GB</span></div><div class="stat-row"><span>GPU</span><span class="value">'+h.gpu+'</span></div><div class="stat-row"><span>VRAM</span><span class="value">'+h.gpu_vram_gb+' GB</span></div></div><div class="card"><h4>Model Recommendation</h4><p style="font-size:13px;color:var(--text-secondary);line-height:1.6">'+r.recommendation+'</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px">'+r.suggested_models.map(function(m){return '<span class="badge badge-neutral">'+m.size+(m.quant?' '+m.quant:'')+'</span>'}).join('')+'</div></div>'})}
+function loadHW(){api('/api/hardware').then(function(r){var h=r.hardware;$('hwC').innerHTML='<div class="card"><h4>Hardware Specifications</h4><div class="stat-row"><span>Operating System</span><span class="value">'+h.os+'</span></div><div class="stat-row"><span>CPU Cores</span><span class="value">'+h.cpu_cores+'</span></div><div class="stat-row"><span>Memory (RAM)</span><span class="value">'+h.ram_gb+' GB</span></div><div class="stat-row"><span>GPU</span><span class="value">'+h.gpu+'</span></div><div class="stat-row"><span>VRAM</span><span class="value">'+h.gpu_vram_gb+' GB</span></div></div><div class="card"><h4>AI Model Recommendation</h4><p style="font-size:13px;color:var(--text-secondary);line-height:1.7">'+r.recommendation+'</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">'+r.suggested_models.map(function(m){return '<span class="chip chip-neutral">'+m.size+(m.quant?' · '+m.quant:'')+'</span>'}).join('')+'</div></div>'})}
 
 function loadProv(){api('/api/providers').then(function(p){$('naPr').innerHTML=p.map(function(x){return '<option value="'+x.name+'">'+x.name+'</option>'}).join('')})}
 function mkRoom(){var n=$('nrN').value,t=$('nrT').value;if(!n)return;api('/api/rooms?user_id='+U,{method:'POST',body:JSON.stringify({name:n,type:t})}).then(function(){hideM('mRoom');loadRooms()})}
@@ -1670,9 +1692,9 @@ function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g
 if(localStorage.getItem('ht')){T=localStorage.getItem('ht');U=localStorage.getItem('hu');N=localStorage.getItem('hn');enter()}
 
 var STEPS=[
-{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',t:'Welcome to Hive',p:'A decentralized, end-to-end encrypted AI messenger. Your data stays on your device.',x:'<strong>What makes Hive different:</strong><br>End-to-end encryption with Signal Protocol<br>Peer-to-peer networking — no central server<br>AI agents run locally on your machine<br>You own your data, your keys, your identity'},
-{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10"/></svg>',t:'Network',p:'Connect with peers over your local network or via Tailscale. Share your invite code to get started.',x:'<strong>How to connect:</strong><br>1. Go to the Network tab<br>2. Copy your invite code<br>3. Share it with someone on your network<br>4. They paste it to connect directly'},
-{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',t:'You are ready',p:'Add an API key, create an agent, create a room, and start chatting.',x:'<strong>Quick start:</strong><br>1. Settings — add your API key (try Groq, it is free)<br>2. Agents — create your first AI agent<br>3. Chat — create a room and invite the bot<br>4. Start chatting!'}
+{i:'<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',t:'Welcome to Hive',p:'Your decentralized, end-to-end encrypted AI knowledge platform.',x:'<strong>What makes Hive different:</strong><br>End-to-end encryption with Signal Protocol<br>Peer-to-peer networking — no central server<br>AI agents run locally on your machine<br>You own your data, your keys, your identity'},
+{i:'<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10"/></svg>',t:'P2P Network',p:'Connect directly with peers over your local network or via Tailscale.',x:'<strong>Getting started:</strong><br>1. Go to the Network tab<br>2. Copy your invite code<br>3. Share it with someone on your network<br>4. They paste it to connect directly'},
+{i:'<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',t:'You are all set',p:'Add an API key, create an AI agent, start a conversation.',x:'<strong>Quick start guide:</strong><br>1. Settings — add your API key (Groq is free and fast)<br>2. AI Agents — create your first agent<br>3. Chat — create a conversation and invite the agent<br>4. Start chatting with your AI!'}
 ];
 var ti=0;
 function showTut(){ti=0;renderT();$('tut').style.display='flex'}
