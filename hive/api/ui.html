@@ -6,7 +6,7 @@
 <title>Hive</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#09090b;--s1:#18181b;--s2:#1f1f23;--bd:#27272a;--t1:#fafafa;--t2:#a1a1aa;--mt:#52525b;--ac:#6366f1;--gn:#22c55e;--rd:#ef4444;--bl:#3b82f6}
+:root{--bg:#09090b;--s1:#18181b;--s2:#1f1f23;--bd:#27272a;--t1:#fafafa;--t2:#a1a1aa;--mt:#52525b;--ac:#6366f1;--gn:#22c55e;--rd:#ef4444;--bl:#3b82f6;--am:#f59e0b}
 body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--t1);height:100vh;display:flex;font-size:14px}
 input,textarea,select,button{font-family:inherit;font-size:inherit}
 input,textarea,select{padding:8px 12px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--t1);outline:none;width:100%}
@@ -14,13 +14,15 @@ input:focus,textarea:focus{border-color:var(--ac)}
 .btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-weight:500}
 .btn-p{background:var(--ac);color:#fff}.btn-o{background:transparent;border:1px solid var(--bd);color:var(--t2)}
 .btn-d{background:var(--rd);color:#fff}.btn-s{padding:4px 10px;font-size:12px}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.tag-g{background:#052e16;color:#4ade80}.tag-r{background:#450a0a;color:#f87171}
+.tag-b{background:#172554;color:#60a5fa}.tag-gr{background:#27272a;color:#a1a1aa}
 
 #auth{display:flex;align-items:center;justify-content:center;width:100vw;height:100vh}
 #auth .card{width:380px;padding:32px;background:var(--s1);border:1px solid var(--bd);border-radius:12px}
 #auth h1{font-size:24px;font-weight:700;margin-bottom:4px}
 #auth .sub{color:var(--mt);font-size:12px;margin-bottom:20px}
-.fg{margin-bottom:12px}
-.fg label{display:block;font-size:12px;color:var(--t2);margin-bottom:4px}
+.fg{margin-bottom:12px}.fg label{display:block;font-size:12px;color:var(--t2);margin-bottom:4px}
 .tabs{display:flex;margin-bottom:20px;border-bottom:1px solid var(--bd)}
 .tab{padding:8px 16px;cursor:pointer;color:var(--mt);font-size:13px;border-bottom:2px solid transparent}
 .tab.on{color:var(--ac);border-color:var(--ac)}
@@ -31,14 +33,15 @@ input:focus,textarea:focus{border-color:var(--ac)}
 .sb-h h2{font-size:15px;font-weight:700}
 .sb-u{padding:8px 14px;border-bottom:1px solid var(--bd);font-size:12px;color:var(--t2)}
 .nav{padding:6px}
-.nav-i{padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--t2);margin-bottom:2px}
+.nav-i{padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--t2);margin-bottom:2px;display:flex;align-items:center;gap:8px}
 .nav-i:hover{background:var(--s2);color:var(--t1)}
 .nav-i.on{background:var(--ac);color:#fff}
 .rooms{flex:1;overflow-y:auto;border-top:1px solid var(--bd);padding:6px}
 .rooms-l{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--mt);padding:8px 12px 4px;font-weight:600}
-.rm{padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;margin-bottom:2px}
+.rm{padding:8px 12px;border-radius:6px;cursor:pointer;font-size:13px;margin-bottom:2px;position:relative}
 .rm:hover{background:var(--s2)}
 .rm.on{background:var(--s2);box-shadow:inset 3px 0 0 var(--ac)}
+.rm .badge{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--ac);color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:600}
 
 .mn{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .tb{padding:12px 20px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
@@ -48,18 +51,24 @@ input:focus,textarea:focus{border-color:var(--ac)}
 .msg{max-width:75%;padding:8px 12px;border-radius:10px;font-size:13px;line-height:1.5}
 .msg-me{align-self:flex-end;background:var(--ac);color:#fff}
 .msg-them{align-self:flex-start;background:var(--s1);border:1px solid var(--bd)}
+.typing-ind{align-self:flex-start;color:var(--mt);font-size:12px;font-style:italic;padding:4px 12px}
 .cbar{padding:12px 20px;border-top:1px solid var(--bd);display:flex;gap:8px}
 .cbar input{flex:1}
+.search-bar{padding:8px 20px;border-bottom:1px solid var(--bd);display:none}
+.search-bar input{background:var(--s2);font-size:12px;padding:6px 10px}
+.conn-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+.conn-ok{background:var(--gn)}.conn-err{background:var(--rd)}
 
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center}
 .modal-bg.show{display:flex}
 .modal{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:24px;width:460px;max-width:90vw}
 .modal h3{font-size:16px;font-weight:600;margin-bottom:16px}
-
 .card{background:var(--s2);border-radius:8px;padding:16px;margin-bottom:12px}
 .card h4{font-size:13px;font-weight:600;margin-bottom:8px}
 .stat{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}
 .stat .v{font-weight:600;color:var(--gn)}
+.peer-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bd)}
+.peer-item:last-child{border:none}
 
 #tut{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;align-items:center;justify-content:center}
 #tut .box{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:32px;width:520px;max-width:92vw}
@@ -100,13 +109,14 @@ input:focus,textarea:focus{border-color:var(--ac)}
 
 <div id="app">
 <div class="sb">
-  <div class="sb-h"><h2>Hive</h2><button class="btn btn-o btn-s" onclick="logout()">Logout</button></div>
+  <div class="sb-h"><h2><span id="connDot" class="conn-dot conn-err"></span>Hive</h2><button class="btn btn-o btn-s" onclick="logout()">Logout</button></div>
   <div class="sb-u" id="sbU"></div>
   <div class="nav">
-    <div class="nav-i on" data-v="chat" onclick="view('chat')">Chat</div>
-    <div class="nav-i" data-v="agents" onclick="view('agents')">Agents</div>
-    <div class="nav-i" data-v="settings" onclick="view('settings')">Settings</div>
-    <div class="nav-i" data-v="system" onclick="view('system')">System</div>
+    <div class="nav-i on" data-v="chat" onclick="view('chat')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Chat</div>
+    <div class="nav-i" data-v="agents" onclick="view('agents')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg> Agents</div>
+    <div class="nav-i" data-v="network" onclick="view('network')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10"/></svg> Network</div>
+    <div class="nav-i" data-v="settings" onclick="view('settings')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings</div>
+    <div class="nav-i" data-v="system" onclick="view('system')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> System</div>
   </div>
   <div class="rooms">
     <div class="rooms-l">Rooms</div>
@@ -115,20 +125,31 @@ input:focus,textarea:focus{border-color:var(--ac)}
   </div>
 </div>
 <div class="mn">
+  <!-- Chat -->
   <div id="vChat" style="display:flex;flex-direction:column;flex:1">
-    <div class="tb"><h3 id="cTitle">Select a room</h3></div>
+    <div class="tb"><h3 id="cTitle">Select a room</h3><button class="btn btn-o btn-s" onclick="toggleSearch()">Search</button></div>
+    <div class="search-bar" id="searchBar"><input id="searchIn" placeholder="Search messages..." oninput="doSearch()"></div>
     <div class="msgs" id="cMsgs"><div style="display:flex;align-items:center;justify-content:center;flex:1;color:var(--mt)">Create or select a room</div></div>
+    <div id="typingArea"></div>
     <div class="cbar" id="cBar" style="display:none">
-      <input id="cIn" placeholder="Type a message..." onkeydown="if(event.key==='Enter')send()">
+      <input id="cIn" placeholder="Type a message..." onkeydown="if(event.key==='Enter')send()" oninput="sendTyping()">
+      <button class="btn btn-o btn-s" onclick="modal('mFile')">File</button>
       <button class="btn btn-o btn-s" onclick="modal('mBot')">Bot</button>
       <button class="btn btn-o btn-s" onclick="modal('mUser')">User</button>
       <button class="btn btn-p" onclick="send()">Send</button>
     </div>
   </div>
+  <!-- Agents -->
   <div id="vAgents" style="display:none;flex-direction:column;flex:1">
     <div class="tb"><h3>Agents</h3><button class="btn btn-p btn-s" onclick="modal('mAgent')">+ New Agent</button></div>
     <div class="ct" id="aList"></div>
   </div>
+  <!-- Network -->
+  <div id="vNetwork" style="display:none;flex-direction:column;flex:1">
+    <div class="tb"><h3>Network</h3><button class="btn btn-o btn-s" onclick="loadNet()">Refresh</button></div>
+    <div class="ct" id="netC"></div>
+  </div>
+  <!-- Settings -->
   <div id="vSettings" style="display:none;flex-direction:column;flex:1">
     <div class="tb"><h3>Settings</h3></div>
     <div class="ct">
@@ -142,51 +163,44 @@ input:focus,textarea:focus{border-color:var(--ac)}
           <button class="btn btn-p btn-s" onclick="saveKey()">Save</button>
         </div>
       </div>
-      <div>
+      <div style="margin-bottom:24px">
         <h4 style="font-size:14px;font-weight:600;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bd)">Profile</h4>
         <div id="pInfo"></div>
       </div>
-      <div style="margin-top:32px">
+      <div>
         <h4 style="font-size:14px;font-weight:600;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--rd);color:var(--rd)">Danger Zone</h4>
-        <p style="font-size:12px;color:var(--mt);margin-bottom:12px">Irreversible actions. Proceed with caution.</p>
+        <p style="font-size:12px;color:var(--mt);margin-bottom:12px">Irreversible actions.</p>
         <div style="display:flex;flex-direction:column;gap:8px">
           <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px">
             <div><div style="font-size:13px;font-weight:500">Delete All API Keys</div><div style="font-size:11px;color:var(--mt)">Remove all stored API keys</div></div>
             <button class="btn btn-d btn-s" onclick="dangerAction('keys','Delete all API keys?')">Delete Keys</button>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px">
-            <div><div style="font-size:13px;font-weight:500">Delete All Agents</div><div style="font-size:11px;color:var(--mt)">Remove all AI agents and their skills</div></div>
+            <div><div style="font-size:13px;font-weight:500">Delete All Agents</div><div style="font-size:11px;color:var(--mt)">Remove all AI agents</div></div>
             <button class="btn btn-d btn-s" onclick="dangerAction('agents','Delete ALL agents?')">Delete Agents</button>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px">
-            <div><div style="font-size:13px;font-weight:500">Delete All Rooms</div><div style="font-size:11px;color:var(--mt)">Remove all rooms, messages, and chat history</div></div>
+            <div><div style="font-size:13px;font-weight:500">Delete All Rooms</div><div style="font-size:11px;color:var(--mt)">Remove all rooms and messages</div></div>
             <button class="btn btn-d btn-s" onclick="dangerAction('rooms','Delete ALL rooms and messages?')">Delete Rooms</button>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px">
-            <div><div style="font-size:13px;font-weight:500">Reset P2P Identity</div><div style="font-size:11px;color:var(--mt)">Delete cryptographic identity. Requires restart.</div></div>
-            <button class="btn btn-d btn-s" onclick="dangerAction('identity','Delete your P2P identity? You will need to restart.')">Reset Identity</button>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px">
-            <div><div style="font-size:13px;font-weight:500">Clear Sessions</div><div style="font-size:11px;color:var(--mt)">Delete all encrypted Signal Protocol sessions</div></div>
-            <button class="btn btn-d btn-s" onclick="dangerAction('sessions','Clear all encrypted sessions?')">Clear Sessions</button>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px">
-            <div><div style="font-size:13px;font-weight:500">Clear Relay Mailboxes</div><div style="font-size:11px;color:var(--mt)">Delete all offline message queues</div></div>
-            <button class="btn btn-d btn-s" onclick="dangerAction('relay','Clear all relay mailboxes?')">Clear Relay</button>
+            <div><div style="font-size:13px;font-weight:500">Reset P2P Identity</div><div style="font-size:11px;color:var(--mt)">Delete cryptographic identity</div></div>
+            <button class="btn btn-d btn-s" onclick="dangerAction('identity','Delete P2P identity?')">Reset Identity</button>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#1a0505;border:1px solid var(--rd);border-radius:8px">
-            <div><div style="font-size:13px;font-weight:600;color:var(--rd)">Delete Everything</div><div style="font-size:11px;color:var(--mt)">Nuclear reset — all data, identity, keys, messages, agents. Requires restart.</div></div>
-            <button class="btn btn-d btn-s" onclick="dangerAction('everything','DELETE EVERYTHING? This cannot be undone!')">Reset All</button>
+            <div><div style="font-size:13px;font-weight:600;color:var(--rd)">Delete Everything</div><div style="font-size:11px;color:var(--mt)">Nuclear reset — all data</div></div>
+            <button class="btn btn-d btn-s" onclick="dangerAction('everything','DELETE EVERYTHING?')">Reset All</button>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#1a0505;border:1px solid var(--rd);border-radius:8px">
-            <div><div style="font-size:13px;font-weight:600;color:var(--rd)">Delete Account</div><div style="font-size:11px;color:var(--mt)">Permanently delete your user account and all data</div></div>
-            <button class="btn btn-d btn-s" onclick="dangerAction('user','DELETE YOUR ACCOUNT? This is permanent!')">Delete Account</button>
+            <div><div style="font-size:13px;font-weight:600;color:var(--rd)">Delete Account</div><div style="font-size:11px;color:var(--mt)">Permanently delete your account</div></div>
+            <button class="btn btn-d btn-s" onclick="dangerAction('user','DELETE ACCOUNT?')">Delete Account</button>
           </div>
         </div>
         <div id="dangerMsg" style="margin-top:8px;font-size:12px"></div>
       </div>
     </div>
   </div>
+  <!-- System -->
   <div id="vSystem" style="display:none;flex-direction:column;flex:1">
     <div class="tb"><h3>System</h3><button class="btn btn-o btn-s" onclick="loadHW()">Refresh</button></div>
     <div class="ct" id="hwC"></div>
@@ -204,7 +218,6 @@ input:focus,textarea:focus{border-color:var(--ac)}
     <button class="btn btn-p" onclick="mkRoom()">Create</button>
   </div>
 </div></div>
-
 <div class="modal-bg" id="mAgent"><div class="modal">
   <h3>New Agent</h3>
   <div class="fg"><label>Name</label><input id="naN" placeholder="Assistant"></div>
@@ -216,7 +229,6 @@ input:focus,textarea:focus{border-color:var(--ac)}
     <button class="btn btn-p" onclick="mkAgent()">Create</button>
   </div>
 </div></div>
-
 <div class="modal-bg" id="mBot"><div class="modal">
   <h3>Invite Bot</h3>
   <div class="fg"><label>Agent</label><select id="ibA"></select></div>
@@ -225,7 +237,6 @@ input:focus,textarea:focus{border-color:var(--ac)}
     <button class="btn btn-p" onclick="invBot()">Invite</button>
   </div>
 </div></div>
-
 <div class="modal-bg" id="mUser"><div class="modal">
   <h3>Invite User</h3>
   <div class="fg"><label>User</label><select id="iuU"></select></div>
@@ -234,10 +245,17 @@ input:focus,textarea:focus{border-color:var(--ac)}
     <button class="btn btn-p" onclick="invUser()">Invite</button>
   </div>
 </div></div>
+<div class="modal-bg" id="mFile"><div class="modal">
+  <h3>Upload File</h3>
+  <div class="fg"><label>File</label><input type="file" id="fileIn"></div>
+  <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+    <button class="btn btn-o" onclick="hideM('mFile')">Cancel</button>
+    <button class="btn btn-p" onclick="uploadFile()">Upload</button>
+  </div>
+</div></div>
 
 <!-- Tutorial -->
-<div id="tut">
-<div class="box">
+<div id="tut"><div class="box">
   <div class="icon" id="tIcon"></div>
   <h2 id="tTitle"></h2>
   <p id="tText"></p>
@@ -250,71 +268,69 @@ input:focus,textarea:focus{border-color:var(--ac)}
       <button class="btn btn-p" id="tNext" onclick="tutNext()">Next</button>
     </div>
   </div>
-</div>
-</div>
+</div></div>
 
 <script>
-var T=null,U=null,N=null,room=null,ws=null;
+var T=null,U=null,N=null,room=null,ws=null,wsRetry=0,unread={},typingTimer=null;
 var $=function(id){return document.getElementById(id)};
 var api=function(u,o){o=o||{};o.headers=o.headers||{};o.headers['Content-Type']='application/json';return fetch(u,o).then(function(r){return r.json()})};
 
 function authTab(i){document.querySelectorAll('.tab').forEach(function(e,j){e.classList.toggle('on',j===i)});$('aLogin').style.display=i?'none':'block';$('aReg').style.display=i?'block':'none'}
-
 function doReg(){var u=$('rU').value,p=$('rP').value,n=$('rN').value;if(!u||!p){$('rErr').textContent='Fill all fields';return}api('/api/auth/register',{method:'POST',body:JSON.stringify({username:u,password:p,display_name:n})}).then(function(r){if(r.token){T=r.token;U=r.id;N=r.username;enter()}else{$('rErr').textContent=r.detail||'Error'}})}
-
-function doLogin(){var u=$('lU').value,p=$('lP').value;if(!u||!p){$('lErr').textContent='Fill all fields';return}api('/api/auth/login',{method:'POST',body:JSON.stringify({username:u,password:p})}).then(function(r){if(r.token){T=r.token;U=r.id;N=r.username;enter()}else{$('lErr').textContent=r.detail||'Invalid credentials'}})}
-
+function doLogin(){var u=$('lU').value,p=$('lP').value;if(!u||!p){$('lErr').textContent='Fill all fields';return}api('/api/auth/login',{method:'POST',body:JSON.stringify({username:u,password:p})}).then(function(r){if(r.token){T=r.token;U=r.id;N=r.username;enter()}else{$('lErr').textContent=r.detail||'Invalid'}})}
 function logout(){T=null;U=null;N=null;if(ws)ws.close();$('app').style.display='none';$('auth').style.display='flex'}
 
-function enter(){localStorage.setItem('ht',T);localStorage.setItem('hu',U);localStorage.setItem('hn',N);$('auth').style.display='none';$('app').style.display='flex';$('sbU').textContent=N;loadRooms();loadProv();loadHW();if(!localStorage.getItem('htut'))setTimeout(showTut,600)}
+function enter(){localStorage.setItem('ht',T);localStorage.setItem('hu',U);localStorage.setItem('hn',N);$('auth').style.display='none';$('app').style.display='flex';$('sbU').textContent=N;loadRooms();loadProv();loadHW();loadNet();if(!localStorage.getItem('htut'))setTimeout(showTut,600)}
 
-function view(v){document.querySelectorAll('[id^=v]').forEach(function(e){e.style.display='none'});$('v'+v.charAt(0).toUpperCase()+v.slice(1)).style.display='flex';document.querySelectorAll('.nav-i').forEach(function(e){e.classList.toggle('on',e.dataset.v===v)});if(v==='agents')loadAgents();if(v==='settings')loadKeys();if(v==='system')loadHW()}
+function view(v){document.querySelectorAll('[id^=v]').forEach(function(e){e.style.display='none'});var el=$('v'+v.charAt(0).toUpperCase()+v.slice(1));if(el)el.style.display='flex';document.querySelectorAll('.nav-i').forEach(function(e){e.classList.toggle('on',e.dataset.v===v)});if(v==='agents')loadAgents();if(v==='settings')loadKeys();if(v==='system')loadHW();if(v==='network')loadNet()}
 
-function loadRooms(){api('/api/rooms?user_id='+U).then(function(r){$('rList').innerHTML=r.map(function(x){return '<div class="rm'+(room===x.id?' on':'')+'" onclick="openR(\''+x.id+'\',\''+(x.name||x.id)+'\')"><div style="font-weight:500">'+(x.name||x.id)+'</div><div style="font-size:11px;color:var(--mt)">'+x.type+'</div></div>'}).join('')||'<div style="padding:8px 12px;font-size:12px;color:var(--mt)">No rooms</div>'})}
+function loadRooms(){api('/api/rooms?user_id='+U).then(function(r){$('rList').innerHTML=r.map(function(x){var b=unread[x.id]?'<span class="badge">'+unread[x.id]+'</span>':'';return '<div class="rm'+(room===x.id?' on':'')+'" onclick="openR(\''+x.id+'\',\''+(x.name||x.id)+'\')"><div style="font-weight:500">'+(x.name||x.id)+'</div><div style="font-size:11px;color:var(--mt)">'+x.type+'</div>'+b+'</div>'}).join('')||'<div style="padding:8px 12px;font-size:12px;color:var(--mt)">No rooms</div>'})}
 
-function openR(id,name){room=id;$('cTitle').textContent=name;loadRooms();$('cBar').style.display='flex';connectWS(id);api('/api/rooms/'+id+'/messages').then(function(m){$('cMsgs').innerHTML=m.map(function(x){var c=x.sender_id===U?'msg-me':'msg-them';return '<div class="msg '+c+'"><div style="font-size:11px;color:'+(x.sender_id===U?'rgba(255,255,255,.6)':'var(--mt)')+';margin-bottom:2px">'+(x.sender_type==='agent'?'bot':'you')+'</div>'+esc(x.content)+'</div>'}).join('')||'<div style="display:flex;align-items:center;justify-content:center;flex:1;color:var(--mt)">No messages yet</div>';$('cMsgs').scrollTop=$('cMsgs').scrollHeight})}
+function openR(id,name){room=id;unread[id]=0;$('cTitle').textContent=name;loadRooms();$('cBar').style.display='flex';connectWS(id);api('/api/rooms/'+id+'/messages').then(function(m){$('cMsgs').innerHTML=m.map(function(x){var c=x.sender_id===U?'msg-me':'msg-them';return '<div class="msg '+c+'"><div style="font-size:11px;color:'+(x.sender_id===U?'rgba(255,255,255,.6)':'var(--mt)')+';margin-bottom:2px">'+(x.sender_type==='agent'?'bot':'you')+'</div>'+esc(x.content)+'</div>'}).join('')||'<div style="display:flex;align-items:center;justify-content:center;flex:1;color:var(--mt)">No messages yet</div>';$('cMsgs').scrollTop=$('cMsgs').scrollHeight})}
 
-function connectWS(id){if(ws)ws.close();ws=new WebSocket('ws://'+location.host+'/ws/'+id+'?token='+T);ws.onmessage=function(e){var d=JSON.parse(e.data);if(d.type==='new_message'){$('cMsgs').innerHTML+='<div class="msg '+(d.message.sender_id===U?'msg-me':'msg-them')+'">'+esc(d.message.content)+'</div>';$('cMsgs').scrollTop=$('cMsgs').scrollHeight}}}
+function connectWS(id){if(ws)ws.close();ws=new WebSocket('ws://'+location.host+'/ws/'+id+'?token='+T);ws.onopen=function(){wsRetry=0;$('connDot').className='conn-dot conn-ok'};ws.onclose=function(){$('connDot').className='conn-dot conn-err';if(T&&room){var d=Math.min(1000*Math.pow(2,wsRetry),30000);wsRetry++;setTimeout(function(){if(room)connectWS(room)},d)}};ws.onmessage=function(e){var d=JSON.parse(e.data);if(d.type==='new_message'){if(d.message.sender_id!==U&&room!==id){unread[id]=(unread[id]||0)+1;loadRooms();beep()}$('cMsgs').innerHTML+='<div class="msg '+(d.message.sender_id===U?'msg-me':'msg-them')+'">'+esc(d.message.content)+'</div>';$('cMsgs').scrollTop=$('cMsgs').scrollHeight}else if(d.type==='typing'&&d.user_id!==U){$('typingArea').innerHTML='<div class="typing-ind">'+(d.is_bot?'bot':'someone')+' is typing...</div>';clearTimeout(typingTimer);typingTimer=setTimeout(function(){$('typingArea').innerHTML=''},3000)}}}
 
 function send(){var v=$('cIn').value.trim();if(!v||!room)return;$('cIn').value='';api('/api/rooms/'+room+'/messages?user_id='+U,{method:'POST',body:JSON.stringify({content:v})})}
+function sendTyping(){if(ws&&ws.readyState===1)ws.send(JSON.stringify({type:'typing'}))}
 
-function loadAgents(){api('/api/agents').then(function(a){$('aList').innerHTML=a.map(function(x){return '<div class="card"><div style="display:flex;justify-content:space-between"><strong>'+x.name+'</strong><span style="font-size:11px;color:var(--mt)">'+x.provider+'</span></div><div style="font-size:12px;color:var(--t2);margin-top:4px">'+esc(x.system_prompt.substring(0,100))+'</div><div style="margin-top:8px"><button class="btn btn-d btn-s" onclick="delAgent(\''+x.id+'\')">Delete</button></div></div>'}).join('')||'<div style="color:var(--mt)">No agents. Create one!</div>'})}
+function toggleSearch(){var b=$('searchBar');b.style.display=b.style.display==='none'||!b.style.display?'block':'none';if(b.style.display==='block')$('searchIn').focus();else{$('searchIn').value='';loadRoomMsgs()}}
+function doSearch(){var q=$('searchIn').value.trim();if(!q){loadRoomMsgs();return}api('/api/messages/search?room_id='+room+'&q='+encodeURIComponent(q)).then(function(m){$('cMsgs').innerHTML=m.map(function(x){return '<div class="msg msg-them"><div style="font-size:11px;color:var(--mt);margin-bottom:2px">'+(x.sender_type==='agent'?'bot':'user')+'</div>'+esc(x.content)+'</div>'}).join('')||'<div style="color:var(--mt);text-align:center;padding:20px">No results</div>'})}
+function loadRoomMsgs(){if(room)api('/api/rooms/'+room+'/messages').then(function(m){$('cMsgs').innerHTML=m.map(function(x){var c=x.sender_id===U?'msg-me':'msg-them';return '<div class="msg '+c+'">'+esc(x.content)+'</div>'}).join('')})}
 
+function beep(){try{var c=new(window.AudioContext||window.webkitAudioContext)();var o=c.createOscillator();var g=c.createGain();o.connect(g);g.connect(c.destination);g.gain.value=0.1;o.frequency.value=800;o.start();o.stop(c.currentTime+0.1)}catch(e){}}
+
+function loadAgents(){api('/api/agents').then(function(a){$('aList').innerHTML=a.map(function(x){return '<div class="card"><div style="display:flex;justify-content:space-between"><strong>'+x.name+'</strong><span style="font-size:11px;color:var(--mt)">'+x.provider+'</span></div><div style="font-size:12px;color:var(--t2);margin-top:4px">'+esc(x.system_prompt.substring(0,100))+'</div><div style="margin-top:8px"><button class="btn btn-d btn-s" onclick="delAgent(\''+x.id+'\')">Delete</button></div></div>'}).join('')||'<div style="color:var(--mt)">No agents</div>'})}
 function mkAgent(){var n=$('naN').value,p=$('naP').value,pr=$('naPr').value,m=$('naM').value;if(!n)return;api('/api/agents',{method:'POST',body:JSON.stringify({name:n,system_prompt:p,provider:pr,model:m})}).then(function(){hideM('mAgent');loadAgents()})}
 function delAgent(id){fetch('/api/agents/'+id,{method:'DELETE'}).then(function(){loadAgents()})}
 
-function loadKeys(){api('/api/users/keys?user_id='+U).then(function(k){$('kList').innerHTML=k.map(function(x){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--s2)"><span style="font-size:13px">'+x.provider+(x.model?' ('+x.model+')':'')+'</span><button class="btn btn-d btn-s" onclick="delKey(\''+x.provider+'\')">Remove</button></div>'}).join('')||'<div style="color:var(--mt);font-size:13px">No keys. Add one below.</div>';$('pInfo').innerHTML='<div style="font-size:13px">User: <strong>'+N+'</strong></div><div style="font-size:12px;color:var(--mt)">ID: '+U+'</div>'})}
+function loadNet(){api('/api/network/status').then(function(s){if(s.status==='stopped'){$('netC').innerHTML='<div class="card"><h4>Network Stopped</h4><p style="color:var(--mt)">P2P network is not running.</p></div>';return}var i=s.identity||{};var peers=s.peers||[];$('netC').innerHTML='<div class="card"><h4>Your Identity</h4><div class="stat"><span>DID</span><span class="v" style="font-size:11px;word-break:break-all">'+i.did+'</span></div><div class="stat"><span>Peer ID</span><span class="v">'+i.peer_id+'</span></div><div class="stat"><span>Fingerprint</span><span class="v" style="font-size:11px">'+i.fingerprint+'</span></div></div><div class="card"><h4>Connection</h4><div class="stat"><span>Status</span><span class="v">'+s.status+'</span></div><div class="stat"><span>Port</span><span class="v">'+s.port+'</span></div><div class="stat"><span>Peers</span><span class="v">'+s.total_peers+'</span></div></div><div class="card"><h4>Invite Code</h4><div style="font-size:11px;word-break:break-all;color:var(--t2);margin-bottom:8px;font-family:monospace">'+s.invite_code+'</div><button class="btn btn-o btn-s" onclick="navigator.clipboard.writeText(\''+s.invite_code+'\');this.textContent=\'Copied!\'">Copy</button></div><div class="card"><h4>Connect to Peer</h4><div style="display:flex;gap:8px"><input id="connCode" placeholder="Paste invite code..." style="flex:1"><button class="btn btn-p btn-s" onclick="connectPeer()">Connect</button></div><div id="connMsg" style="margin-top:8px;font-size:12px"></div></div>'+(peers.length?'<div class="card"><h4>Connected Peers</h4>'+peers.map(function(p){return '<div class="peer-item"><div><div style="font-weight:500">'+(p.display_name||p.peer_id)+'</div><div style="font-size:11px;color:var(--mt)">'+p.address+'</div></div><span class="tag tag-g">online</span></div>'}).join('')+'</div>':'')})}
+function connectPeer(){var c=$('connCode').value.trim();if(!c)return;api('/api/network/connect?invite_code='+encodeURIComponent(c),{method:'POST'}).then(function(r){$('connMsg').innerHTML='<span style="color:var(--gn)">Connected to '+r.display_name+'</span>';loadNet()}).catch(function(e){$('connMsg').innerHTML='<span style="color:var(--rd)">Failed: '+e+'</span>'})}
+
+function loadKeys(){api('/api/users/keys?user_id='+U).then(function(k){$('kList').innerHTML=k.map(function(x){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--s2)"><span style="font-size:13px">'+x.provider+(x.model?' ('+x.model+')':'')+'</span><button class="btn btn-d btn-s" onclick="delKey(\''+x.provider+'\')">Remove</button></div>'}).join('')||'<div style="color:var(--mt);font-size:13px">No keys</div>';$('pInfo').innerHTML='<div style="font-size:13px">User: <strong>'+N+'</strong></div><div style="font-size:12px;color:var(--mt)">ID: '+U+'</div>'})}
 function saveKey(){var p=$('kProv').value,k=$('kVal').value;if(!k)return;api('/api/users/keys?user_id='+U,{method:'POST',body:JSON.stringify({provider:p,api_key:k})}).then(function(){$('kVal').value='';loadKeys()})}
 function delKey(p){fetch('/api/users/keys/'+p+'?user_id='+U,{method:'DELETE'}).then(function(){loadKeys()})}
 
-function dangerAction(action,confirmMsg){if(!confirm(confirmMsg))return;var url='/api/danger/'+action;if(action==='keys'||action==='user')url+='?user_id='+U;fetch(url,{method:'DELETE'}).then(function(r){return r.json()}).then(function(d){$('dangerMsg').innerHTML='<span style="color:var(--gn)">'+d.message+'</span>';if(action==='user'){setTimeout(function(){logout()},1500)}if(action==='everything'){setTimeout(function(){location.reload()},2000)}loadKeys();loadAgents();loadRooms()}).catch(function(e){$('dangerMsg').innerHTML='<span style="color:var(--rd)">Error: '+e+'</span>'})}
+function dangerAction(action,msg){if(!confirm(msg))return;var url='/api/danger/'+action;if(action==='keys'||action==='user')url+='?user_id='+U;fetch(url,{method:'DELETE'}).then(function(r){return r.json()}).then(function(d){$('dangerMsg').innerHTML='<span style="color:var(--gn)">'+d.message+'</span>';if(action==='user')setTimeout(function(){logout()},1500);if(action==='everything')setTimeout(function(){location.reload()},2000);loadKeys();loadAgents();loadRooms()}).catch(function(e){$('dangerMsg').innerHTML='<span style="color:var(--rd)">Error</span>'})}
 
 function loadHW(){api('/api/hardware').then(function(r){var h=r.hardware;$('hwC').innerHTML='<div class="card"><h4>Hardware</h4><div class="stat"><span>OS</span><span class="v">'+h.os+'</span></div><div class="stat"><span>CPU</span><span class="v">'+h.cpu_cores+' cores</span></div><div class="stat"><span>RAM</span><span class="v">'+h.ram_gb+' GB</span></div><div class="stat"><span>GPU</span><span class="v">'+h.gpu+'</span></div><div class="stat"><span>VRAM</span><span class="v">'+h.gpu_vram_gb+' GB</span></div></div><div class="card"><h4>Recommendation</h4><p style="font-size:13px;color:var(--t2)">'+r.recommendation+'</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+r.suggested_models.map(function(m){return '<div style="background:var(--s1);border:1px solid var(--bd);border-radius:6px;padding:4px 10px;font-size:12px">'+m.size+' '+(m.quant||'')+'</div>'}).join('')+'</div></div>'})}
 
 function loadProv(){api('/api/providers').then(function(p){$('naPr').innerHTML=p.map(function(x){return '<option value="'+x.name+'">'+x.name+'</option>'}).join('')})}
-
 function mkRoom(){var n=$('nrN').value,t=$('nrT').value;if(!n)return;api('/api/rooms?user_id='+U,{method:'POST',body:JSON.stringify({name:n,type:t})}).then(function(){hideM('mRoom');loadRooms()})}
-
 function invBot(){var a=$('ibA').value;if(!a||!room)return;api('/api/rooms/'+room+'/members',{method:'POST',body:JSON.stringify({member_type:'agent',member_id:a})}).then(function(){hideM('mBot')})}
 function invUser(){var u=$('iuU').value;if(!u||!room)return;api('/api/rooms/'+room+'/members',{method:'POST',body:JSON.stringify({member_type:'user',member_id:u})}).then(function(){hideM('mUser')})}
+function uploadFile(){var f=$('fileIn').files[0];if(!f||!room)return;var r=new FileReader();r.onload=function(){var b64=r.result.split(',')[1];api('/api/rooms/'+room+'/files?user_id='+U+'&filename='+f.name,{method:'POST',body:JSON.stringify({content:b64})}).then(function(){hideM('mFile');$('cMsgs').innerHTML+='<div class="msg msg-them"><div style="font-size:11px;color:var(--mt);margin-bottom:2px">file</div>'+f.name+' ('+Math.round(f.size/1024)+'KB)</div>';$('cMsgs').scrollTop=$('cMsgs').scrollHeight})};r.readAsDataURL(f)}
 
 function modal(id){$(id).classList.add('show');if(id==='mBot')api('/api/agents').then(function(a){$('ibA').innerHTML=a.map(function(x){return '<option value="'+x.id+'">'+x.name+'</option>'}).join('')});if(id==='mUser')api('/api/users').then(function(u){$('iuU').innerHTML=u.filter(function(x){return x.id!==U}).map(function(x){return '<option value="'+x.id+'">'+(x.display_name||x.username)+'</option>'}).join('')||'<option>No users</option>'})}
 function hideM(id){$(id).classList.remove('show')}
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 
-// Session restore
 if(localStorage.getItem('ht')){T=localStorage.getItem('ht');U=localStorage.getItem('hu');N=localStorage.getItem('hn');enter()}
 
 // Tutorial
 var STEPS=[
-{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',t:'Welcome to Hive',p:'Decentralized, end-to-end encrypted AI messenger. Your data stays on your device.',x:'<b>Core:</b> E2EE with Signal Protocol, P2P networking, local AI agents, you own your keys'},
-{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',t:'Your Identity',p:'Cryptographic keypair (Ed25519 + X25519). No username database. Your key IS your identity.',x:'<b>DID:</b> hive:z6Mk... derived from your public key<br><b>Verify:</b> Compare Safety Numbers via QR code'},
-{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>',t:'API Keys',p:'Add your own API keys in Settings. You pay for your own AI usage. Keys stored encrypted locally.',x:'<b>Providers:</b> OpenAI, Anthropic, Groq, Mistral, OpenRouter, xAI, DeepSeek, Gemini<br><b>Tip:</b> Start with Groq (free, fast)'},
-{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>',t:'AI Agents',p:'Create agents with custom personalities. Each has its own P2P identity. Local or cloud LLM.',x:'<b>Steps:</b> Agents tab, + New Agent, name + prompt, choose provider<br><b>Tip:</b> Ollama + llama3.3 = free local AI'},
-{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',t:'Rooms and Chat',p:'Create rooms, invite users and bots. E2EE messages, real-time WebSocket delivery.',x:'<b>Group:</b> Multiple users + bots, shared history<br><b>DM:</b> 1-to-1 private, forward secrecy<br><b>In chat:</b> Messages, files, invite bots/users'},
-{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',t:'P2P and Sharing',p:'Accessible over local network or Tailscale. Share your IP so others can connect.',x:'<b>Steps:</b> Install Tailscale, run tailscale ip -4, share http://YOUR-IP:8000<br><b>Invite:</b> GET /api/p2p/invite for QR code'},
-{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',t:'Security',p:'5 layers of encryption. Forward Secrecy — compromised key today cannot read yesterday messages.',x:'<b>Layers:</b> Ed25519 identity, Noise transport, Signal Protocol, AES-256 storage, per-message keys<br><b>Properties:</b> Forward Secrecy, Post-Compromise Security, Deniability'},
-{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',t:'You Are Ready',p:'Add an API key, create an agent, create a room, start chatting.',x:'<b>Checklist:</b> Add API key in Settings, Create agent in Agents, Create room, Invite bot, Chat!<br><b>Docs:</b> github.com/zyay/hive'}
+{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',t:'Welcome to Hive',p:'Decentralized, end-to-end encrypted AI messenger.',x:'<b>Core:</b> E2EE, P2P networking, local AI agents, you own your keys'},
+{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10"/></svg>',t:'Network Tab',p:'View your P2P identity, connect peers via invite codes, see who is online.',x:'<b>Green dot</b> = connected. Share your invite code so others can connect.'},
+{i:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',t:'You Are Ready',p:'Add API key, create agent, create room, chat!',x:'<b>Checklist:</b> Settings > Add key, Agents > Create, Chat > New room, Invite bot'}
 ];
 var ti=0;
 function showTut(){ti=0;renderT();$('tut').style.display='flex'}
