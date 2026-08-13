@@ -1255,17 +1255,8 @@ def search_messages(room_id: str, q: str, limit: int = 20):
 
 
 @app.get("/", response_class=HTMLResponse)
-def landing():
-    """Landing page — marketing site."""
-    import os
-    landing_path = os.path.join(os.path.dirname(__file__), "landing.html")
-    with open(landing_path, encoding="utf-8") as f:
-        return f.read()
-
-
-@app.get("/app", response_class=HTMLResponse)
 def ui():
-    """Dashboard — the actual app."""
+    """Hive — AI Knowledge Platform."""
     return HTML_PAGE
 
 
