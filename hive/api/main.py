@@ -1397,8 +1397,28 @@ def get_task_history(limit: int = 50):
     return [t for t in task_history if t["status"] in ["completed", "failed"]][:limit]
 
 
+@app.get("/api/tasks/templates")
+def list_task_templates():
+    """List available task templates."""
+    return task_templates
+
+
+@app.get("/api/tasks/stats")
+def task_stats():
+    """Get task statistics."""
+    all_tasks = task_queue + task_history
+    return {
+        "total": len(all_tasks),
+        "pending": len([t for t in all_tasks if t["status"] == "pending"]),
+        "running": len([t for t in all_tasks if t["status"] == "running"]),
+        "completed": len([t for t in all_tasks if t["status"] == "completed"]),
+        "failed": len([t for t in all_tasks if t["status"] == "failed"]),
+        "queue_size": len(task_queue),
+    }
+
+
 @app.post("/api/tasks")
-async def create_task(body: TaskCreate):
+async def create_task_endpoint(body: TaskCreate):
     """Create a new task and add to queue."""
     import uuid
     task_id = str(uuid.uuid4())[:8]
@@ -1418,7 +1438,6 @@ async def create_task(body: TaskCreate):
         "completed_at": None,
     }
     task_queue.append(task)
-    # Start execution in background
     asyncio.create_task(execute_task(task_id))
     return task
 
@@ -1428,7 +1447,7 @@ async def create_batch_tasks(body: TaskBatch):
     """Create multiple tasks at once."""
     results = []
     for task_data in body.tasks:
-        task = await create_task(task_data)
+        task = await create_task_endpoint(task_data)
         results.append(task)
     return {"tasks": results, "count": len(results)}
 
@@ -1463,12 +1482,6 @@ def delete_task(task_id: str):
             task_history.pop(i)
             return {"id": task_id, "status": "deleted"}
     raise HTTPException(404, "Task not found")
-
-
-@app.get("/api/tasks/templates")
-def list_task_templates():
-    """List available task templates."""
-    return task_templates
 
 
 async def execute_task(task_id: str):
@@ -1547,20 +1560,6 @@ async def execute_task(task_id: str):
     if task in task_queue:
         task_queue.remove(task)
     task_history.insert(0, task)
-
-
-@app.get("/api/tasks/stats")
-def task_stats():
-    """Get task statistics."""
-    all_tasks = task_queue + task_history
-    return {
-        "total": len(all_tasks),
-        "pending": len([t for t in all_tasks if t["status"] == "pending"]),
-        "running": len([t for t in all_tasks if t["status"] == "running"]),
-        "completed": len([t for t in all_tasks if t["status"] == "completed"]),
-        "failed": len([t for t in all_tasks if t["status"] == "failed"]),
-        "queue_size": len(task_queue),
-    }
 
 
 # ---------------------------------------------------------------------------
