@@ -33,7 +33,16 @@ def init_db():
             temperature REAL NOT NULL DEFAULT 0.7,
             max_tokens INTEGER NOT NULL DEFAULT 4096,
             created_at REAL NOT NULL,
-            updated_at REAL NOT NULL
+            updated_at REAL NOT NULL,
+            mode TEXT NOT NULL DEFAULT 'work'
+        );
+
+        CREATE TABLE IF NOT EXISTS agent_files (
+            agent_id TEXT NOT NULL,
+            filename TEXT NOT NULL,
+            assigned_at REAL NOT NULL,
+            PRIMARY KEY (agent_id, filename),
+            FOREIGN KEY (agent_id) REFERENCES agents(id)
         );
 
         CREATE TABLE IF NOT EXISTS conversations (

@@ -1085,6 +1085,185 @@ def relay_status():
 
 
 # ---------------------------------------------------------------------------
+# Agent Modes — Plan, Work, Visualize, Analyze
+# ---------------------------------------------------------------------------
+
+AGENT_MODES = {
+    "plan": {
+        "name": "Plan Mode",
+        "description": "Strategic planning and architecture",
+        "system_suffix": "\n\n[PLAN MODE] You are in planning mode. Focus on strategy, architecture, and high-level design. Break down complex tasks into steps. Do not execute code — only plan and document."
+    },
+    "work": {
+        "name": "Work Mode",
+        "description": "Active execution and implementation",
+        "system_suffix": "\n\n[WORK MODE] You are in work mode. Execute tasks, write code, implement features. Be direct and action-oriented."
+    },
+    "visualize": {
+        "name": "Visualize Mode",
+        "description": "Create diagrams, charts, and visual representations",
+        "system_suffix": "\n\n[VISUALIZE MODE] You are in visualization mode. Create ASCII diagrams, Mermaid charts, data visualizations, and visual representations. Use code blocks for diagrams."
+    },
+    "analyze": {
+        "name": "Analyze Mode",
+        "description": "Deep analysis and research",
+        "system_suffix": "\n\n[ANALYZE MODE] You are in analysis mode. Deep-dive into data, find patterns, provide insights. Be thorough and evidence-based."
+    },
+    "creative": {
+        "name": "Creative Mode",
+        "description": "Brainstorming and creative thinking",
+        "system_suffix": "\n\n[CREATIVE MODE] You are in creative mode. Brainstorm freely, think outside the box, generate novel ideas. Be imaginative and unconventional."
+    },
+}
+
+
+class AgentModeUpdate(BaseModel):
+    mode: str
+
+
+@app.get("/api/agents/{agent_id}/mode")
+def get_agent_mode(agent_id: str):
+    """Get current mode of an agent."""
+    from hive.core.db import get_connection
+    conn = get_connection()
+    row = conn.execute("SELECT mode FROM agents WHERE id = ?", (agent_id,)).fetchone()
+    conn.close()
+    if not row:
+        raise HTTPException(404, "Agent not found")
+    mode = row["mode"] if "mode" in row.keys() else "work"
+    return {"agent_id": agent_id, "mode": mode, "available_modes": list(AGENT_MODES.keys())}
+
+
+@app.put("/api/agents/{agent_id}/mode")
+def set_agent_mode(agent_id: str, body: AgentModeUpdate):
+    """Set agent mode (plan, work, visualize, analyze, creative)."""
+    if body.mode not in AGENT_MODES:
+        raise HTTPException(400, f"Invalid mode. Available: {list(AGENT_MODES.keys())}")
+    from hive.core.db import get_connection
+    conn = get_connection()
+    conn.execute("UPDATE agents SET mode = ? WHERE id = ?", (body.mode, agent_id))
+    conn.commit()
+    conn.close()
+    return {"agent_id": agent_id, "mode": body.mode, "mode_info": AGENT_MODES[body.mode]}
+
+
+@app.get("/api/modes")
+def list_modes():
+    """List all available agent modes."""
+    return {k: {"name": v["name"], "description": v["description"]} for k, v in AGENT_MODES.items()}
+
+
+# ---------------------------------------------------------------------------
+# File Storage — upload, browse, manage files
+# ---------------------------------------------------------------------------
+
+import os
+import shutil
+from pathlib import Path as PathLib
+
+FILES_DIR = PathLib("workspace_files")
+FILES_DIR.mkdir(exist_ok=True)
+
+
+class FileUpload(BaseModel):
+    filename: str
+    content: str  # base64 encoded
+
+
+@app.get("/api/files")
+def list_files():
+    """List all uploaded files."""
+    files = []
+    for f in FILES_DIR.iterdir():
+        if f.is_file():
+            files.append({
+                "name": f.name,
+                "size": f.stat().st_size,
+                "modified": f.stat().st_mtime,
+                "type": f.suffix.lower(),
+            })
+    return sorted(files, key=lambda x: x["modified"], reverse=True)
+
+
+@app.post("/api/files")
+def upload_file(body: FileUpload):
+    """Upload a file to workspace."""
+    import base64
+    try:
+        content = base64.b64decode(body.content)
+        file_path = FILES_DIR / body.filename
+        file_path.write_bytes(content)
+        return {"name": body.filename, "size": len(content), "status": "uploaded"}
+    except Exception as e:
+        raise HTTPException(400, f"Upload failed: {e}")
+
+
+@app.get("/api/files/{filename}")
+def get_file_content(filename: str):
+    """Get file content as text."""
+    file_path = FILES_DIR / filename
+    if not file_path.exists():
+        raise HTTPException(404, "File not found")
+    try:
+        content = file_path.read_text(encoding="utf-8", errors="ignore")
+        return {"name": filename, "content": content, "size": len(content)}
+    except Exception as e:
+        raise HTTPException(400, f"Cannot read file: {e}")
+
+
+@app.delete("/api/files/{filename}")
+def delete_file(filename: str):
+    """Delete a file from workspace."""
+    file_path = FILES_DIR / filename
+    if not file_path.exists():
+        raise HTTPException(404, "File not found")
+    file_path.unlink()
+    return {"name": filename, "status": "deleted"}
+
+
+# Agent-File associations
+@app.get("/api/agents/{agent_id}/files")
+def get_agent_files(agent_id: str):
+    """Get files assigned to an agent."""
+    from hive.core.db import get_connection
+    conn = get_connection()
+    rows = conn.execute(
+        "SELECT filename FROM agent_files WHERE agent_id = ?",
+        (agent_id,)
+    ).fetchall()
+    conn.close()
+    return [r["filename"] for r in rows]
+
+
+@app.post("/api/agents/{agent_id}/files")
+def assign_file_to_agent(agent_id: str, filename: str):
+    """Assign a file to an agent."""
+    from hive.core.db import get_connection
+    conn = get_connection()
+    conn.execute(
+        "INSERT OR IGNORE INTO agent_files (agent_id, filename) VALUES (?, ?)",
+        (agent_id, filename)
+    )
+    conn.commit()
+    conn.close()
+    return {"agent_id": agent_id, "filename": filename, "status": "assigned"}
+
+
+@app.delete("/api/agents/{agent_id}/files/{filename}")
+def unassign_file(agent_id: str, filename: str):
+    """Remove file assignment from agent."""
+    from hive.core.db import get_connection
+    conn = get_connection()
+    conn.execute(
+        "DELETE FROM agent_files WHERE agent_id = ? AND filename = ?",
+        (agent_id, filename)
+    )
+    conn.commit()
+    conn.close()
+    return {"agent_id": agent_id, "filename": filename, "status": "unassigned"}
+
+
+# ---------------------------------------------------------------------------
 # Danger Zone — destructive actions
 # ---------------------------------------------------------------------------
 

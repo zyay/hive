@@ -215,6 +215,8 @@ button { cursor: pointer; border: none; }
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Chat</div>
     <div class="nav-item" data-v="agents" onclick="view('agents')">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg> AI Agents</div>
+    <div class="nav-item" data-v="files" onclick="view('files')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Files</div>
     <div class="nav-item" data-v="network" onclick="view('network')">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10"/></svg> Network</div>
     <div class="nav-item" data-v="settings" onclick="view('settings')">
@@ -263,6 +265,12 @@ button { cursor: pointer; border: none; }
     <div class="topbar"><h3>AI Agents</h3><button class="btn btn-primary btn-sm" onclick="modal('mAgent')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Create agent</button></div>
     <div class="content" id="aList"></div>
+  </div>
+  <!-- Files -->
+  <div id="vFiles" style="display:none;flex-direction:column;flex:1">
+    <div class="topbar"><h3>Workspace Files</h3><button class="btn btn-primary btn-sm" onclick="modal('mUpload')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Upload file</button></div>
+    <div class="content" id="fList"></div>
   </div>
   <!-- Network -->
   <div id="vNetwork" style="display:none;flex-direction:column;flex:1">
@@ -346,11 +354,36 @@ button { cursor: pointer; border: none; }
   </div>
 </div></div>
 <div class="modal-overlay" id="mFile"><div class="modal">
-  <h3>Upload File</h3>
+  <h3>Attach File to Chat</h3>
   <div class="form-group"><label>Choose file</label><input type="file" id="fileIn"></div>
   <div style="display:flex;gap:12px;margin-top:28px;justify-content:flex-end">
     <button class="btn btn-secondary" onclick="hideM('mFile')">Cancel</button>
     <button class="btn btn-primary" onclick="uploadFile()">Upload</button>
+  </div>
+</div></div>
+<div class="modal-overlay" id="mUpload"><div class="modal">
+  <h3>Upload to Workspace</h3>
+  <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px">Files uploaded here can be assigned to agents for processing.</p>
+  <div class="form-group"><label>Choose file</label><input type="file" id="wsFileIn"></div>
+  <div style="display:flex;gap:12px;margin-top:28px;justify-content:flex-end">
+    <button class="btn btn-secondary" onclick="hideM('mUpload')">Cancel</button>
+    <button class="btn btn-primary" onclick="uploadWorkspaceFile()">Upload</button>
+  </div>
+</div></div>
+<div class="modal-overlay" id="mMode"><div class="modal">
+  <h3>Change Agent Mode</h3>
+  <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px">Modes change how the agent behaves and responds.</p>
+  <div id="modeList"></div>
+  <div style="display:flex;gap:12px;margin-top:28px;justify-content:flex-end">
+    <button class="btn btn-secondary" onclick="hideM('mMode')">Close</button>
+  </div>
+</div></div>
+<div class="modal-overlay" id="mAssignFiles"><div class="modal">
+  <h3>Assign Files to Agent</h3>
+  <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px">Select files the agent can access and work with.</p>
+  <div id="assignFileList"></div>
+  <div style="display:flex;gap:12px;margin-top:28px;justify-content:flex-end">
+    <button class="btn btn-secondary" onclick="hideM('mAssignFiles')">Close</button>
   </div>
 </div></div>
 
@@ -382,7 +415,7 @@ function logout(){T=null;U=null;N=null;if(ws)ws.close();$('app').style.display='
 
 function enter(){localStorage.setItem('ht',T);localStorage.setItem('hu',U);localStorage.setItem('hn',N);$('auth').style.display='none';$('app').style.display='flex';$('sbU').textContent=N;$('userAvatar').textContent=N.charAt(0).toUpperCase();loadRooms();loadProv();loadHW();loadNet();if(!localStorage.getItem('htut'))setTimeout(showTut,800)}
 
-function view(v){document.querySelectorAll('[id^=v]').forEach(function(e){e.style.display='none'});var el=$('v'+v.charAt(0).toUpperCase()+v.slice(1));if(el)el.style.display='flex';document.querySelectorAll('.nav-item').forEach(function(e){e.classList.toggle('active',e.dataset.v===v)});if(v==='agents')loadAgents();if(v==='settings')loadKeys();if(v==='system')loadHW();if(v==='network')loadNet()}
+function view(v){document.querySelectorAll('[id^=v]').forEach(function(e){e.style.display='none'});var el=$('v'+v.charAt(0).toUpperCase()+v.slice(1));if(el)el.style.display='flex';document.querySelectorAll('.nav-item').forEach(function(e){e.classList.toggle('active',e.dataset.v===v)});if(v==='agents')loadAgents();if(v==='files')loadFiles();if(v==='settings')loadKeys();if(v==='system')loadHW();if(v==='network')loadNet()}
 
 function loadRooms(){api('/api/rooms?user_id='+U).then(function(r){$('rList').innerHTML=r.map(function(x){var b=unread[x.id]?'<span class="unread-badge">'+unread[x.id]+'</span>':'';return '<div class="room-item'+(room===x.id?' active':'')+'" onclick="openR(\''+x.id+'\',\''+(x.name||x.id)+'\')"><div class="room-name">'+(x.name||x.id)+'</div><div class="room-type">'+x.type+'</div>'+b+'</div>'}).join('')||'<div style="padding:20px;font-size:13px;color:var(--text-muted);text-align:center">No conversations yet</div>'})}
 
@@ -399,7 +432,23 @@ function loadRoomMsgs(){if(room)api('/api/rooms/'+room+'/messages').then(functio
 
 function beep(){try{var c=new(window.AudioContext||window.webkitAudioContext)();var o=c.createOscillator();var g=c.createGain();o.connect(g);g.connect(c.destination);g.gain.value=0.06;o.frequency.value=880;o.start();o.stop(c.currentTime+0.06)}catch(e){}}
 
-function loadAgents(){api('/api/agents').then(function(a){$('aList').innerHTML=a.map(function(x){return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:start"><div><div style="font-weight:700;font-size:16px">'+x.name+'</div><div style="display:flex;gap:8px;margin-top:10px"><span class="chip chip-accent">'+x.provider+'</span></div></div><button class="btn btn-danger btn-sm" onclick="delAgent(\''+x.id+'\')">Delete</button></div><div style="font-size:13px;color:var(--text-secondary);margin-top:16px;line-height:1.7">'+esc(x.system_prompt.substring(0,150))+(x.system_prompt.length>150?'...':'')+'</div></div>'}).join('')||'<div class="empty-state"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/></svg><span>No agents yet. Create your first AI agent.</span></div>'})}
+function loadAgents(){api('/api/agents').then(function(a){$('aList').innerHTML=a.map(function(x){var mode=x.mode||'work';var modeColors={plan:'chip-neutral',work:'chip-accent',visualize:'chip-success',analyze:'chip-accent',creative:'chip-success'};return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:start"><div><div style="font-weight:700;font-size:16px">'+x.name+'</div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><span class="chip chip-accent">'+x.provider+'</span><span class="chip '+(modeColors[mode]||'chip-neutral')+'">'+mode+' mode</span></div></div><div style="display:flex;gap:6px"><button class="btn btn-secondary btn-sm" onclick="showModes(\''+x.id+'\')">Mode</button><button class="btn btn-secondary btn-sm" onclick="showAssignFiles(\''+x.id+'\')">Files</button><button class="btn btn-danger btn-sm" onclick="delAgent(\''+x.id+'\')">Delete</button></div></div><div style="font-size:13px;color:var(--text-secondary);margin-top:16px;line-height:1.7">'+esc(x.system_prompt.substring(0,150))+(x.system_prompt.length>150?'...':'')+'</div></div>'}).join('')||'<div class="empty-state"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/></svg><span>No agents yet. Create your first AI agent.</span></div>'})}
+
+// Agent Modes
+var currentModeAgent=null;
+function showModes(agentId){currentModeAgent=agentId;api('/api/modes').then(function(modes){$('modeList').innerHTML=Object.keys(modes).map(function(k){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--border)"><div><div style="font-weight:600">'+modes[k].name+'</div><div style="font-size:12px;color:var(--text-muted);margin-top:2px">'+modes[k].description+'</div></div><button class="btn btn-primary btn-sm" onclick="setMode(\''+k+'\')">Select</button></div>'}).join('')});modal('mMode')}
+function setMode(mode){api('/api/agents/'+currentModeAgent+'/mode',{method:'PUT',body:JSON.stringify({mode:mode})}).then(function(){hideM('mMode');loadAgents()})}
+
+// Workspace Files
+function loadFiles(){api('/api/files').then(function(f){$('fList').innerHTML=f.map(function(x){var size=x.size>1024?Math.round(x.size/1024)+'KB':x.size+'B';return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:600">'+x.name+'</div><div style="font-size:12px;color:var(--text-muted);margin-top:4px">'+size+' · '+x.type+'</div></div><div style="display:flex;gap:6px"><button class="btn btn-secondary btn-sm" onclick="viewFile(\''+x.name+'\')">View</button><button class="btn btn-danger btn-sm" onclick="deleteFile(\''+x.name+'\')">Delete</button></div></div></div>'}).join('')||'<div class="empty-state"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>No files yet. Upload files for agents to work with.</span></div>'})}
+function uploadWorkspaceFile(){var f=$('wsFileIn').files[0];if(!f)return;var r=new FileReader();r.onload=function(){var b64=r.result.split(',')[1];api('/api/files',{method:'POST',body:JSON.stringify({filename:f.name,content:b64})}).then(function(){hideM('mUpload');loadFiles()})};r.readAsDataURL(f)}
+function viewFile(name){api('/api/files/'+name).then(function(f){alert('File: '+f.name+'\n\n'+f.content.substring(0,500)+(f.content.length>500?'...':''))})}
+function deleteFile(name){if(!confirm('Delete '+name+'?'))return;api('/api/files/'+name,{method:'DELETE'}).then(function(){loadFiles()})}
+
+// Assign files to agent
+var currentAssignAgent=null;
+function showAssignFiles(agentId){currentAssignAgent=agentId;Promise.all([api('/api/files'),api('/api/agents/'+agentId+'/files')]).then(function(r){var allFiles=r[0],assignedFiles=r[1];$('assignFileList').innerHTML=allFiles.map(function(f){var isAssigned=assignedFiles.indexOf(f.name)>=0;return '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)"><div style="font-weight:500">'+f.name+'</div><button class="btn '+(isAssigned?'btn-danger':'btn-primary')+' btn-sm" onclick="toggleFileAssign(\''+f.name+'\','+(!isAssigned)+')">'+(isAssigned?'Remove':'Assign')+'</button></div>'}).join('')||'<div style="color:var(--text-muted);text-align:center;padding:20px">No files available. Upload files first.</div>'});modal('mAssignFiles')}
+function toggleFileAssign(filename,assign){if(assign){api('/api/agents/'+currentAssignAgent+'/files?filename='+filename,{method:'POST'}).then(function(){showAssignFiles(currentAssignAgent)})}else{api('/api/agents/'+currentAssignAgent+'/files/'+filename,{method:'DELETE'}).then(function(){showAssignFiles(currentAssignAgent)})}}
 function mkAgent(){var n=$('naN').value,p=$('naP').value,pr=$('naPr').value,m=$('naM').value;if(!n)return;api('/api/agents',{method:'POST',body:JSON.stringify({name:n,system_prompt:p,provider:pr,model:m})}).then(function(){hideM('mAgent');loadAgents()})}
 function delAgent(id){fetch('/api/agents/'+id,{method:'DELETE'}).then(function(){loadAgents()})}
 
