@@ -98,17 +98,19 @@ def save_identity(identity: Identity, password: str = ""):
     if password:
         from nacl.secret import SecretBox
         from nacl.pwhash import argon2id
+        salt = os.urandom(argon2id.SALT_SIZE)
         key = argon2id.kdf(
             SecretBox.KEY_SIZE,
             password.encode(),
-            os.urandom(argon2id.SALT_SIZE),
+            salt,
             opslimit=argon2id.OPSLIMIT_INTERACTIVE,
             memlimit=argon2id.MEMLIMIT_INTERACTIVE,
         )
         box = SecretBox(key)
         plaintext = json.dumps(data).encode()
         encrypted = box.encrypt(plaintext)
-        keystore_path.write_bytes(encrypted)
+        # Store salt + encrypted data
+        keystore_path.write_bytes(salt + encrypted)
     else:
         keystore_path.write_text(json.dumps(data, indent=2))
 
@@ -125,13 +127,15 @@ def load_identity(password: str = "") -> Identity | None:
         if password:
             from nacl.secret import SecretBox
             from nacl.pwhash import argon2id
-            encrypted = keystore_path.read_bytes()
-            # Note: in production, salt should be stored alongside
-            # For simplicity, we derive from password directly
+            raw = keystore_path.read_bytes()
+            # Salt is stored at the beginning (SALT_SIZE bytes)
+            salt_size = argon2id.SALT_SIZE
+            salt = raw[:salt_size]
+            encrypted = raw[salt_size:]
             key = argon2id.kdf(
                 SecretBox.KEY_SIZE,
                 password.encode(),
-                os.urandom(argon2id.SALT_SIZE),
+                salt,
                 opslimit=argon2id.OPSLIMIT_INTERACTIVE,
                 memlimit=argon2id.MEMLIMIT_INTERACTIVE,
             )

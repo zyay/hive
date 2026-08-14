@@ -180,7 +180,16 @@ def builtin_get_time() -> str:
 def builtin_list_agents() -> str:
     from hive.core.db import get_all_agents
     import asyncio
-    agents = asyncio.get_event_loop().run_until_complete(get_all_agents()) if False else []
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as pool:
+                agents = pool.submit(asyncio.run, get_all_agents()).result()
+        else:
+            agents = loop.run_until_complete(get_all_agents())
+    except Exception:
+        agents = []
     return f"Available agents: {len(agents)}"
 
 

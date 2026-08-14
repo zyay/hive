@@ -69,14 +69,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Hive",
-    description="Self-hosted multi-agent AI platform â€” swarm, arena, memory, voice",
-    version="0.2.0",
+    description="Self-hosted multi-agent AI platform — swarm, arena, memory, voice",
+    version="0.3.0",
     lifespan=lifespan,
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:8000", "http://127.0.0.1:8000", "http://localhost:3000"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -144,7 +145,7 @@ class ChatRequest(BaseModel):
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "version": "0.1.0"}
+    return {"status": "ok", "version": "0.3.0"}
 
 
 @app.get("/api/providers")
@@ -574,11 +575,6 @@ async def call_integration(body: IntegrationCallRequest):
 # ---------------------------------------------------------------------------
 # Benchmark Suite
 # ---------------------------------------------------------------------------
-
-class BenchmarkRequest(BaseModel):
-    models: list[str]  # "provider/model" format
-    categories: list[str] = []
-
 
 @app.post("/api/benchmark/run")
 async def run_benchmark_suite(body: BenchmarkRequest):
@@ -1849,8 +1845,15 @@ def search_messages(room_id: str, q: str, limit: int = 20):
 
 @app.get("/", response_class=HTMLResponse)
 def ui():
-    """Hive — AI Knowledge Platform."""
-    return HTML_PAGE
+    """Serve the web UI from ui.html file."""
+    import os
+    ui_path = os.path.join(os.path.dirname(__file__), "ui.html")
+    with open(ui_path, encoding="utf-8") as f:
+        return f.read()
+
+
+# HTML_PAGE kept as fallback — the actual UI is loaded from ui.html
+HTML_PAGE = "<html><body>UI loading error</body></html>"
 
 
 HTML_PAGE = r"""
