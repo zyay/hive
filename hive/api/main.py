@@ -23,6 +23,11 @@ from hive.core.db import (
     get_conversation, save_messages, get_usage_summary, log_usage,
 )
 from hive.core.api_keys import validate_key
+from hive.core.security import (
+    validate_string, validate_filename, validate_file_extension,
+    validate_path, auth_limiter, api_limiter, chat_limiter,
+    MAX_STRING_LENGTH, MAX_FILE_SIZE,
+)
 from hive.api.routes import router as v2_router, init_routes
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -645,11 +650,23 @@ class SendMessageRequest(BaseModel):
 
 
 @app.post("/api/auth/register")
-async def register_endpoint(body: RegisterRequest):
+async def register_endpoint(body: RegisterRequest, request: Request):
     from hive.core.users import register
     from hive.core.auth import create_token
+    # Rate limiting
+    client_ip = request.client.host if request.client else "unknown"
+    if not auth_limiter.is_allowed(f"register:{client_ip}"):
+        raise HTTPException(429, "Too many registration attempts. Try again later.")
+    # Input validation
     try:
-        user = await register(body.username, body.password, body.display_name)
+        username = validate_string(body.username, 50, "username")
+        validate_string(body.password, 128, "password")
+        if len(body.password) < 4:
+            raise ValueError("Password must be at least 4 characters")
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    try:
+        user = await register(username, body.password, body.display_name)
         token = create_token(user["id"], role="user")
         return {**user, "token": token}
     except ValueError as e:
@@ -657,8 +674,12 @@ async def register_endpoint(body: RegisterRequest):
 
 
 @app.post("/api/auth/login")
-async def login_endpoint(body: LoginRequest):
+async def login_endpoint(body: LoginRequest, request: Request):
     from hive.core.users import login
+    # Rate limiting
+    client_ip = request.client.host if request.client else "unknown"
+    if not auth_limiter.is_allowed(f"login:{client_ip}"):
+        raise HTTPException(429, "Too many login attempts. Try again later.")
     result = await login(body.username, body.password)
     if not result:
         raise HTTPException(401, "Invalid credentials")
@@ -759,10 +780,18 @@ async def get_room_messages(room_id: str, limit: int = 50):
 
 
 @app.post("/api/rooms/{room_id}/messages")
-async def send_room_message(room_id: str, user_id: str, body: SendMessageRequest):
+async def send_room_message(room_id: str, user_id: str, body: SendMessageRequest, request: Request):
     from hive.core.rooms import send_message
     from hive.core.ws import broadcast
-    msg = await send_message(room_id, "user", user_id, body.content)
+    # Rate limiting
+    client_ip = request.client.host if request.client else "unknown"
+    if not chat_limiter.is_allowed(f"chat:{client_ip}"):
+        raise HTTPException(429, "Rate limit exceeded. Please slow down.")
+    # Input validation
+    content = validate_string(body.content, MAX_STRING_LENGTH, "message")
+    if not content:
+        raise HTTPException(400, "Message cannot be empty")
+    msg = await send_message(room_id, "user", user_id, content)
     await broadcast(room_id, {"type": "new_message", "message": msg})
     return msg
 
@@ -1599,10 +1628,17 @@ def upload_file(body: FileUpload):
     """Upload a file to workspace."""
     import base64
     try:
+        # Validate filename
+        safe_name = validate_filename(body.filename)
+        # Validate content size
         content = base64.b64decode(body.content)
-        file_path = FILES_DIR / body.filename
+        if len(content) > MAX_FILE_SIZE:
+            raise HTTPException(413, f"File too large. Maximum size is {MAX_FILE_SIZE // (1024*1024)}MB")
+        file_path = FILES_DIR / safe_name
         file_path.write_bytes(content)
-        return {"name": body.filename, "size": len(content), "status": "uploaded"}
+        return {"name": safe_name, "size": len(content), "status": "uploaded"}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(400, f"Upload failed: {e}")
 
@@ -1610,7 +1646,12 @@ def upload_file(body: FileUpload):
 @app.get("/api/files/{filename}")
 def get_file_content(filename: str):
     """Get file content as text."""
-    file_path = FILES_DIR / filename
+    # Validate filename to prevent path traversal
+    try:
+        safe_name = validate_filename(filename)
+    except ValueError:
+        raise HTTPException(400, "Invalid filename")
+    file_path = FILES_DIR / safe_name
     if not file_path.exists():
         raise HTTPException(404, "File not found")
     try:
@@ -1623,11 +1664,15 @@ def get_file_content(filename: str):
 @app.delete("/api/files/{filename}")
 def delete_file(filename: str):
     """Delete a file from workspace."""
-    file_path = FILES_DIR / filename
+    try:
+        safe_name = validate_filename(filename)
+    except ValueError:
+        raise HTTPException(400, "Invalid filename")
+    file_path = FILES_DIR / safe_name
     if not file_path.exists():
         raise HTTPException(404, "File not found")
     file_path.unlink()
-    return {"name": filename, "status": "deleted"}
+    return {"name": safe_name, "status": "deleted"}
 
 
 # Agent-File associations
