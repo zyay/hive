@@ -91,27 +91,47 @@ app.add_middleware(
 app.include_router(v2_router)
 
 
-# Auth middleware for API key protection
+# Auth middleware — require authentication on all API endpoints
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
-    # Skip auth for non-API routes and health check
     path = request.url.path
-    if not path.startswith("/api/") or path in ("/api/health", "/health"):
+
+    # Skip auth for non-API routes, health check, auth endpoints, and docs
+    if (not path.startswith("/api/")
+        or path in ("/api/health", "/health")
+        or path.startswith("/api/auth/")
+        or path in ("/docs", "/openapi.json", "/redoc")):
         return await call_next(request)
 
-    # Skip auth for read-only endpoints
-    if request.method == "GET" and not path.startswith("/api/keys"):
-        return await call_next(request)
+    # Check for JWT token in Authorization header
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.startswith("Bearer "):
+        token = auth_header[7:]
+        from hive.core.auth import verify_token
+        payload = verify_token(token)
+        if payload:
+            request.state.user_id = payload.get("sub")
+            request.state.user_role = payload.get("role", "user")
+            return await call_next(request)
 
-    # Check API key if provided
-    api_key = request.headers.get("X-API-Key") or request.headers.get("Authorization", "").replace("Bearer ", "")
+    # Check for API key
+    api_key = request.headers.get("X-API-Key", "")
     if api_key:
         key_info = validate_key(api_key)
-        if not key_info:
-            raise HTTPException(401, "Invalid API key")
-        request.state.api_key = key_info
+        if key_info:
+            request.state.user_id = key_info.get("name")
+            request.state.user_role = "api"
+            return await call_next(request)
 
-    return await call_next(request)
+    # For GET requests, allow anonymous access (read-only)
+    if request.method == "GET":
+        request.state.user_id = None
+        request.state.user_role = "anonymous"
+        return await call_next(request)
+
+    # All other requests require authentication
+    from fastapi.responses import JSONResponse
+    return JSONResponse(status_code=401, content={"detail": "Authentication required"})
 
 
 # ---------------------------------------------------------------------------
@@ -483,12 +503,8 @@ class TokenRequest(BaseModel):
     role: str = "user"
 
 
-@app.post("/api/auth/token")
-def create_auth_token(body: TokenRequest):
-    """Create a JWT authentication token."""
-    from hive.core.auth import create_token
-    token = create_token(body.user_id, body.role)
-    return {"token": token, "type": "Bearer"}
+# Token creation removed — was a security vulnerability (unauthenticated token minting)
+# Tokens are only issued through /api/auth/login and /api/auth/register
 
 
 @app.get("/api/auth/verify")

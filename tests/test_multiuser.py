@@ -31,8 +31,8 @@ class TestUsers:
     @pytest.mark.asyncio
     async def test_register_short_password(self):
         from hive.core.users import register
-        with pytest.raises(ValueError, match="at least 4"):
-            await register("user1", "abc")
+        with pytest.raises(ValueError, match="at least 8"):
+            await register("user1", "short")
 
     @pytest.mark.asyncio
     async def test_login_success(self):

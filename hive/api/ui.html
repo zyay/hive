@@ -205,12 +205,35 @@ button{cursor:pointer;border:none;font-family:inherit}
 <div class="modal-bg" id="mTask"><div class="modal"><h3>Create Task</h3><div class="fg"><label>Title</label><input id="tTitle" placeholder="Task title"></div><div class="fg"><label>Agent</label><select id="tAgent"></select></div><div class="fg"><label>Template</label><select id="tTemplate"><option value="">None</option><option value="research">Research</option><option value="code_review">Code Review</option><option value="summarize">Summarize</option><option value="plan">Planning</option><option value="visualize">Visualize</option><option value="brainstorm">Brainstorm</option></select></div><div class="fg"><label>Priority</label><select id="tPriority"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option><option value="critical">Critical</option></select></div><div class="fg"><label>Input</label><textarea id="tInput" rows="3" placeholder="Task input data..."></textarea></div><div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end"><button class="btn btn-s" onclick="hideM('mTask')">Cancel</button><button class="btn btn-p" onclick="createTask()">Create</button></div></div></div>
 
 <script>
-// Configure marked for markdown + code highlighting
-marked.setOptions({highlight:function(code,lang){if(lang&&hljs.getLanguage(lang))return hljs.highlight(code,{language:lang}).value;return hljs.highlightAuto(code).value},breaks:true});
+// Configure marked for markdown with sanitization
+marked.setOptions({
+  breaks: true,
+  // Sanitize HTML output to prevent XSS
+  sanitize: false  // We use our own esc function below
+});
+
+// XSS protection — escape HTML in user-generated content
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+// Safe markdown rendering — escape first, then apply markdown
+function safeMd(s) {
+  if (!s) return '';
+  // Escape HTML entities first to prevent XSS
+  var escaped = escHtml(s);
+  // Then apply markdown formatting (bold, italic, code, links)
+  return escaped
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/`(.+?)`/g, '<code>$1</code>')
+    .replace(/\n/g, '<br>');
+}
 
 var T=null,U=null,N=null,room=null,ws=null,wsRetry=0,unread={};
 var $=function(id){return document.getElementById(id)};
-var api=function(u,o){o=o||{};o.headers=o.headers||{};o.headers['Content-Type']='application/json';return fetch(u,o).then(function(r){return r.json()})};
+var api=function(u,o){o=o||{};o.headers=o.headers||{};o.headers['Content-Type']='application/json';if(T)o.headers['Authorization']='Bearer '+T;return fetch(u,o).then(function(r){return r.json()})};
 
 function authTab(i){document.querySelectorAll('.auth-tab').forEach(function(e,j){e.style.background=j===i?'var(--bg2)':'transparent';e.style.color=j===i?'var(--accent2)':'var(--text3)';e.style.fontWeight=j===i?'600':'500'});$('aLogin').style.display=i?'none':'block';$('aReg').style.display=i?'block':'none'}
 function doReg(){var u=$('rU').value,p=$('rP').value,n=$('rN').value;if(!u||!p){$('rErr').textContent='Fill all fields';$('rErr').style.display='block';return}api('/api/auth/register',{method:'POST',body:JSON.stringify({username:u,password:p,display_name:n})}).then(function(r){if(r.token){T=r.token;U=r.id;N=r.username;enter()}else{$('rErr').textContent=r.detail||'Error';$('rErr').style.display='block'}})}
@@ -221,11 +244,11 @@ function enter(){localStorage.setItem('ht',T);localStorage.setItem('hu',U);local
 
 function view(v){document.querySelectorAll('[id^=v]').forEach(function(e){e.style.display='none'});var el=$('v'+v.charAt(0).toUpperCase()+v.slice(1));if(el)el.style.display='flex';document.querySelectorAll('.nav-i').forEach(function(e){e.classList.toggle('active',e.dataset.v===v)});if(v==='agents')loadAgents();if(v==='tasks')loadTasks();if(v==='files')loadFiles();if(v==='settings')loadKeys();if(v==='network')loadNet()}
 
-function loadRooms(){api('/api/rooms?user_id='+U).then(function(r){$('rList').innerHTML=r.map(function(x){var b=unread[x.id]?'<span class="badge">'+unread[x.id]+'</span>':'';return '<div class="room'+(room===x.id?' active':'')+'" onclick="openR(\''+x.id+'\',\''+(x.name||x.id)+'\')"><div class="rn">'+(x.name||x.id)+'</div><div class="rt">'+x.type+'</div>'+b+'</div>'}).join('')||'<div style="padding:14px;font-size:12px;color:var(--text3)">No rooms</div>'})}
+function loadRooms(){api('/api/rooms?user_id='+U).then(function(r){$('rList').innerHTML=r.map(function(x){var b=unread[x.id]?'<span class="badge">'+unread[x.id]+'</span>':'';return '<div class="room'+(room===x.id?' active':'')+'" onclick="openR(\''+x.id+'\',\''+escHtml(x.name||x.id)+'\')"><div class="rn">'+escHtml(x.name||x.id)+'</div><div class="rt">'+escHtml(x.type)+'</div>'+b+'</div>'}).join('')||'<div style="padding:14px;font-size:12px;color:var(--text3)">No rooms</div>'})}
 
 function openR(id,name){room=id;unread[id]=0;$('cTitle').textContent=name;loadRooms();$('cBar').style.display='flex';connectWS(id);api('/api/rooms/'+id+'/messages').then(function(m){$('cMsgs').innerHTML=m.map(function(x){return renderMsg(x)}).join('')||'<div class="empty"><span>No messages yet</span></div>';$('cMsgs').scrollTop=$('cMsgs').scrollHeight;hl()})}
 
-function renderMsg(x){var c=x.sender_id===U?'msg-me':'msg-them';var t=new Date(x.created_at*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});var content=marked.parse(x.content);return '<div class="msg '+c+'"><div class="sender">'+(x.sender_type==='agent'?'Bot':'You')+'</div>'+content+'<div class="time">'+t+'</div></div>'}
+function renderMsg(x){var c=x.sender_id===U?'msg-me':'msg-them';var t=new Date(x.created_at*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});var content=safeMd(x.content);return '<div class="msg '+c+'"><div class="sender">'+(x.sender_type==='agent'?'Bot':'You')+'</div>'+content+'<div class="time">'+t+'</div></div>'}
 function hl(){document.querySelectorAll('.msg pre code').forEach(function(e){hljs.highlightElement(e)})}
 
 function connectWS(id){if(ws)ws.close();ws=new WebSocket('ws://'+location.host+'/ws/'+id+'?token='+T);ws.onopen=function(){wsRetry=0};ws.onclose=function(){if(T&&room){var d=Math.min(1000*Math.pow(2,wsRetry),30000);wsRetry++;setTimeout(function(){if(room)connectWS(room)},d)}};ws.onmessage=function(e){var d=JSON.parse(e.data);if(d.type==='new_message'){$('cMsgs').innerHTML+=renderMsg(d.message);$('cMsgs').scrollTop=$('cMsgs').scrollPath;hl();if(d.message.sender_id!==U&&room!==id){unread[id]=(unread[id]||0)+1;loadRooms()}}else if(d.type==='typing'&&d.user_id!==U){$('typingArea').innerHTML='<div style="padding:6px 24px;color:var(--text3);font-size:12px;font-style:italic">'+(d.is_bot?'Bot':'Someone')+' typing...</div>';clearTimeout(window._tt);window._tt=setTimeout(function(){$('typingArea').innerHTML=''},3000)}}}
@@ -233,7 +256,7 @@ function connectWS(id){if(ws)ws.close();ws=new WebSocket('ws://'+location.host+'
 function send(){var v=$('cIn').value.trim();if(!v||!room)return;$('cIn').value='';api('/api/rooms/'+room+'/messages?user_id='+U,{method:'POST',body:JSON.stringify({content:v})})}
 function sendTyping(){if(ws&&ws.readyState===1)ws.send(JSON.stringify({type:'typing'}))}
 function toggleSearch(){var b=$('searchBar');b.style.display=b.style.display==='none'?'block':'none';if(b.style.display==='block')$('searchIn').focus();else{$('searchIn').value='';if(room)openR(room,$('cTitle').textContent)}}
-function doSearch(){var q=$('searchIn').value.trim();if(!q){if(room)openR(room,$('cTitle').textContent);return}api('/api/messages/search?room_id='+room+'&q='+encodeURIComponent(q)).then(function(m){$('cMsgs').innerHTML=m.map(function(x){return '<div class="msg msg-them">'+marked.parse(x.content)+'</div>'}).join('')||'<div class="empty"><span>No results</span></div>';hl()})}
+function doSearch(){var q=$('searchIn').value.trim();if(!q){if(room)openR(room,$('cTitle').textContent);return}api('/api/messages/search?room_id='+room+'&q='+encodeURIComponent(q)).then(function(m){$('cMsgs').innerHTML=m.map(function(x){return '<div class="msg msg-them">'+safeMd(x.content)+'</div>'}).join('')||'<div class="empty"><span>No results</span></div>';hl()})}
 
 function loadAgents(){api('/api/agents').then(function(a){$('aList').innerHTML=a.map(function(x){return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:start"><div><div style="font-weight:700;font-size:15px">'+x.name+'</div><div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><span class="chip chip-a">'+x.provider+'</span>'+(x.mode?'<span class="chip chip-n">'+x.mode+'</span>':'')+'</div></div><div style="display:flex;gap:4px"><button class="btn btn-s btn-sm" onclick="delAgent(\''+x.id+'\')">Delete</button></div></div><div style="font-size:13px;color:var(--text2);margin-top:12px;line-height:1.6">'+esc(x.system_prompt.substring(0,200))+(x.system_prompt.length>200?'...':'')+'</div></div>'}).join('')||'<div class="empty"><span>No agents yet</span></div>'})}
 function mkAgent(){var n=$('naN').value,p=$('naP').value,pr=$('naPr').value,m=$('naM').value;if(!n)return;api('/api/agents',{method:'POST',body:JSON.stringify({name:n,system_prompt:p,provider:pr,model:m})}).then(function(){hideM('mAgent');loadAgents()})}
@@ -257,9 +280,9 @@ function loadNet(){api('/api/network/status').then(function(s){if(s.status==='st
 
 function loadKeys(){api('/api/users/keys?user_id='+U).then(function(k){$('kList').innerHTML=k.map(function(x){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;font-weight:500">'+x.provider+(x.model?' ('+x.model+')':'')+'</span><button class="btn btn-d btn-sm" onclick="delKey(\''+x.provider+'\')">Remove</button></div>'}).join('')||'<div style="color:var(--text3);font-size:13px">No keys</div>';$('pInfo').innerHTML='User: <strong>'+N+'</strong><br><span style="font-size:12px;color:var(--text3)">ID: '+U+'</span>'})}
 function saveKey(){var p=$('kProv').value,k=$('kVal').value;if(!k)return;api('/api/users/keys?user_id='+U,{method:'POST',body:JSON.stringify({provider:p,api_key:k})}).then(function(){$('kVal').value='';loadKeys()})}
-function delKey(p){fetch('/api/users/keys/'+p+'?user_id='+U,{method:'DELETE'}).then(function(){loadKeys()})}
+function delKey(p){fetch('/api/users/keys/'+p+'?user_id='+U,{method:'DELETE',headers:{'Authorization':'Bearer '+T}}).then(function(){loadKeys()})}
 
-function dangerAction(a,m){if(!confirm(m))return;var u='/api/danger/'+a;if(a==='keys'||a==='user')u+='?user_id='+U;fetch(u,{method:'DELETE'}).then(function(r){return r.json()}).then(function(d){$('dangerMsg').innerHTML='<span style="color:var(--green)">'+d.message+'</span>';if(a==='user')setTimeout(logout,1500);if(a==='everything')setTimeout(function(){location.reload()},2000);loadKeys();loadAgents();loadRooms()})}
+function dangerAction(a,m){if(!confirm(m))return;var u='/api/danger/'+a;if(a==='keys'||a==='user')u+='?user_id='+U;fetch(u,{method:'DELETE',headers:{'Authorization':'Bearer '+T}}).then(function(r){return r.json()}).then(function(d){$('dangerMsg').innerHTML='<span style="color:var(--green)">'+(d.message||d.detail||'Done')+'</span>';if(a==='user')setTimeout(logout,1500);if(a==='everything')setTimeout(function(){location.reload()},2000);loadKeys();loadAgents();loadRooms()})}
 
 function mkRoom(){var n=$('nrN').value,t=$('nrT').value;if(!n)return;api('/api/rooms?user_id='+U,{method:'POST',body:JSON.stringify({name:n,type:t})}).then(function(){hideM('mRoom');loadRooms()})}
 function invBot(){var a=$('ibA').value;if(!a||!room)return;api('/api/rooms/'+room+'/members',{method:'POST',body:JSON.stringify({member_type:'agent',member_id:a})}).then(function(){hideM('mBot')})}

@@ -27,8 +27,8 @@ async def register(username: str, password: str, display_name: str = None) -> di
     username = username.strip().lower()
     if not username or len(username) < 2:
         raise ValueError("Username must be at least 2 characters")
-    if len(password) < 4:
-        raise ValueError("Password must be at least 4 characters")
+    if len(password) < 8:
+        raise ValueError("Password must be at least 8 characters")
 
     conn = get_connection()
     existing = conn.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone()

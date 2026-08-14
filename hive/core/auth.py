@@ -8,12 +8,33 @@ import json
 import hashlib
 import hmac
 import base64
+import secrets
 import logging
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-SECRET_KEY = os.getenv("HIVE_SECRET_KEY", "hive-dev-secret-change-in-production")
+SECRET_KEY_FILE = Path("hive_secret.key")
 TOKEN_EXPIRY = 7 * 86400  # 7 days
+
+
+def _get_secret_key() -> str:
+    """Get or generate the JWT secret key."""
+    # First check environment variable
+    env_key = os.getenv("HIVE_SECRET_KEY")
+    if env_key:
+        return env_key
+    # Then check file
+    if SECRET_KEY_FILE.exists():
+        return SECRET_KEY_FILE.read_text().strip()
+    # Generate new random key and save
+    new_key = secrets.token_hex(32)
+    SECRET_KEY_FILE.write_text(new_key)
+    logger.info("Generated new JWT secret key (saved to hive_secret.key)")
+    return new_key
+
+
+SECRET_KEY = _get_secret_key()
 
 
 def _base64url_encode(data: bytes) -> str:

@@ -7,9 +7,11 @@ venv/
 .traces/
 .pytest_cache/
 hive_memory/
-hive.db
+hive_secret.key
 skills/
 uploads/
+workspace_files/
 hive.egg-info/
 keystore/
 relay_mailbox/
+custom_providers.json
