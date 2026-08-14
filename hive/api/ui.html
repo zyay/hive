@@ -330,11 +330,29 @@ button { cursor: pointer; border: none; }
   <h3>Create AI Agent</h3>
   <div class="form-group"><label>Name</label><input id="naN" placeholder="e.g., Research Assistant"></div>
   <div class="form-group"><label>System prompt</label><textarea id="naP" rows="3" placeholder="Define the agent's behavior...">You are a helpful assistant.</textarea></div>
-  <div class="form-group"><label>Provider</label><select id="naPr"></select></div>
-  <div class="form-group"><label>Model</label><input id="naM" placeholder="Leave empty for default"></div>
+  <div class="form-group"><label>Provider</label>
+    <div style="display:flex;gap:8px">
+      <select id="naPr" onchange="scanModels()" style="flex:1"></select>
+      <button class="btn btn-secondary btn-sm" onclick="modal('mCustomProvider')">+ Custom</button>
+    </div>
+  </div>
+  <div class="form-group"><label>Model <span id="modelScanStatus" style="color:var(--text-muted);font-weight:400"></span></label>
+    <select id="naM"><option value="">Default model</option></select>
+  </div>
   <div style="display:flex;gap:12px;margin-top:28px;justify-content:flex-end">
     <button class="btn btn-secondary" onclick="hideM('mAgent')">Cancel</button>
     <button class="btn btn-primary" onclick="mkAgent()">Create agent</button>
+  </div>
+</div></div>
+<div class="modal-overlay" id="mCustomProvider"><div class="modal">
+  <h3>Add Custom Provider</h3>
+  <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px">Add any OpenAI-compatible API endpoint (e.g., local LLM, custom API).</p>
+  <div class="form-group"><label>Provider name</label><input id="cpName" placeholder="e.g., my-local-llm"></div>
+  <div class="form-group"><label>Base URL</label><input id="cpUrl" placeholder="http://localhost:11434/v1"></div>
+  <div class="form-group"><label>API Key</label><input id="cpKey" type="password" placeholder="sk-... (or empty for local)"></div>
+  <div style="display:flex;gap:12px;margin-top:28px;justify-content:flex-end">
+    <button class="btn btn-secondary" onclick="hideM('mCustomProvider')">Cancel</button>
+    <button class="btn btn-primary" onclick="addCustomProvider()">Add Provider</button>
   </div>
 </div></div>
 <div class="modal-overlay" id="mBot"><div class="modal">
@@ -463,7 +481,9 @@ function dangerAction(action,msg){if(!confirm(msg))return;var url='/api/danger/'
 
 function loadHW(){api('/api/hardware').then(function(r){var h=r.hardware;$('hwC').innerHTML='<div class="card"><h4>Hardware Specifications</h4><div class="stat-row"><span>Operating System</span><span class="value">'+h.os+'</span></div><div class="stat-row"><span>CPU Cores</span><span class="value">'+h.cpu_cores+'</span></div><div class="stat-row"><span>Memory (RAM)</span><span class="value">'+h.ram_gb+' GB</span></div><div class="stat-row"><span>GPU</span><span class="value">'+h.gpu+'</span></div><div class="stat-row"><span>VRAM</span><span class="value">'+h.gpu_vram_gb+' GB</span></div></div><div class="card"><h4>AI Model Recommendation</h4><p style="font-size:13px;color:var(--text-secondary);line-height:1.8">'+r.recommendation+'</p><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px">'+r.suggested_models.map(function(m){return '<span class="chip chip-neutral">'+m.size+(m.quant?' · '+m.quant:'')+'</span>'}).join('')+'</div></div>'})}
 
-function loadProv(){api('/api/providers').then(function(p){$('naPr').innerHTML=p.map(function(x){return '<option value="'+x.name+'">'+x.name+'</option>'}).join('')})}
+function loadProv(){api('/api/providers/all?user_id='+U).then(function(p){var html='';for(var k in p){html+='<option value="'+k+'">'+p[k].name+(p[k].type==='custom'?' (custom)':'')+'</option>'}$('naPr').innerHTML=html;scanModels()})}
+function scanModels(){var provider=$('naPr').value;if(!provider)return;$('modelScanStatus').textContent='— scanning...';api('/api/providers/'+provider+'/models?user_id='+U).then(function(r){var models=r.models||[];$('naM').innerHTML='<option value="">Default model</option>'+models.map(function(m){return '<option value="'+m.id+'">'+m.name+'</option>'}).join('');$('modelScanStatus').textContent='— '+models.length+' models found'+(r.source==='fallback'?' (fallback)':'')}).catch(function(){$('modelScanStatus').textContent='— scan failed'})}
+function addCustomProvider(){var name=$('cpName').value,url=$('cpUrl').value,key=$('cpKey').value;if(!name||!url){alert('Name and URL required');return}api('/api/providers/custom',{method:'POST',body:JSON.stringify({name:name,base_url:url,api_key:key})}).then(function(){hideM('mCustomProvider');loadProv();$('cpName').value='';$('cpUrl').value='';$('cpKey').value=''})}
 function mkRoom(){var n=$('nrN').value,t=$('nrT').value;if(!n)return;api('/api/rooms?user_id='+U,{method:'POST',body:JSON.stringify({name:n,type:t})}).then(function(){hideM('mRoom');loadRooms()})}
 function invBot(){var a=$('ibA').value;if(!a||!room)return;api('/api/rooms/'+room+'/members',{method:'POST',body:JSON.stringify({member_type:'agent',member_id:a})}).then(function(){hideM('mBot')})}
 function invUser(){var u=$('iuU').value;if(!u||!room)return;api('/api/rooms/'+room+'/members',{method:'POST',body:JSON.stringify({member_type:'user',member_id:u})}).then(function(){hideM('mUser')})}

@@ -1154,6 +1154,194 @@ def list_modes():
 
 
 # ---------------------------------------------------------------------------
+# Provider Model Discovery & Custom Providers
+# ---------------------------------------------------------------------------
+
+import json as json_module
+from pathlib import Path as PathLib
+
+CUSTOM_PROVIDERS_FILE = PathLib("custom_providers.json")
+
+
+def load_custom_providers() -> dict:
+    """Load custom providers from file."""
+    if CUSTOM_PROVIDERS_FILE.exists():
+        try:
+            return json_module.loads(CUSTOM_PROVIDERS_FILE.read_text())
+        except Exception:
+            return {}
+    return {}
+
+
+def save_custom_providers(providers: dict):
+    """Save custom providers to file."""
+    CUSTOM_PROVIDERS_FILE.write_text(json_module.dumps(providers, indent=2))
+
+
+async def fetch_openai_models(base_url: str, api_key: str) -> list[dict]:
+    """Fetch models from OpenAI-compatible API."""
+    import httpx
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.get(
+                f"{base_url.rstrip('/')}/models",
+                headers={"Authorization": f"Bearer {api_key}"}
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                models = data.get("data", [])
+                return [{"id": m["id"], "name": m.get("name", m["id"])} for m in models[:50]]
+    except Exception as e:
+        logger.debug(f"Failed to fetch models from {base_url}: {e}")
+    return []
+
+
+async def fetch_anthropic_models(api_key: str) -> list[dict]:
+    """Fetch models from Anthropic API."""
+    import httpx
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.get(
+                "https://api.anthropic.com/v1/models",
+                headers={
+                    "x-api-key": api_key,
+                    "anthropic-version": "2023-06-01"
+                }
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                models = data.get("data", [])
+                return [{"id": m["id"], "name": m.get("display_name", m["id"])} for m in models[:50]]
+    except Exception as e:
+        logger.debug(f"Failed to fetch Anthropic models: {e}")
+    return []
+
+
+@app.get("/api/providers/{provider}/models")
+async def scan_provider_models(provider: str, user_id: str = ""):
+    """Auto-scan available models from a provider."""
+    from hive.core.config import settings
+    from hive.core.user_keys import get_key
+
+    # Check custom providers first
+    custom = load_custom_providers()
+    if provider in custom:
+        cfg = custom[provider]
+        models = await fetch_openai_models(cfg["base_url"], cfg["api_key"])
+        return {"provider": provider, "models": models, "source": "custom"}
+
+    # Built-in providers
+    cfg = settings.PROVIDERS.get(provider)
+    if not cfg:
+        raise HTTPException(404, f"Unknown provider: {provider}")
+
+    # Get API key (user-specific or server default)
+    api_key = cfg["api_key"]
+    if user_id:
+        user_key, _ = await get_key(user_id, provider)
+        if user_key:
+            api_key = user_key
+
+    if not api_key:
+        return {"provider": provider, "models": [], "error": "No API key configured"}
+
+    # Fetch models based on provider type
+    if provider == "anthropic":
+        models = await fetch_anthropic_models(api_key)
+    else:
+        models = await fetch_openai_models(cfg["base_url"], api_key)
+
+    # Fallback to known models if scan fails
+    if not models:
+        fallback_models = {
+            "openai": ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo"],
+            "anthropic": ["claude-3-5-sonnet-20241022", "claude-3-5-haiku-20241022", "claude-3-opus-20240229"],
+            "groq": ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768"],
+            "mistral": ["mistral-large-latest", "mistral-small-latest", "open-mistral-nemo"],
+            "xai": ["grok-3", "grok-3-mini", "grok-2"],
+            "deepseek": ["deepseek-chat", "deepseek-reasoner", "deepseek-coder"],
+            "gemini": ["gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash"],
+            "ollama": ["llama3.3", "llama3.2", "mistral", "codellama", "phi3"],
+        }
+        models = [{"id": m, "name": m} for m in fallback_models.get(provider, [])]
+
+    return {"provider": provider, "models": models, "source": "scanned" if models else "fallback"}
+
+
+@app.get("/api/providers/custom")
+def list_custom_providers():
+    """List all custom providers."""
+    custom = load_custom_providers()
+    return {k: {"name": v.get("name", k), "base_url": v["base_url"]} for k, v in custom.items()}
+
+
+class CustomProvider(BaseModel):
+    name: str
+    base_url: str
+    api_key: str
+
+
+@app.post("/api/providers/custom")
+def add_custom_provider(body: CustomProvider):
+    """Add a custom OpenAI-compatible provider."""
+    custom = load_custom_providers()
+    custom[body.name] = {
+        "name": body.name,
+        "base_url": body.base_url,
+        "api_key": body.api_key,
+    }
+    save_custom_providers(custom)
+    return {"name": body.name, "status": "added"}
+
+
+@app.delete("/api/providers/custom/{name}")
+def delete_custom_provider(name: str):
+    """Delete a custom provider."""
+    custom = load_custom_providers()
+    if name in custom:
+        del custom[name]
+        save_custom_providers(custom)
+        return {"name": name, "status": "deleted"}
+    raise HTTPException(404, "Provider not found")
+
+
+@app.get("/api/providers/all")
+async def list_all_providers(user_id: str = ""):
+    """List all providers (built-in + custom) with their models."""
+    from hive.core.config import settings
+
+    result = {}
+
+    # Built-in providers
+    for name, cfg in settings.PROVIDERS.items():
+        has_key = bool(cfg["api_key"])
+        if user_id:
+            from hive.core.user_keys import get_key
+            user_key, _ = await get_key(user_id, name)
+            if user_key:
+                has_key = True
+        result[name] = {
+            "name": name,
+            "type": "built-in",
+            "configured": has_key,
+            "models": [],
+        }
+
+    # Custom providers
+    custom = load_custom_providers()
+    for name, cfg in custom.items():
+        result[name] = {
+            "name": cfg.get("name", name),
+            "type": "custom",
+            "base_url": cfg["base_url"],
+            "configured": bool(cfg.get("api_key")),
+            "models": [],
+        }
+
+    return result
+
+
+# ---------------------------------------------------------------------------
 # File Storage — upload, browse, manage files
 # ---------------------------------------------------------------------------
 
