@@ -1342,6 +1342,232 @@ async def list_all_providers(user_id: str = ""):
 
 
 # ---------------------------------------------------------------------------
+# Task System — Taskforcing for Agents
+# ---------------------------------------------------------------------------
+
+import asyncio
+from datetime import datetime
+
+TASK_STATUSES = ["pending", "running", "completed", "failed", "cancelled"]
+TASK_PRIORITIES = ["low", "medium", "high", "critical"]
+
+# In-memory task queue (in production, use Redis/DB)
+task_queue: list[dict] = []
+task_history: list[dict] = []
+task_templates = {
+    "research": {"name": "Research Task", "description": "Research a topic and compile findings", "default_mode": "analyze"},
+    "code_review": {"name": "Code Review", "description": "Review code for issues and improvements", "default_mode": "work"},
+    "summarize": {"name": "Summarize", "description": "Summarize documents or conversations", "default_mode": "work"},
+    "plan": {"name": "Planning", "description": "Create a detailed plan or architecture", "default_mode": "plan"},
+    "visualize": {"name": "Visualize", "description": "Create diagrams or visualizations", "default_mode": "visualize"},
+    "brainstorm": {"name": "Brainstorm", "description": "Generate creative ideas", "default_mode": "creative"},
+}
+
+
+class TaskCreate(BaseModel):
+    title: str
+    description: str = ""
+    agent_id: str
+    priority: str = "medium"
+    template: str = ""
+    input_data: str = ""
+    depends_on: list[str] = []
+
+
+class TaskBatch(BaseModel):
+    tasks: list[TaskCreate]
+
+
+@app.get("/api/tasks")
+def list_tasks(status: str = "", agent_id: str = ""):
+    """List all tasks (queue + history)."""
+    all_tasks = task_queue + task_history
+    if status:
+        all_tasks = [t for t in all_tasks if t["status"] == status]
+    if agent_id:
+        all_tasks = [t for t in all_tasks if t["agent_id"] == agent_id]
+    return sorted(all_tasks, key=lambda x: x.get("created_at", 0), reverse=True)
+
+
+@app.get("/api/tasks/queue")
+def get_task_queue():
+    """Get pending and running tasks."""
+    return [t for t in task_queue if t["status"] in ["pending", "running"]]
+
+
+@app.get("/api/tasks/history")
+def get_task_history(limit: int = 50):
+    """Get completed/failed task history."""
+    return [t for t in task_history if t["status"] in ["completed", "failed"]][:limit]
+
+
+@app.post("/api/tasks")
+async def create_task(body: TaskCreate):
+    """Create a new task and add to queue."""
+    import uuid
+    task_id = str(uuid.uuid4())[:8]
+    task = {
+        "id": task_id,
+        "title": body.title,
+        "description": body.description,
+        "agent_id": body.agent_id,
+        "priority": body.priority,
+        "template": body.template,
+        "input_data": body.input_data,
+        "depends_on": body.depends_on,
+        "status": "pending",
+        "result": None,
+        "created_at": time.time(),
+        "started_at": None,
+        "completed_at": None,
+    }
+    task_queue.append(task)
+    # Start execution in background
+    asyncio.create_task(execute_task(task_id))
+    return task
+
+
+@app.post("/api/tasks/batch")
+async def create_batch_tasks(body: TaskBatch):
+    """Create multiple tasks at once."""
+    results = []
+    for task_data in body.tasks:
+        task = await create_task(task_data)
+        results.append(task)
+    return {"tasks": results, "count": len(results)}
+
+
+@app.get("/api/tasks/{task_id}")
+def get_task(task_id: str):
+    """Get task details."""
+    for t in task_queue + task_history:
+        if t["id"] == task_id:
+            return t
+    raise HTTPException(404, "Task not found")
+
+
+@app.post("/api/tasks/{task_id}/cancel")
+def cancel_task(task_id: str):
+    """Cancel a pending task."""
+    for t in task_queue:
+        if t["id"] == task_id and t["status"] == "pending":
+            t["status"] = "cancelled"
+            t["completed_at"] = time.time()
+            task_queue.remove(t)
+            task_history.insert(0, t)
+            return {"id": task_id, "status": "cancelled"}
+    raise HTTPException(400, "Task cannot be cancelled")
+
+
+@app.delete("/api/tasks/{task_id}")
+def delete_task(task_id: str):
+    """Delete a task from history."""
+    for i, t in enumerate(task_history):
+        if t["id"] == task_id:
+            task_history.pop(i)
+            return {"id": task_id, "status": "deleted"}
+    raise HTTPException(404, "Task not found")
+
+
+@app.get("/api/tasks/templates")
+def list_task_templates():
+    """List available task templates."""
+    return task_templates
+
+
+async def execute_task(task_id: str):
+    """Execute a task using the assigned agent."""
+    global task_queue, task_history
+
+    # Find task in queue
+    task = None
+    for t in task_queue:
+        if t["id"] == task_id:
+            task = t
+            break
+
+    if not task:
+        return
+
+    # Check dependencies
+    for dep_id in task.get("depends_on", []):
+        dep_task = None
+        for t in task_queue + task_history:
+            if t["id"] == dep_id:
+                dep_task = t
+                break
+        if dep_task and dep_task["status"] != "completed":
+            task["status"] = "failed"
+            task["result"] = f"Dependency {dep_id} not completed"
+            task["completed_at"] = time.time()
+            task_queue.remove(task)
+            task_history.insert(0, task)
+            return
+
+    # Mark as running
+    task["status"] = "running"
+    task["started_at"] = time.time()
+
+    try:
+        # Get agent config
+        from hive.core.db import get_connection
+        conn = get_connection()
+        agent_row = conn.execute("SELECT * FROM agents WHERE id = ?", (task["agent_id"],)).fetchone()
+        conn.close()
+
+        if not agent_row:
+            raise Exception(f"Agent {task['agent_id']} not found")
+
+        # Build prompt based on template and input
+        template = task_templates.get(task.get("template"), {})
+        mode_suffix = ""
+        if task.get("template") and task["template"] in AGENT_MODES:
+            mode_suffix = AGENT_MODES[task["template"]].get("system_suffix", "")
+
+        system_prompt = agent_row["system_prompt"] + mode_suffix
+        user_message = task["input_data"] or task["description"] or task["title"]
+
+        # Execute via agent
+        from hive.core.agent import run_agent, AgentConfig
+        config = AgentConfig(
+            name=agent_row["name"],
+            system_prompt=system_prompt,
+            provider=agent_row["provider"],
+            model=agent_row["model"] or "",
+        )
+        result = await run_agent(config, user_message)
+
+        # Mark as completed
+        task["status"] = "completed"
+        task["result"] = result.response
+        task["completed_at"] = time.time()
+
+    except Exception as e:
+        task["status"] = "failed"
+        task["result"] = f"Error: {str(e)}"
+        task["completed_at"] = time.time()
+
+    # Move from queue to history
+    if task in task_queue:
+        task_queue.remove(task)
+    task_history.insert(0, task)
+
+
+@app.get("/api/tasks/stats")
+def task_stats():
+    """Get task statistics."""
+    all_tasks = task_queue + task_history
+    return {
+        "total": len(all_tasks),
+        "pending": len([t for t in all_tasks if t["status"] == "pending"]),
+        "running": len([t for t in all_tasks if t["status"] == "running"]),
+        "completed": len([t for t in all_tasks if t["status"] == "completed"]),
+        "failed": len([t for t in all_tasks if t["status"] == "failed"]),
+        "queue_size": len(task_queue),
+    }
+
+
+# ---------------------------------------------------------------------------
 # File Storage — upload, browse, manage files
 # ---------------------------------------------------------------------------
 

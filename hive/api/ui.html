@@ -217,6 +217,8 @@ button { cursor: pointer; border: none; }
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg> AI Agents</div>
     <div class="nav-item" data-v="files" onclick="view('files')">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Files</div>
+    <div class="nav-item" data-v="tasks" onclick="view('tasks')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Tasks</div>
     <div class="nav-item" data-v="network" onclick="view('network')">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10"/></svg> Network</div>
     <div class="nav-item" data-v="settings" onclick="view('settings')">
@@ -271,6 +273,18 @@ button { cursor: pointer; border: none; }
     <div class="topbar"><h3>Workspace Files</h3><button class="btn btn-primary btn-sm" onclick="modal('mUpload')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Upload file</button></div>
     <div class="content" id="fList"></div>
+  </div>
+  <!-- Tasks -->
+  <div id="vTasks" style="display:none;flex-direction:column;flex:1">
+    <div class="topbar"><h3>Task Force</h3><button class="btn btn-primary btn-sm" onclick="openTaskModal()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New task</button></div>
+    <div class="content">
+      <div id="taskStats" style="display:flex;gap:12px;margin-bottom:24px"></div>
+      <h4 style="font-size:14px;font-weight:600;margin-bottom:12px">Queue</h4>
+      <div id="taskQueue"></div>
+      <h4 style="font-size:14px;font-weight:600;margin:24px 0 12px">History</h4>
+      <div id="taskHistory"></div>
+    </div>
   </div>
   <!-- Network -->
   <div id="vNetwork" style="display:none;flex-direction:column;flex:1">
@@ -404,6 +418,19 @@ button { cursor: pointer; border: none; }
     <button class="btn btn-secondary" onclick="hideM('mAssignFiles')">Close</button>
   </div>
 </div></div>
+<div class="modal-overlay" id="mTask"><div class="modal">
+  <h3>Create Task</h3>
+  <div class="form-group"><label>Title</label><input id="tTitle" placeholder="e.g., Research quantum computing"></div>
+  <div class="form-group"><label>Description</label><textarea id="tDesc" rows="2" placeholder="Task details..."></textarea></div>
+  <div class="form-group"><label>Assign to Agent</label><select id="tAgent"></select></div>
+  <div class="form-group"><label>Template</label><select id="tTemplate"><option value="">None</option><option value="research">Research</option><option value="code_review">Code Review</option><option value="summarize">Summarize</option><option value="plan">Planning</option><option value="visualize">Visualize</option><option value="brainstorm">Brainstorm</option></select></div>
+  <div class="form-group"><label>Priority</label><select id="tPriority"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option><option value="critical">Critical</option></select></div>
+  <div class="form-group"><label>Input Data (optional)</label><textarea id="tInput" rows="3" placeholder="Data for the agent to process..."></textarea></div>
+  <div style="display:flex;gap:12px;margin-top:28px;justify-content:flex-end">
+    <button class="btn btn-secondary" onclick="hideM('mTask')">Cancel</button>
+    <button class="btn btn-primary" onclick="createTask()">Create Task</button>
+  </div>
+</div></div>
 
 <!-- Tutorial -->
 <div id="tut"><div class="tut-box">
@@ -433,7 +460,7 @@ function logout(){T=null;U=null;N=null;if(ws)ws.close();$('app').style.display='
 
 function enter(){localStorage.setItem('ht',T);localStorage.setItem('hu',U);localStorage.setItem('hn',N);$('auth').style.display='none';$('app').style.display='flex';$('sbU').textContent=N;$('userAvatar').textContent=N.charAt(0).toUpperCase();loadRooms();loadProv();loadHW();loadNet();if(!localStorage.getItem('htut'))setTimeout(showTut,800)}
 
-function view(v){document.querySelectorAll('[id^=v]').forEach(function(e){e.style.display='none'});var el=$('v'+v.charAt(0).toUpperCase()+v.slice(1));if(el)el.style.display='flex';document.querySelectorAll('.nav-item').forEach(function(e){e.classList.toggle('active',e.dataset.v===v)});if(v==='agents')loadAgents();if(v==='files')loadFiles();if(v==='settings')loadKeys();if(v==='system')loadHW();if(v==='network')loadNet()}
+function view(v){document.querySelectorAll('[id^=v]').forEach(function(e){e.style.display='none'});var el=$('v'+v.charAt(0).toUpperCase()+v.slice(1));if(el)el.style.display='flex';document.querySelectorAll('.nav-item').forEach(function(e){e.classList.toggle('active',e.dataset.v===v)});if(v==='agents')loadAgents();if(v==='files')loadFiles();if(v==='tasks')loadTasks();if(v==='settings')loadKeys();if(v==='system')loadHW();if(v==='network')loadNet()}
 
 function loadRooms(){api('/api/rooms?user_id='+U).then(function(r){$('rList').innerHTML=r.map(function(x){var b=unread[x.id]?'<span class="unread-badge">'+unread[x.id]+'</span>':'';return '<div class="room-item'+(room===x.id?' active':'')+'" onclick="openR(\''+x.id+'\',\''+(x.name||x.id)+'\')"><div class="room-name">'+(x.name||x.id)+'</div><div class="room-type">'+x.type+'</div>'+b+'</div>'}).join('')||'<div style="padding:20px;font-size:13px;color:var(--text-muted);text-align:center">No conversations yet</div>'})}
 
@@ -467,6 +494,11 @@ function deleteFile(name){if(!confirm('Delete '+name+'?'))return;api('/api/files
 var currentAssignAgent=null;
 function showAssignFiles(agentId){currentAssignAgent=agentId;Promise.all([api('/api/files'),api('/api/agents/'+agentId+'/files')]).then(function(r){var allFiles=r[0],assignedFiles=r[1];$('assignFileList').innerHTML=allFiles.map(function(f){var isAssigned=assignedFiles.indexOf(f.name)>=0;return '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)"><div style="font-weight:500">'+f.name+'</div><button class="btn '+(isAssigned?'btn-danger':'btn-primary')+' btn-sm" onclick="toggleFileAssign(\''+f.name+'\','+(!isAssigned)+')">'+(isAssigned?'Remove':'Assign')+'</button></div>'}).join('')||'<div style="color:var(--text-muted);text-align:center;padding:20px">No files available. Upload files first.</div>'});modal('mAssignFiles')}
 function toggleFileAssign(filename,assign){if(assign){api('/api/agents/'+currentAssignAgent+'/files?filename='+filename,{method:'POST'}).then(function(){showAssignFiles(currentAssignAgent)})}else{api('/api/agents/'+currentAssignAgent+'/files/'+filename,{method:'DELETE'}).then(function(){showAssignFiles(currentAssignAgent)})}}
+
+// Tasks
+function loadTasks(){api('/api/tasks/stats').then(function(s){$('taskStats').innerHTML='<div class="card" style="flex:1;text-align:center"><div style="font-size:28px;font-weight:800;color:var(--accent)">'+s.pending+'</div><div style="font-size:11px;color:var(--text-muted)">Pending</div></div><div class="card" style="flex:1;text-align:center"><div style="font-size:28px;font-weight:800;color:var(--info)">'+s.running+'</div><div style="font-size:11px;color:var(--text-muted)">Running</div></div><div class="card" style="flex:1;text-align:center"><div style="font-size:28px;font-weight:800;color:var(--success)">'+s.completed+'</div><div style="font-size:11px;color:var(--text-muted)">Completed</div></div><div class="card" style="flex:1;text-align:center"><div style="font-size:28px;font-weight:800;color:var(--error)">'+s.failed+'</div><div style="font-size:11px;color:var(--text-muted)">Failed</div></div>'});api('/api/tasks/queue').then(function(q){$('taskQueue').innerHTML=q.map(function(t){var statusColor={pending:'chip-neutral',running:'chip-accent'};return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:start"><div><div style="font-weight:600">'+t.title+'</div><div style="font-size:12px;color:var(--text-muted);margin-top:4px">Agent: '+t.agent_id+' · Priority: '+t.priority+'</div></div><span class="chip '+(statusColor[t.status]||'chip-neutral')+'">'+t.status+'</span></div>'+(t.description?'<div style="font-size:13px;color:var(--text-secondary);margin-top:8px">'+esc(t.description)+'</div>':'')+'</div>'}).join('')||'<div style="color:var(--text-muted);font-size:13px;padding:12px 0">No tasks in queue</div>'});api('/api/tasks/history').then(function(h){$('taskHistory').innerHTML=h.map(function(t){var statusColor={completed:'chip-success',failed:'chip-error',cancelled:'chip-neutral'};return '<div class="card"><div style="display:flex;justify-content:space-between;align-items:start"><div style="flex:1"><div style="font-weight:600">'+t.title+'</div><div style="font-size:12px;color:var(--text-muted);margin-top:4px">Agent: '+t.agent_id+' · '+(t.completed_at?new Date(t.completed_at*1000).toLocaleString():'')+'</div></div><span class="chip '+(statusColor[t.status]||'chip-neutral')+'">'+t.status+'</span></div>'+(t.result?'<div style="font-size:13px;color:var(--text-secondary);margin-top:12px;padding:12px;background:var(--bg-elevated);border-radius:var(--radius-sm);max-height:150px;overflow-y:auto;white-space:pre-wrap">'+esc(t.result.substring(0,500))+(t.result.length>500?'...':'')+'</div>':'')+'</div>'}).join('')||'<div style="color:var(--text-muted);font-size:13px;padding:12px 0">No task history</div>'})}
+function createTask(){var title=$('tTitle').value,desc=$('tDesc').value,agent=$('tAgent').value,template=$('tTemplate').value,priority=$('tPriority').value,input=$('tInput').value;if(!title||!agent){alert('Title and agent required');return}api('/api/tasks',{method:'POST',body:JSON.stringify({title:title,description:desc,agent_id:agent,template:template,priority:priority,input_data:input})}).then(function(){hideM('mTask');loadTasks();$('tTitle').value='';$('tDesc').value='';$('tInput').value=''})}
+function openTaskModal(){api('/api/agents').then(function(a){$('tAgent').innerHTML=a.map(function(x){return '<option value="'+x.id+'">'+x.name+'</option>'}).join('')||'<option>No agents available</option>';modal('mTask')})}
 function mkAgent(){var n=$('naN').value,p=$('naP').value,pr=$('naPr').value,m=$('naM').value;if(!n)return;api('/api/agents',{method:'POST',body:JSON.stringify({name:n,system_prompt:p,provider:pr,model:m})}).then(function(){hideM('mAgent');loadAgents()})}
 function delAgent(id){fetch('/api/agents/'+id,{method:'DELETE'}).then(function(){loadAgents()})}
 
