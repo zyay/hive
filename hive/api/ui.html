@@ -1076,7 +1076,7 @@ function createAgent() {
 
 function deleteAgent(id) {
   if (!confirm('Delete this agent?')) return;
-  fetch('/api/agents/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + T } }).then(() => loadAgents());
+  fetch('/api/agents/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + T, 'Content-Type': 'application/json' } }).then(() => loadAgents());
 }
 
 function loadProviders() {
