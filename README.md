@@ -1,6 +1,11 @@
-# Hive — Self-hosted Multi-Agent AI Platform
+<p align="center">
+  <img src="static/logo-text-black.png" alt="Hive" width="300">
+</p>
 
-[![CI](https://github.com/zyay/hive/actions/workflows/ci.yml/badge.svg)](https://github.com/zyay/hive/actions/workflows/ci.yml)
+<p align="center">
+  <strong>Self-hosted Multi-Agent AI Platform</strong><br>
+  <a href="https://github.com/zyay/hive/actions/workflows/ci.yml"><img src="https://github.com/zyay/hive/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+</p>
 
 > **v0.3** — 10 LLM providers · Swarm orchestration · Vector memory · SSE streaming · JWT auth · Benchmark suite · MCP integrations · 92 tests
 
