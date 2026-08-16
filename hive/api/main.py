@@ -789,21 +789,27 @@ async def get_room_members(room_id: str):
 @app.post("/api/rooms/{room_id}/members")
 async def invite_member(room_id: str, body: InviteRequest):
     from hive.core.rooms import add_member, invite_bot
+    from hive.core.ws import broadcast
     if body.member_type == "agent":
         ok = await invite_bot(room_id, body.member_id)
     else:
         ok = await add_member(room_id, body.member_type, body.member_id)
     if not ok:
         raise HTTPException(400, "Already a member or invalid")
+    if body.member_type == "agent":
+        await broadcast(room_id, {"type": "agent_joined", "agent_id": body.member_id})
     return {"invited": True}
 
 
 @app.delete("/api/rooms/{room_id}/members/{member_type}/{member_id}")
 async def remove_member_endpoint(room_id: str, member_type: str, member_id: str):
     from hive.core.rooms import remove_member
+    from hive.core.ws import broadcast
     ok = await remove_member(room_id, member_type, member_id)
     if not ok:
         raise HTTPException(404, "Member not found")
+    if member_type == "agent":
+        await broadcast(room_id, {"type": "agent_left", "agent_id": member_id})
     return {"removed": True}
 
 

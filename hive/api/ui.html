@@ -814,16 +814,6 @@ label.lbl { font-size: 12px; font-weight: 600; color: var(--text-secondary); dis
 .setting-name { font-size: 13.5px; font-weight: 600; }
 .setting-desc { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
 
-/* ═══════════ WebGL background ═══════════ */
-#glbg {
-  position: fixed; inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 1.2s ease;
-}
-#glbg.on { opacity: 1; }
-.app, .auth-screen, .welcome-deck, .tour-overlay { position: relative; z-index: 1; }
 
 /* ═══════════ Motion upgrades ═══════════ */
 @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
@@ -856,7 +846,6 @@ label.lbl { font-size: 12px; font-weight: 600; color: var(--text-secondary); dis
 }
 @keyframes glowPulse { 0%, 100% { opacity: 0.32; } 50% { opacity: 0.62; } }
 
-.rail-logo img { animation: floatY 6s ease-in-out infinite; }
 
 .topbar-title { animation: titleIn 480ms var(--ease-sheet); }
 @keyframes titleIn { from { opacity: 0; transform: translateY(-8px); letter-spacing: 0.02em; } to { opacity: 1; transform: translateY(0); letter-spacing: -0.025em; } }
@@ -885,6 +874,73 @@ label.lbl { font-size: 12px; font-weight: 600; color: var(--text-secondary); dis
 @keyframes typingDot { 0%, 60%, 100% { transform: translateY(0) scale(0.8); opacity: 0.4; } 30% { transform: translateY(-5px) scale(1.05); opacity: 1; } }
 .processing-dot { animation: typingDot 1.1s infinite ease-in-out; }
 
+/* ═══════════ Agent spawn & chat life ═══════════ */
+.avatar-wrap { position: relative; flex-shrink: 0; }
+.avatar-ring {
+  position: absolute; inset: -5px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  opacity: 0;
+  pointer-events: none;
+}
+.message-agent.spawn .avatar-wrap { animation: spawnPop 640ms var(--ease-spring); }
+.message-agent.spawn .avatar-ring { animation: ringBurst 700ms var(--ease-sheet); }
+@keyframes spawnPop {
+  0% { transform: scale(0) rotate(-160deg); opacity: 0; }
+  60% { transform: scale(1.25) rotate(8deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); }
+}
+@keyframes ringBurst {
+  0% { transform: scale(0.4); opacity: 0.9; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+.message-agent.spawn .msg-sender { animation: nameFlash 900ms ease; }
+@keyframes nameFlash { 0% { color: var(--accent-hover); text-shadow: 0 0 14px rgba(10,132,255,0.8); } 100% { color: var(--text-secondary); text-shadow: none; } }
+
+/* System join/leave lines */
+.sys-line {
+  align-self: center;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11.5px; font-weight: 600;
+  color: var(--text-tertiary);
+  padding: 4px 14px;
+  border-radius: var(--radius-pill);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  animation: sysIn 480ms var(--ease-spring);
+}
+.sys-line .sys-face { width: 18px; height: 18px; border-radius: 5px; overflow: hidden; }
+.sys-line .sys-face svg { display: block; }
+@keyframes sysIn { from { opacity: 0; transform: translateY(8px) scale(0.85); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+/* Thinking indicator with agent face */
+.thinking {
+  display: flex; align-items: center; gap: 11px;
+  padding: 8px 28px;
+  animation: fadeIn 240ms ease;
+}
+.thinking-face {
+  width: 30px; height: 30px; border-radius: 50%;
+  overflow: hidden; flex-shrink: 0;
+  border: 1.5px solid var(--accent);
+  animation: thinkBob 1s ease-in-out infinite;
+}
+.thinking-face svg { display: block; }
+@keyframes thinkBob { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-4px) rotate(4deg); } }
+.thinking-name { font-size: 12.5px; font-weight: 700; color: var(--text-secondary); }
+.thinking-dots { display: flex; gap: 4px; margin-left: 2px; }
+.thinking-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: typingDot 1.1s infinite ease-in-out; }
+.thinking-dot:nth-child(2) { animation-delay: 0.15s; }
+.thinking-dot:nth-child(3) { animation-delay: 0.3s; }
+
+/* User message launch */
+.message-user .message-bubble { animation: launchUp 420ms var(--ease-spring); }
+@keyframes launchUp { 0% { transform: translateY(14px) scale(0.92); opacity: 0; } 70% { transform: translateY(-2px) scale(1.015); } 100% { transform: translateY(0) scale(1); opacity: 1; } }
+
+/* Composer reacts when mentioning */
+.composer-input.mention-live { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft), 0 10px 34px rgba(10,132,255,0.16); }
+.chat-messages { scroll-behavior: smooth; }
+
 .modal-title::after {
   content: '';
   display: block; width: 34px; height: 3px; border-radius: 99px;
@@ -906,7 +962,6 @@ label.lbl { font-size: 12px; font-weight: 600; color: var(--text-secondary); dis
 </head>
 <body>
 
-<canvas id="glbg"></canvas>
 <div class="toast-container" id="toastContainer"></div>
 
 <div class="app">
@@ -997,11 +1052,12 @@ label.lbl { font-size: 12px; font-weight: 600; color: var(--text-secondary); dis
           <button class="btn btn-primary" onclick="startTour()">Show me around</button>
         </div>
       </div>
-      <div id="processingIndicator" style="display:none" class="processing">
-        <div class="processing-dots">
-          <div class="processing-dot"></div><div class="processing-dot"></div><div class="processing-dot"></div>
+      <div id="processingIndicator" style="display:none" class="thinking">
+        <div class="thinking-face" id="thinkingFace"></div>
+        <div class="thinking-name" id="thinkingName">Agent</div>
+        <div class="thinking-dots">
+          <div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div>
         </div>
-        <div class="processing-text">Agent is thinking…</div>
       </div>
       <div class="composer" id="composer" style="display:none">
         <div class="composer-chips" id="composerChips"></div>
@@ -1563,6 +1619,8 @@ function addAgentToRoom(agentId) {
     .then(() => {
       roomAgentIds.push(agentId);
       renderRoomAgents();
+      appendSysLine(agentId, 'joined the chat');
+      markForSpawn(agentId);
       toast(agentName(agentId) + ' added — call it with @' + agentName(agentId), 'success');
     });
 }
@@ -1570,10 +1628,35 @@ function addAgentToRoom(agentId) {
 function removeAgentFromRoom(agentId) {
   fetch('/api/rooms/' + currentRoom + '/members/agent/' + agentId, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + T } })
     .then(() => {
+      appendSysLine(agentId, 'left the chat');
       roomAgentIds = roomAgentIds.filter(i => i !== agentId);
       renderRoomAgents();
       toast('Agent removed from chat', 'success');
     });
+}
+
+/* Animated system line ("Garry joined the chat") */
+function appendSysLine(agentId, text) {
+  const box = $('chatMessages');
+  const el = document.createElement('div');
+  el.className = 'sys-line';
+  el.innerHTML = `<span class="sys-face">${faceSVG(agentId, agentName(agentId))}</span>${escHtml(agentName(agentId))} ${escHtml(text)}`;
+  box.appendChild(el);
+  box.scrollTop = box.scrollHeight;
+}
+
+/* Thinking indicator with the called agent's face */
+let thinkingAgentId = null;
+function showThinking(agentId) {
+  thinkingAgentId = agentId || null;
+  const name = agentId ? agentName(agentId) : 'Agent';
+  $('thinkingFace').innerHTML = faceSVG(agentId || 'generic', name);
+  $('thinkingName').textContent = name + ' is thinking';
+  $('processingIndicator').style.display = 'flex';
+}
+function hideThinking() {
+  thinkingAgentId = null;
+  $('processingIndicator').style.display = 'none';
 }
 
 /* @mention autocomplete */
@@ -1591,6 +1674,7 @@ function insertMention(name) {
 function closeMentionMenu() {
   mentionState.open = false;
   $('mentionMenu').classList.remove('show');
+  document.querySelector('.composer-input').classList.remove('mention-live');
 }
 
 function updateMentionMenu() {
@@ -1610,6 +1694,7 @@ function updateMentionMenu() {
       <div><div class="mention-name">${escHtml(a.name)}</div><div class="mention-sub">${escHtml(a.provider || 'default')}</div></div>
     </div>`).join('');
   $('mentionMenu').classList.add('show');
+  document.querySelector('.composer-input').classList.add('mention-live');
 }
 
 function mentionKeydown(e) {
@@ -1637,12 +1722,14 @@ function renderMessage(x) {
   const isUser = x.sender_id === U;
   const cls = isUser ? 'message-user' : 'message-agent';
   const name = isUser ? (N || 'You') : agentName(x.sender_id);
+  const spawn = !isUser && recentSpawns.has(x.sender_id) ? ' spawn' : '';
+  if (!isUser && recentSpawns.has(x.sender_id)) recentSpawns.delete(x.sender_id);
   const avatar = isUser
     ? `<div class="message-avatar">${N ? N.charAt(0).toUpperCase() : 'U'}</div>`
-    : faceBadge(x.sender_id, name, 'monogram-msg');
+    : `<div class="avatar-wrap"><div class="avatar-ring"></div>${faceBadge(x.sender_id, name, 'monogram-msg')}</div>`;
   const label = isUser ? '' : `<div class="msg-sender">${escHtml(name)}</div>`;
   const content = isUser ? escHtml(x.content).replace(/\n/g, '<br>') : renderMarkdown(x.content);
-  return `<div class="message ${cls}">${avatar}<div>${label}<div class="message-bubble">${content}</div></div></div>`;
+  return `<div class="message ${cls}${spawn}">${avatar}<div>${label}<div class="message-bubble">${content}</div></div></div>`;
 }
 
 function createRoom() {
@@ -1683,23 +1770,68 @@ function connectWS(id) {
     const d = JSON.parse(e.data);
     if (d.type === 'new_message') {
       currentMessages.push(d.message);
-      $('chatMessages').innerHTML += renderMessage(d.message);
-      $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
-      $('processingIndicator').style.display = 'none';
+      appendChatMessage(d.message);
+      if (d.message.sender_type === 'agent' || d.message.sender_id !== U) hideThinking();
       if (d.message.sender_id !== U && currentRoom !== id) { unread[id] = (unread[id] || 0) + 1; loadRooms(); }
     } else if (d.type === 'typing') {
-      $('processingIndicator').style.display = 'flex';
+      if (!thinkingAgentId) showThinking(null);
       clearTimeout(window._tt);
-      window._tt = setTimeout(() => { $('processingIndicator').style.display = 'none'; }, 3000);
+      window._tt = setTimeout(hideThinking, 3000);
+    } else if (d.type === 'agent_joined') {
+      refreshRoomMembers();
+      if (!roomAgentIds.includes(d.agent_id)) roomAgentIds.push(d.agent_id);
+      appendSysLine(d.agent_id, 'joined the chat');
+      refreshAgentCache();
+    } else if (d.type === 'agent_left') {
+      appendSysLine(d.agent_id, 'left the chat');
+      roomAgentIds = roomAgentIds.filter(i => i !== d.agent_id);
+      renderRoomAgents();
     }
   };
+}
+
+/* Track recently-joined agents so their first reply gets the spawn burst */
+let recentSpawns = new Set();
+function markForSpawn(agentId) {
+  recentSpawns.add(agentId);
+  setTimeout(() => recentSpawns.delete(agentId), 15000);
+}
+
+function appendChatMessage(x) {
+  const box = $('chatMessages');
+  const emptyEl = box.querySelector('.empty');
+  if (emptyEl) emptyEl.remove();
+  box.insertAdjacentHTML('beforeend', renderMessage(x));
+  box.scrollTop = box.scrollHeight;
+}
+
+function refreshRoomMembers() {
+  if (!currentRoom) return;
+  api('/api/rooms/' + currentRoom + '/members').then(members => {
+    roomAgentIds = members.filter(m => m.member_type === 'agent').map(m => m.member_id);
+    renderRoomAgents();
+  });
+}
+
+/* Find the first @mentioned room agent in a text ("@Garry do x" -> Garry) */
+function detectMention(text) {
+  const t = text.toLowerCase();
+  for (const a of AGENTS) {
+    if (!roomAgentIds.includes(a.id)) continue;
+    const n = a.name.toLowerCase();
+    if (t.includes('@' + n) || t.includes('@' + n.replace(/[^a-z0-9]/g, ''))) return a;
+  }
+  return null;
 }
 
 function sendMessage() {
   const v = $('chatInput').value.trim();
   if (!v || !currentRoom) return;
   $('chatInput').value = '';
-  $('processingIndicator').style.display = 'flex';
+  $('composer').querySelector('.composer-input').classList.remove('mention-live');
+  const called = detectMention(v);
+  if (called) markForSpawn(called.id);
+  showThinking(called ? called.id : null);
   api('/api/rooms/' + currentRoom + '/messages?user_id=' + U, { method: 'POST', body: JSON.stringify({ content: v }) });
 }
 
@@ -1785,12 +1917,14 @@ function pixelFace(h, c1, c2, eye, mouth) {
   </svg>`;
 }
 
-function faceBadge(seed, name, cls) {
+function faceSVG(seed, name) {
   const h = faceHash(String(seed) + '|' + String(name));
   const pal = FACE_PALETTES[h % FACE_PALETTES.length];
   const eye = (h >> 3) % 3, mouth = (h >> 5) % 3, style = (h >> 11) & 1;
-  const svg = style ? pixelFace(h, pal[0], pal[1], eye, mouth) : blobFace(h, pal[0], pal[1], eye, mouth);
-  return `<div class="${cls || 'monogram'} face-badge">${svg}</div>`;
+  return style ? pixelFace(h, pal[0], pal[1], eye, mouth) : blobFace(h, pal[0], pal[1], eye, mouth);
+}
+function faceBadge(seed, name, cls) {
+  return `<div class="${cls || 'monogram'} face-badge">${faceSVG(seed, name)}</div>`;
 }
 function agentById(id) { return AGENTS.find(a => a.id === id); }
 function agentName(id) { const a = agentById(id); return a ? a.name : 'Agent'; }
@@ -2327,117 +2461,6 @@ document.addEventListener('keydown', e => {
 window.addEventListener('resize', () => {
   if ($('tourOverlay').classList.contains('show')) renderTourStep();
 });
-
-/* ═══════════ WebGL hive-swarm background (no libs) ═══════════ */
-(function initGL() {
-  const canvas = $('glbg');
-  if (!canvas || document.body.classList.contains('reduce-motion')) return;
-  const gl = canvas.getContext('webgl', { alpha: true, antialias: false, depth: false });
-  if (!gl) return;
-
-  const VERT = `
-    attribute vec3 aPos;
-    attribute float aSeed;
-    uniform float uTime, uAspect;
-    uniform vec2 uMouse;
-    varying float vAlpha; varying float vSeed;
-    void main() {
-      vec3 p = aPos;
-      // slow swarm orbit + individual wobble, seeded per particle
-      float t = uTime * (0.06 + 0.05 * fract(aSeed * 7.31));
-      p.x += 0.16 * sin(t * 6.2831 + aSeed * 40.0);
-      p.y += 0.20 * cos(t * 4.9 + aSeed * 80.0);
-      // gentle parallax toward cursor
-      p.xy += uMouse * 0.05 * (0.3 + fract(aSeed * 3.7));
-      gl_Position = vec4(p, 1.0);
-      gl_PointSize = 1.4 + 2.6 * fract(aSeed * 13.37);
-      vAlpha = 0.16 + 0.5 * fract(aSeed * 5.91);
-      vSeed = aSeed;
-    }`;
-  const FRAG = `
-    precision mediump float;
-    varying float vAlpha; varying float vSeed;
-    void main() {
-      vec2 uv = gl_PointCoord - 0.5;
-      float d = length(uv);
-      if (d > 0.5) discard;
-      float glow = smoothstep(0.5, 0.0, d);
-      // amber hive dots + blue tech dots
-      vec3 amber = vec3(0.96, 0.62, 0.04);
-      vec3 blue  = vec3(0.04, 0.52, 1.0);
-      vec3 col = mix(amber, blue, step(0.62, fract(vSeed * 9.13)));
-      gl_FragColor = vec4(col, glow * glow * vAlpha);
-    }`;
-
-  function sh(type, src) {
-    const s = gl.createShader(type);
-    gl.shaderSource(s, src); gl.compileShader(s);
-    return gl.checkShaderStatus ? s : (gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null);
-  }
-  const vs = sh(gl.VERTEX_SHADER, VERT), fs = sh(gl.FRAGMENT_SHADER, FRAG);
-  if (!vs || !fs) return;
-  const prog = gl.createProgram();
-  gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
-  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
-  gl.useProgram(prog);
-
-  // Hive-like distribution: denser ring + scatter
-  const N = 520;
-  const data = new Float32Array(N * 4);
-  for (let i = 0; i < N; i++) {
-    const ring = (i % 5 !== 0);                         // 4/5 particles in a band
-    const ang = Math.random() * Math.PI * 2;
-    const r = ring ? 0.42 + Math.random() * 0.30 : Math.random() * 1.15;
-    data[i * 4]     = Math.cos(ang) * r * 1.55;         // widen x (aspect fixed in JS)
-    data[i * 4 + 1] = Math.sin(ang) * r;
-    data[i * 4 + 2] = 0;
-    data[i * 4 + 3] = Math.random();
-  }
-  const buf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-  const aPos = gl.getAttribLocation(prog, 'aPos');
-  const aSeed = gl.getAttribLocation(prog, 'aSeed');
-  gl.enableVertexAttribArray(aPos);
-  gl.vertexAttribPointer(aPos, 3, gl.FLOAT, false, 16, 0);
-  gl.enableVertexAttribArray(aSeed);
-  gl.vertexAttribPointer(aSeed, 1, gl.FLOAT, false, 16, 12);
-
-  const uTime = gl.getUniformLocation(prog, 'uTime');
-  const uAspect = gl.getUniformLocation(prog, 'uAspect');
-  const uMouse = gl.getUniformLocation(prog, 'uMouse');
-
-  let mx = 0, my = 0, tx = 0, ty = 0;
-  window.addEventListener('pointermove', e => {
-    tx = (e.clientX / window.innerWidth) * 2 - 1;
-    ty = -((e.clientY / window.innerHeight) * 2 - 1);
-  }, { passive: true });
-
-  function resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = window.innerWidth * dpr;
-    canvas.height = window.innerHeight * dpr;
-    gl.viewport(0, 0, canvas.width, canvas.height);
-  }
-  window.addEventListener('resize', resize);
-  resize();
-  gl.enable(gl.BLEND);
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE);   // additive glow
-  canvas.classList.add('on');
-
-  const t0 = performance.now();
-  (function frame(now) {
-    if (document.body.classList.contains('reduce-motion')) return;
-    mx += (tx - mx) * 0.03; my += (ty - my) * 0.03;
-    gl.uniform1f(uTime, (now - t0) / 1000);
-    gl.uniform1f(uAspect, canvas.width / canvas.height);
-    gl.uniform2f(uMouse, mx, my);
-    gl.clearColor(0, 0, 0, 0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.drawArrays(gl.POINTS, 0, N);
-    requestAnimationFrame(frame);
-  })(t0);
-})();
 
 /* Cursor-tracking glow on cards (CSS var driven) */
 document.addEventListener('pointermove', e => {
