@@ -15,3 +15,6 @@ hive.egg-info/
 keystore/
 relay_mailbox/
 custom_providers.json
+hive_rag/
+__pycache__/
+*.pyc

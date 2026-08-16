@@ -1,5 +1,7 @@
 """Tests for hardware detection, agent skills, and file sharing."""
 
+import asyncio
+
 import pytest
 import base64
 
@@ -39,7 +41,7 @@ class TestSkills:
     def setup_method(self):
         from hive.core.db import init_db, get_connection
         from hive.core.skills import init_skills
-        init_db()
+        asyncio.run(init_db())
         init_skills()
         conn = get_connection()
         conn.execute("DELETE FROM agent_skills")

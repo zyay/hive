@@ -3,631 +3,703 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hive</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Hive — AI Agent Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
 <style>
-/* ═══════════════════════════════════════════════════════════════
-   DESIGN TOKENS — Sana-inspired
-   ═══════════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 :root {
-  --bg: #F4F4F2;
-  --bg-card: #FFFFFF;
-  --bg-elevated: #FAFAF9;
-  --border: rgba(0,0,0,0.06);
-  --border-strong: rgba(0,0,0,0.12);
-  --text: #0A0A0A;
-  --text-secondary: #6B7280;
-  --text-muted: #9CA3AF;
-  --primary: #0A0A0A;
-  --primary-text: #FFFFFF;
-  --secondary: #ECECEA;
-  --secondary-text: #374151;
-  --accent: #2563EB;
-  --accent-light: #DBEAFE;
+  --bg-primary: #09090B;
+  --bg-secondary: #111113;
+  --bg-tertiary: #18181B;
+  --bg-elevated: #1F1F23;
+  --bg-hover: #27272A;
+  --border-subtle: rgba(255,255,255,0.06);
+  --border-default: rgba(255,255,255,0.1);
+  --border-strong: rgba(255,255,255,0.15);
+  --text-primary: #FAFAFA;
+  --text-secondary: #A1A1AA;
+  --text-tertiary: #71717A;
+  --text-muted: #52525B;
+  --accent: #F59E0B;
+  --accent-hover: #FBBF24;
+  --accent-subtle: rgba(245,158,11,0.1);
   --success: #10B981;
-  --success-light: #D1FAE5;
+  --success-subtle: rgba(16,185,129,0.1);
   --warning: #F59E0B;
-  --warning-light: #FEF3C7;
+  --warning-subtle: rgba(245,158,11,0.1);
   --error: #EF4444;
-  --error-light: #FEE2E2;
-  --gradient-orange: linear-gradient(135deg, #F59E0B, #EA580C);
-  --gradient-blue: linear-gradient(135deg, #60A5FA, #2563EB);
-  --gradient-purple: linear-gradient(135deg, #A78BFA, #7C3AED);
-  --gradient-green: linear-gradient(135deg, #34D399, #059669);
-  --radius-sm: 8px;
-  --radius: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --radius-full: 9999px;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-  --shadow: 0 4px 12px rgba(0,0,0,0.06);
-  --shadow-lg: 0 12px 32px rgba(0,0,0,0.08);
-  --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  --rail-width: 64px;
+  --error-subtle: rgba(239,68,68,0.1);
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+  --shadow-xl: 0 16px 48px rgba(0,0,0,0.6);
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --transition-fast: 100ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   RESET & BASE
-   ═══════════════════════════════════════════════════════════════ */
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100vh; overflow: hidden; }
-body {
-  font-family: var(--font);
-  background: var(--bg);
-  color: var(--text);
+html, body {
+  height: 100vh;
+  overflow: hidden;
+  font-family: var(--font-sans);
   font-size: 14px;
   line-height: 1.5;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
 input, textarea, select, button { font-family: inherit; font-size: inherit; }
 a { color: inherit; text-decoration: none; }
 
-/* ═══════════════════════════════════════════════════════════════
-   ICON RAIL (left sidebar)
-   ═══════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+
+/* ===== Layout: icon rail + panel + main ===== */
+.app { display: flex; height: 100vh; }
+
 .rail {
-  width: var(--rail-width);
+  width: 60px;
   height: 100vh;
-  background: var(--bg-card);
-  border-right: 1px solid var(--border);
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 16px 0;
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 100;
+  padding: 14px 0;
+  gap: 6px;
+  flex-shrink: 0;
+  z-index: 20;
 }
+
 .rail-logo {
-  width: 36px;
-  height: 36px;
-  background: var(--gradient-orange);
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 24px;
-}
-.rail-logo svg { width: 20px; height: 20px; color: white; }
-.rail-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
-.rail-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-muted);
+  width: 38px; height: 38px;
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+  transition: all var(--transition-base);
   cursor: pointer;
-  transition: all var(--transition);
-  border: none;
+}
+.rail-logo:hover { background: var(--bg-elevated); transform: scale(1.05); }
+.rail-logo img { width: 26px; height: 26px; }
+
+.rail-btn {
+  width: 42px; height: 42px;
+  border-radius: var(--radius-md);
   background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition-base);
   position: relative;
 }
-.rail-btn:hover { background: var(--secondary); color: var(--text); }
-.rail-btn.active { background: var(--secondary); color: var(--text); }
+.rail-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+.rail-btn.active { background: var(--bg-tertiary); color: var(--accent); }
 .rail-btn.active::before {
   content: '';
-  position: absolute;
-  left: -8px;
-  width: 4px;
-  height: 20px;
-  background: var(--text);
-  border-radius: 0 4px 4px 0;
+  position: absolute; left: -10px; top: 50%;
+  transform: translateY(-50%);
+  width: 3px; height: 20px;
+  background: var(--accent);
+  border-radius: 0 2px 2px 0;
 }
-.rail-btn svg { width: 20px; height: 20px; }
-.rail-bottom { margin-top: auto; }
+.rail-btn svg { width: 19px; height: 19px; stroke-width: 2; }
 
-/* ═══════════════════════════════════════════════════════════════
-   MAIN LAYOUT
-   ═══════════════════════════════════════════════════════════════ */
-.app {
-  display: flex;
-  height: 100vh;
-  padding-left: var(--rail-width);
+.rail-spacer { flex: 1; }
+
+.rail-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
 }
-.sidebar {
-  width: 280px;
+.rail-avatar:hover { border-color: var(--accent); }
+
+/* Secondary panel (contextual) */
+.panel {
+  width: 264px;
   height: 100vh;
-  background: var(--bg-card);
-  border-right: 1px solid var(--border);
-  display: flex;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-subtle);
+  display: none;
   flex-direction: column;
   overflow: hidden;
+  flex-shrink: 0;
 }
-.sidebar-header {
-  padding: 20px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.panel.show { display: flex; }
+
+.panel-header {
+  padding: 18px 16px 12px;
+  border-bottom: 1px solid var(--border-subtle);
 }
-.sidebar-title { font-size: 16px; font-weight: 700; }
-.sidebar-content { flex: 1; overflow-y: auto; padding: 12px; }
-.sidebar-section { margin-bottom: 20px; }
-.sidebar-label {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
-  padding: 8px 12px 6px;
+.panel-title { font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
+.panel-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+
+.panel-content { flex: 1; overflow-y: auto; padding: 10px 8px; }
+
+.list-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  margin-bottom: 2px;
+  position: relative;
+}
+.list-item:hover { background: var(--bg-tertiary); }
+.list-item.active { background: var(--bg-tertiary); }
+.list-item.active::before {
+  content: '';
+  position: absolute; left: 0; top: 50%;
+  transform: translateY(-50%);
+  width: 3px; height: 18px;
+  background: var(--accent);
+  border-radius: 0 2px 2px 0;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BUTTONS & PILLS
-   ═══════════════════════════════════════════════════════════════ */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border-radius: var(--radius-full);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition);
-  border: none;
+.li-icon {
+  width: 30px; height: 30px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-tertiary);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  color: var(--text-secondary);
 }
-.btn-primary { background: var(--primary); color: var(--primary-text); }
-.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-.btn-secondary { background: var(--secondary); color: var(--secondary-text); }
-.btn-secondary:hover { background: #E0E0DE; }
+.list-item.active .li-icon { color: var(--accent); }
+.li-icon svg { width: 15px; height: 15px; }
+
+.li-content { flex: 1; min-width: 0; }
+.li-title {
+  font-size: 13px; font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.li-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
+
+.li-badge {
+  background: var(--accent);
+  color: var(--bg-primary);
+  font-size: 10px; font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px; text-align: center;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  border: none; outline: none;
+  white-space: nowrap;
+}
+.btn-primary { background: var(--accent); color: #0a0a0a; }
+.btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-primary:active { transform: translateY(0); }
+.btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-default); }
+.btn-secondary:hover { background: var(--bg-elevated); border-color: var(--border-strong); }
 .btn-ghost { background: transparent; color: var(--text-secondary); }
-.btn-ghost:hover { background: var(--secondary); }
-.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-ghost:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+.btn-danger { background: var(--error-subtle); color: var(--error); }
+.btn-danger:hover { background: var(--error); color: white; }
+.btn-sm { padding: 6px 10px; font-size: 12px; }
+.btn-icon {
+  width: 32px; height: 32px; padding: 0;
+  border-radius: var(--radius-md);
+  background: transparent; border: none; cursor: pointer;
+  color: var(--text-tertiary);
+  transition: all var(--transition-base);
+  display: flex; align-items: center; justify-content: center;
+}
+.btn-icon:hover { background: var(--bg-tertiary); color: var(--text-primary); }
 .btn svg { width: 14px; height: 14px; }
 
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
-  font-size: 11px;
-  font-weight: 600;
-}
-.pill-accent { background: var(--accent-light); color: var(--accent); }
-.pill-success { background: var(--success-light); color: #059669; }
-.pill-warning { background: var(--warning-light); color: #D97706; }
-.pill-error { background: var(--error-light); color: #DC2626; }
-.pill-neutral { background: var(--secondary); color: var(--text-secondary); }
-
-/* ═══════════════════════════════════════════════════════════════
-   CARDS
-   ═══════════════════════════════════════════════════════════════ */
+/* Cards */
 .card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  padding: 20px;
-  transition: all var(--transition);
+  padding: 16px;
+  transition: all var(--transition-base);
 }
-.card:hover { box-shadow: var(--shadow); }
-.card-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
-.card-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+.card:hover { border-color: var(--border-default); box-shadow: var(--shadow-sm); }
 
-.gradient-card {
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  color: white;
-  position: relative;
-  overflow: hidden;
-}
-.gradient-card.orange { background: var(--gradient-orange); }
-.gradient-card.blue { background: var(--gradient-blue); }
-.gradient-card.purple { background: var(--gradient-purple); }
-.gradient-card.green { background: var(--gradient-green); }
-.gradient-card-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
-.gradient-card-desc { font-size: 13px; opacity: 0.9; }
-
-/* ═══════════════════════════════════════════════════════════════
-   INPUTS
-   ═══════════════════════════════════════════════════════════════ */
+/* Inputs */
 .input {
   width: 100%;
-  padding: 10px 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg-card);
+  padding: 10px 14px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
   font-size: 14px;
-  transition: all var(--transition);
-}
-.input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
-.input-search {
-  border-radius: var(--radius-full);
-  padding-left: 40px;
-  background: var(--secondary);
-  border: none;
-}
-.input-search:focus { background: var(--bg-card); border: 1px solid var(--border); }
-
-/* ═══════════════════════════════════════════════════════════════
-   LIST ITEMS
-   ═══════════════════════════════════════════════════════════════ */
-.list-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: all var(--transition);
-}
-.list-item:hover { background: var(--bg-elevated); }
-.list-item.active { background: var(--secondary); }
-.list-item-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.list-item-content { flex: 1; min-width: 0; }
-.list-item-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.list-item-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-
-/* ═══════════════════════════════════════════════════════════════
-   CHAT
-   ═══════════════════════════════════════════════════════════════ */
-.chat-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.message { display: flex; gap: 12px; max-width: 80%; }
-.message-user { align-self: flex-end; flex-direction: row-reverse; }
-.message-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
-  flex-shrink: 0;
-}
-.message-user .message-avatar { background: var(--gradient-blue); color: white; }
-.message-agent .message-avatar { background: var(--gradient-orange); color: white; }
-.message-bubble {
-  padding: 12px 16px;
-  border-radius: 18px;
-  font-size: 14px;
-  line-height: 1.5;
-}
-.message-user .message-bubble {
-  background: var(--secondary);
-  border-bottom-right-radius: 4px;
-}
-.message-agent .message-bubble {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-bottom-left-radius: 4px;
-}
-.message-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-  opacity: 0;
-  transition: opacity var(--transition);
-}
-.message:hover .message-actions { opacity: 1; }
-.message-action {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  cursor: pointer;
-  transition: all var(--transition);
-}
-.message-action:hover { background: var(--secondary); }
-.message-action svg { width: 14px; height: 14px; color: var(--text-muted); }
-
-/* Composer */
-.composer {
-  padding: 16px 24px 24px;
-  border-top: 1px solid var(--border);
-  background: var(--bg);
-}
-.composer-input {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  padding: 8px 8px 8px 20px;
-  transition: all var(--transition);
-}
-.composer-input:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
-.composer-input input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  font-size: 14px;
+  transition: all var(--transition-base);
   outline: none;
 }
-.composer-chips { display: flex; gap: 8px; margin-top: 12px; }
-.composer-send {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--primary);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all var(--transition);
-  border: none;
-}
-.composer-send:hover { opacity: 0.9; transform: scale(1.05); }
-.composer-send svg { width: 16px; height: 16px; }
+.input::placeholder { color: var(--text-tertiary); }
+.input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-subtle); }
+textarea.input { resize: vertical; min-height: 80px; font-family: var(--font-sans); }
 
-/* Processing dots animation */
-.processing {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 24px;
+label.lbl {
+  font-size: 12px; font-weight: 500; color: var(--text-secondary);
+  display: block; margin-bottom: 6px;
 }
-.processing-dots {
-  display: flex;
-  gap: 4px;
+
+/* Pills */
+.pill {
+  display: inline-flex; align-items: center;
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  font-size: 11px; font-weight: 500;
 }
+.pill-accent { background: var(--accent-subtle); color: var(--accent); }
+.pill-success { background: var(--success-subtle); color: var(--success); }
+.pill-warning { background: var(--warning-subtle); color: var(--warning); }
+.pill-error { background: var(--error-subtle); color: var(--error); }
+.pill-neutral { background: var(--bg-tertiary); color: var(--text-secondary); }
+
+/* Main content */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+.topbar {
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg-secondary);
+  min-height: 61px;
+}
+.topbar-title { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+.topbar-subtitle { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
+.topbar-actions { display: flex; gap: 8px; align-items: center; }
+
+.content { flex: 1; overflow-y: auto; padding: 24px; }
+
+/* Chat */
+.chat-messages {
+  flex: 1; overflow-y: auto; padding: 24px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.message {
+  display: flex; gap: 12px; max-width: 85%;
+  animation: messageIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.message-user { align-self: flex-end; flex-direction: row-reverse; }
+@keyframes messageIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+.message-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; flex-shrink: 0;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+}
+.message-bubble {
+  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+  font-size: 14px; line-height: 1.6;
+  word-wrap: break-word; overflow-wrap: break-word;
+}
+.message-user .message-bubble { background: var(--bg-tertiary); border-bottom-right-radius: var(--radius-sm); }
+.message-agent .message-bubble { background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-bottom-left-radius: var(--radius-sm); }
+.message-bubble pre {
+  background: var(--bg-primary); border-radius: var(--radius-md);
+  padding: 12px; margin: 8px 0; overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+}
+.message-bubble code {
+  background: var(--bg-primary); padding: 2px 6px;
+  border-radius: var(--radius-xs); font-size: 12px;
+  font-family: var(--font-mono);
+  border: 1px solid var(--border-subtle);
+}
+.message-bubble pre code { background: transparent; padding: 0; border: none; }
+
+/* Composer */
+.composer { padding: 16px 24px 24px; border-top: 1px solid var(--border-subtle); background: var(--bg-secondary); }
+.composer-input {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: 8px 8px 8px 16px;
+  transition: all var(--transition-base);
+}
+.composer-input:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-subtle); }
+.composer-input input { flex: 1; border: none; background: transparent; font-size: 14px; outline: none; color: var(--text-primary); }
+.composer-input input::placeholder { color: var(--text-tertiary); }
+.composer-send {
+  width: 32px; height: 32px; border-radius: var(--radius-md);
+  background: var(--accent); color: #0a0a0a;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all var(--transition-base); border: none;
+}
+.composer-send:hover { background: var(--accent-hover); transform: scale(1.05); }
+.composer-send:active { transform: scale(0.95); }
+
+/* Empty state */
+.empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; color: var(--text-tertiary); text-align: center; padding: 40px;
+}
+.empty-icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--bg-tertiary);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px; border: 1px solid var(--border-subtle);
+}
+.empty-title { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; letter-spacing: -0.01em; }
+.empty-desc { font-size: 13px; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(12px);
+  display: none; align-items: center; justify-content: center;
+  z-index: 200; animation: fadeIn 0.2s ease;
+}
+.modal-overlay.show { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-xl);
+  padding: 24px; width: 460px; max-width: 90vw; max-height: 90vh;
+  overflow-y: auto; box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-default);
+  animation: modalIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.modal-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; letter-spacing: -0.01em; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+
+/* Toast */
+.toast-container { position: fixed; top: 20px; right: 20px; z-index: 300; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 12px 16px; box-shadow: var(--shadow-lg);
+  display: flex; align-items: center; gap: 12px;
+  min-width: 280px;
+  animation: toastIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes toastIn { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+.toast-success { border-left: 3px solid var(--success); }
+.toast-error { border-left: 3px solid var(--error); }
+.toast-warning { border-left: 3px solid var(--warning); }
+.toast-info { border-left: 3px solid var(--accent); }
+.toast-content { flex: 1; font-size: 13px; font-weight: 500; }
+.toast-close { cursor: pointer; color: var(--text-tertiary); padding: 4px; }
+.toast-close:hover { color: var(--text-primary); }
+
+/* Stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px; margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  transition: all var(--transition-base);
+}
+.stat-card:hover { border-color: var(--border-default); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.stat-value {
+  font-size: 28px; font-weight: 700; letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.stat-label {
+  font-size: 12px; color: var(--text-tertiary); margin-top: 4px;
+  font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+/* Agent grid */
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+.agent-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  transition: all var(--transition-base);
+  display: flex; flex-direction: column; gap: 10px;
+  position: relative;
+}
+.agent-card:hover { border-color: var(--border-default); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.agent-card-top { display: flex; align-items: center; gap: 12px; }
+.agent-emoji {
+  width: 42px; height: 42px; border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-elevated));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+  border: 1px solid var(--border-subtle);
+}
+.agent-name { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+.agent-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.agent-desc {
+  font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; flex: 1;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.agent-actions { display: flex; gap: 6px; margin-top: 4px; }
+.agent-add {
+  border: 1px dashed var(--border-strong);
+  background: transparent;
+  border-radius: var(--radius-lg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; min-height: 160px; cursor: pointer;
+  color: var(--text-tertiary);
+  transition: all var(--transition-base);
+  font-size: 13px; font-weight: 500;
+}
+.agent-add:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-subtle); }
+.agent-add svg { width: 22px; height: 22px; }
+
+/* Processing */
+.processing { display: flex; align-items: center; gap: 12px; padding: 8px 24px 8px; animation: fadeIn 0.3s ease; }
+.processing-dots { display: flex; gap: 4px; }
 .processing-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--text-muted);
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
   animation: pulse 1.4s infinite ease-in-out;
 }
 .processing-dot:nth-child(1) { animation-delay: 0s; }
 .processing-dot:nth-child(2) { animation-delay: 0.2s; }
 .processing-dot:nth-child(3) { animation-delay: 0.4s; }
-.processing-dot:nth-child(4) { animation-delay: 0.6s; }
-@keyframes pulse {
-  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-  40% { transform: scale(1); opacity: 1; }
-}
-.processing-text { font-size: 13px; color: var(--text-secondary); }
+@keyframes pulse { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+.processing-text { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
 
-/* ═══════════════════════════════════════════════════════════════
-   MAIN CONTENT AREA
-   ═══════════════════════════════════════════════════════════════ */
-.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-.topbar {
-  padding: 16px 24px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--bg-card);
+/* Task rows */
+.task-row {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px; margin-bottom: 10px;
+  transition: all var(--transition-base);
 }
-.topbar-title { font-size: 18px; font-weight: 700; }
-.topbar-actions { display: flex; gap: 8px; }
-.content { flex: 1; overflow-y: auto; padding: 24px; }
+.task-row:hover { border-color: var(--border-default); }
+.task-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.task-title { font-size: 14px; font-weight: 500; flex: 1; min-width: 0; }
+.task-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
 
-/* ═══════════════════════════════════════════════════════════════
-   EMPTY STATE
-   ═══════════════════════════════════════════════════════════════ */
-.empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--text-muted);
-  text-align: center;
-  padding: 40px;
+/* Doc rows */
+.doc-row {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px; margin-bottom: 10px;
 }
-.empty-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: var(--secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-.empty-icon svg { width: 28px; height: 28px; color: var(--text-muted); }
-.empty-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-.empty-desc { font-size: 13px; }
+.doc-title { font-size: 13px; font-weight: 600; }
+.doc-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
 
-/* ═══════════════════════════════════════════════════════════════
-   MODAL
-   ═══════════════════════════════════════════════════════════════ */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  backdrop-filter: blur(4px);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 200;
+/* Auth */
+.auth-screen {
+  position: fixed; inset: 0;
+  background: var(--bg-primary);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 300;
 }
-.modal-overlay.show { display: flex; }
-.modal {
-  background: var(--bg-card);
+.auth-card {
+  background: var(--bg-secondary);
   border-radius: var(--radius-xl);
-  padding: 28px;
-  width: 480px;
-  max-width: 90vw;
-  box-shadow: var(--shadow-lg);
+  padding: 40px; width: 400px; max-width: 90vw;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-subtle);
+  animation: modalIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+.auth-logo { text-align: center; margin-bottom: 32px; }
+.auth-logo img { width: 64px; height: 64px; }
+.auth-tabs {
+  display: flex; gap: 4px; margin-bottom: 24px;
+  background: var(--bg-tertiary); padding: 4px;
+  border-radius: var(--radius-md);
+}
+.auth-tab {
+  flex: 1; padding: 10px; text-align: center;
+  border-radius: var(--radius-sm); cursor: pointer;
+  font-size: 13px; font-weight: 500;
+  transition: all var(--transition-base); color: var(--text-tertiary);
+}
+.auth-tab.active { background: var(--bg-elevated); color: var(--text-primary); font-weight: 600; box-shadow: var(--shadow-sm); }
 
-/* ═══════════════════════════════════════════════════════════════
-   DASHBOARD
-   ═══════════════════════════════════════════════════════════════ */
-.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-.stat-card { text-align: center; }
-.stat-value { font-size: 28px; font-weight: 800; color: var(--accent); }
-.stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-.stat-delta { font-size: 11px; color: var(--success); margin-top: 4px; }
+.view { display: none; }
+.view.active { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 
-/* ═══════════════════════════════════════════════════════════════
-   SCROLLBAR
-   ═══════════════════════════════════════════════════════════════ */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+/* Section headers in content */
+.section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.section-title { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
 
-/* ═══════════════════════════════════════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════════════════════════════════════ */
-@media (max-width: 768px) {
-  .sidebar { display: none; }
+/* Query result */
+.rag-answer {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  font-size: 13px; line-height: 1.6;
+  color: var(--text-secondary);
+  margin-top: 12px;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 900px) {
+  .panel { display: none !important; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .message { max-width: 95%; }
 }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     ICON RAIL
-     ═══════════════════════════════════════════════════════════════ -->
-<div class="rail">
-  <div class="rail-logo">
-    <img src="/static/logo.png" alt="Hive" style="width:32px;height:32px;border-radius:8px">
-  </div>
-  <div class="rail-nav">
-    <button class="rail-btn active" data-view="chat" title="Chat">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-    </button>
-    <button class="rail-btn" data-view="agents" title="Agents">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>
-    </button>
-    <button class="rail-btn" data-view="tasks" title="Tasks">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-    </button>
-    <button class="rail-btn" data-view="files" title="Files">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-    </button>
-    <button class="rail-btn" data-view="dashboard" title="Dashboard">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-    </button>
-  </div>
-  <div class="rail-bottom">
-    <button class="rail-btn" data-view="settings" title="Settings">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    </button>
-  </div>
-</div>
+<div class="toast-container" id="toastContainer"></div>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     APP CONTAINER
-     ═══════════════════════════════════════════════════════════════ -->
 <div class="app">
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-title" id="sidebarTitle">Conversations</div>
-      <button class="btn btn-primary btn-sm" onclick="openNewRoom()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        New
-      </button>
+  <!-- Icon rail -->
+  <div class="rail">
+    <div class="rail-logo" onclick="showView('chat')" title="Hive">
+      <img src="/static/logo.png" alt="Hive">
     </div>
-    <div class="sidebar-content">
-      <div class="sidebar-section">
-        <div class="sidebar-label">Recent</div>
-        <div id="roomList"></div>
-      </div>
-    </div>
-    <!-- User info at bottom -->
-    <div style="padding:16px 20px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px">
-      <div style="width:32px;height:32px;border-radius:50%;background:var(--gradient-blue);display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:600" id="userAvatar"></div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="userName"></div>
-        <div style="font-size:11px;color:var(--text-muted)" id="userStatus">
-          <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--success);margin-right:4px"></span>
-          Connected
-        </div>
-      </div>
-      <button class="btn btn-ghost btn-sm" onclick="logout()" title="Sign out">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      </button>
-    </div>
+    <button class="rail-btn active" data-view="chat" onclick="showView('chat')" title="Chat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </button>
+    <button class="rail-btn" data-view="agents" onclick="showView('agents')" title="Agents">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 7V4"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/></svg>
+    </button>
+    <button class="rail-btn" data-view="tasks" onclick="showView('tasks')" title="Tasks">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    </button>
+    <button class="rail-btn" data-view="knowledge" onclick="showView('knowledge')" title="Knowledge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    </button>
+    <button class="rail-btn" data-view="dashboard" onclick="showView('dashboard')" title="Dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    </button>
+    <button class="rail-btn" data-view="settings" onclick="showView('settings')" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+    <div class="rail-spacer"></div>
+    <button class="rail-btn" onclick="logout()" title="Sign out">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+    <div class="rail-avatar" id="userAvatar" onclick="showView('settings')" title="Profile"></div>
   </div>
 
-  <!-- Main content -->
+  <!-- Contextual panel (rooms for chat) -->
+  <div class="panel" id="panel-chat">
+    <div class="panel-header">
+      <div class="panel-title">Conversations</div>
+      <div class="panel-sub">Your chat history</div>
+    </div>
+    <div class="panel-content" id="roomList"></div>
+  </div>
+
+  <!-- Main area -->
   <div class="main">
-    <!-- Chat View -->
-    <div id="view-chat" class="view" style="display:flex;flex-direction:column;flex:1">
+    <!-- Chat -->
+    <div id="view-chat" class="view active">
       <div class="topbar">
-        <div class="topbar-title" id="chatTitle">Select a conversation</div>
+        <div>
+          <div class="topbar-title" id="chatTitle">Select a conversation</div>
+          <div class="topbar-subtitle" id="chatSub">Pick a room on the left or start a new chat</div>
+        </div>
         <div class="topbar-actions">
-          <button class="btn btn-ghost btn-sm" onclick="toggleSearch()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            Search
+          <button class="btn btn-ghost btn-sm" onclick="exportConversation()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="openModal('mRoom')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Chat
           </button>
         </div>
       </div>
       <div class="chat-messages" id="chatMessages">
         <div class="empty">
           <div class="empty-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </div>
           <div class="empty-title">Start a conversation</div>
-          <div class="empty-desc">Create a new room or select an existing one</div>
+          <div class="empty-desc">Create a new room and put your agents to work</div>
         </div>
       </div>
       <div id="processingIndicator" style="display:none" class="processing">
         <div class="processing-dots">
-          <div class="processing-dot"></div>
-          <div class="processing-dot"></div>
-          <div class="processing-dot"></div>
-          <div class="processing-dot"></div>
+          <div class="processing-dot"></div><div class="processing-dot"></div><div class="processing-dot"></div>
         </div>
-        <div class="processing-text">Agent is thinking...</div>
+        <div class="processing-text">Agent is thinking…</div>
       </div>
       <div class="composer" id="composer" style="display:none">
         <div class="composer-input">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          <input id="chatInput" placeholder="Ask anything..." onkeydown="if(event.key==='Enter')sendMessage()">
+          <input id="chatInput" placeholder="Ask anything…" onkeydown="if(event.key==='Enter')sendMessage()">
           <button class="composer-send" onclick="sendMessage()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Agents View -->
-    <div id="view-agents" class="view" style="display:none;flex-direction:column;flex:1">
+    <!-- Agents -->
+    <div id="view-agents" class="view">
       <div class="topbar">
-        <div class="topbar-title">AI Agents</div>
+        <div>
+          <div class="topbar-title">Agents</div>
+          <div class="topbar-subtitle">Your AI workforce — create from scratch or a template</div>
+        </div>
         <div class="topbar-actions">
-          <button class="btn btn-primary btn-sm" onclick="openModal('mAgent')">
+          <button class="btn btn-primary btn-sm" onclick="openCreateAgent()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Create Agent
           </button>
         </div>
       </div>
-      <div class="content" id="agentsList"></div>
+      <div class="content" id="agentsContent"></div>
     </div>
 
-    <!-- Tasks View -->
-    <div id="view-tasks" class="view" style="display:none;flex-direction:column;flex:1">
+    <!-- Tasks -->
+    <div id="view-tasks" class="view">
       <div class="topbar">
-        <div class="topbar-title">Tasks</div>
+        <div>
+          <div class="topbar-title">Tasks</div>
+          <div class="topbar-subtitle">Background jobs executed by your agents</div>
+        </div>
         <div class="topbar-actions">
-          <button class="btn btn-primary btn-sm" onclick="openTaskModal()">
+          <button class="btn btn-primary btn-sm" onclick="openModal('mTask')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             New Task
           </button>
@@ -635,220 +707,239 @@ a { color: inherit; text-decoration: none; }
       </div>
       <div class="content">
         <div class="stats-grid" id="taskStats"></div>
-        <h3 style="font-size:14px;font-weight:600;margin-bottom:12px">Queue</h3>
-        <div id="taskQueue"></div>
-        <h3 style="font-size:14px;font-weight:600;margin:24px 0 12px">History</h3>
-        <div id="taskHistory"></div>
+        <div class="section-head"><div class="section-title">All tasks</div></div>
+        <div id="tasksList"></div>
       </div>
     </div>
 
-    <!-- Files View -->
-    <div id="view-files" class="view" style="display:none;flex-direction:column;flex:1">
+    <!-- Knowledge (RAG) -->
+    <div id="view-knowledge" class="view">
       <div class="topbar">
-        <div class="topbar-title">Files</div>
+        <div>
+          <div class="topbar-title">Knowledge</div>
+          <div class="topbar-subtitle">Documents your agents can search (RAG)</div>
+        </div>
         <div class="topbar-actions">
-          <button class="btn btn-primary btn-sm" onclick="openModal('mUpload')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Upload
+          <button class="btn btn-primary btn-sm" onclick="openModal('mDoc')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Text
           </button>
         </div>
       </div>
-      <div class="content" id="filesList"></div>
+      <div class="content">
+        <div class="card" style="margin-bottom:20px">
+          <div style="font-weight:600;margin-bottom:12px;font-size:15px">Ask your knowledge base</div>
+          <div style="display:flex;gap:8px">
+            <input id="ragQuery" class="input" placeholder="Ask a question across all documents…" onkeydown="if(event.key==='Enter')runRagQuery()">
+            <button class="btn btn-primary" onclick="runRagQuery()">Search</button>
+          </div>
+          <div id="ragResults"></div>
+        </div>
+        <div class="section-head">
+          <div class="section-title">Documents</div>
+          <div style="font-size:12px;color:var(--text-tertiary)" id="docCount"></div>
+        </div>
+        <div id="docsList"></div>
+      </div>
     </div>
 
-    <!-- Dashboard View -->
-    <div id="view-dashboard" class="view" style="display:none;flex-direction:column;flex:1">
+    <!-- Dashboard -->
+    <div id="view-dashboard" class="view">
       <div class="topbar">
         <div>
           <div class="topbar-title">Dashboard</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:2px">
-            <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--success);margin-right:4px;animation:pulse 2s infinite"></span>
-            Updating live
-          </div>
+          <div class="topbar-subtitle">Platform overview and metrics</div>
         </div>
       </div>
-      <div class="content" id="dashboardContent">
+      <div class="content">
         <div class="stats-grid" id="dashStats"></div>
+        <div class="section-head"><div class="section-title">Hardware</div></div>
+        <div class="card" id="hwCard" style="font-family:var(--font-mono);font-size:12.5px;line-height:1.8;color:var(--text-secondary)"></div>
       </div>
     </div>
 
-    <!-- Settings View -->
-    <div id="view-settings" class="view" style="display:none;flex-direction:column;flex:1">
+    <!-- Settings -->
+    <div id="view-settings" class="view">
       <div class="topbar">
-        <div class="topbar-title">Settings</div>
+        <div>
+          <div class="topbar-title">Settings</div>
+          <div class="topbar-subtitle">Manage your account and provider keys</div>
+        </div>
       </div>
       <div class="content">
         <div class="card" style="margin-bottom:20px">
-          <div class="card-title">API Keys</div>
-          <div class="card-desc" style="margin-bottom:16px">Configure your AI provider credentials</div>
+          <div style="font-weight:600;margin-bottom:16px;font-size:15px">Profile</div>
+          <div style="display:flex;gap:16px;align-items:center">
+            <div style="width:64px;height:64px;border-radius:50%;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;color:var(--text-primary);font-size:24px;font-weight:700;border:2px solid var(--border-default)" id="profileAvatar"></div>
+            <div>
+              <div style="font-weight:600;font-size:16px;margin-bottom:4px" id="profileName"></div>
+              <div style="font-size:13px;color:var(--text-tertiary)" id="profileUsername"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div style="font-weight:600;margin-bottom:16px;font-size:15px">API Keys</div>
           <div id="keysList"></div>
           <div style="display:flex;gap:8px;margin-top:16px">
-            <select id="keyProvider" class="input" style="width:140px">
+            <select id="keyProvider" class="input" style="width:150px">
               <option>openai</option><option>anthropic</option><option>groq</option>
               <option>mistral</option><option>openrouter</option><option>xai</option>
               <option>deepseek</option><option>gemini</option>
             </select>
-            <input id="keyValue" class="input" placeholder="sk-..." style="flex:1">
+            <input id="keyValue" class="input" placeholder="sk-…" style="flex:1">
             <button class="btn btn-primary btn-sm" onclick="saveKey()">Save</button>
           </div>
-        </div>
-        <div class="card" style="border-color:var(--error-light)">
-          <div class="card-title" style="color:var(--error)">Danger Zone</div>
-          <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--bg-elevated);border-radius:var(--radius)">
-              <div><div style="font-weight:500;font-size:13px">Delete API Keys</div><div style="font-size:11px;color:var(--text-muted)">Remove all stored credentials</div></div>
-              <button class="btn btn-secondary btn-sm" onclick="dangerAction('keys')">Delete</button>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--bg-elevated);border-radius:var(--radius)">
-              <div><div style="font-weight:500;font-size:13px">Delete All Data</div><div style="font-size:11px;color:var(--text-muted)">Complete factory reset</div></div>
-              <button class="btn btn-secondary btn-sm" style="color:var(--error)" onclick="dangerAction('everything')">Reset All</button>
-            </div>
-          </div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:10px">Keys are stored locally on your machine. Never shared.</div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     MODALS
-     ═══════════════════════════════════════════════════════════════ -->
+<!-- New Room modal -->
 <div class="modal-overlay" id="mRoom">
   <div class="modal">
     <div class="modal-title">New Conversation</div>
     <div style="margin-bottom:16px">
-      <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Name</label>
+      <label class="lbl">Name</label>
       <input id="nrN" class="input" placeholder="Conversation name">
     </div>
     <div style="margin-bottom:20px">
-      <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Type</label>
+      <label class="lbl">Type</label>
       <select id="nrT" class="input"><option value="group">Group</option><option value="dm">Direct Message</option></select>
     </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end">
+    <div class="modal-actions">
       <button class="btn btn-secondary" onclick="hideModal('mRoom')">Cancel</button>
       <button class="btn btn-primary" onclick="createRoom()">Create</button>
     </div>
   </div>
 </div>
 
+<!-- Create/Edit Agent modal -->
 <div class="modal-overlay" id="mAgent">
   <div class="modal">
-    <div class="modal-title">Create Agent</div>
+    <div class="modal-title" id="mAgentTitle">Create Agent</div>
     <div style="margin-bottom:16px">
-      <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Name</label>
+      <label class="lbl">Name</label>
       <input id="naN" class="input" placeholder="Agent name">
     </div>
     <div style="margin-bottom:16px">
-      <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">System Prompt</label>
-      <textarea id="naP" class="input" rows="3" placeholder="Define the agent's behavior...">You are a helpful assistant.</textarea>
+      <label class="lbl">Description</label>
+      <input id="naD" class="input" placeholder="What does this agent do?">
     </div>
     <div style="margin-bottom:16px">
-      <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Provider</label>
-      <select id="naPr" class="input" onchange="scanModels()"></select>
+      <label class="lbl">System Prompt</label>
+      <textarea id="naP" class="input" rows="4" placeholder="Define the agent's behavior…">You are a helpful assistant.</textarea>
+    </div>
+    <div style="display:flex;gap:12px;margin-bottom:16px">
+      <div style="flex:1">
+        <label class="lbl">Provider</label>
+        <select id="naPr" class="input" onchange="scanModels()"></select>
+      </div>
+      <div style="flex:1">
+        <label class="lbl">Model</label>
+        <select id="naM" class="input"><option value="">Default</option></select>
+      </div>
     </div>
     <div style="margin-bottom:20px">
-      <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Model <span id="modelStatus" style="font-weight:400;color:var(--text-muted)"></span></label>
-      <select id="naM" class="input"><option value="">Default</option></select>
+      <label class="lbl">Temperature: <span id="naTv">0.7</span></label>
+      <input id="naT" type="range" min="0" max="2" step="0.1" value="0.7" style="width:100%" oninput="document.getElementById('naTv').textContent=this.value">
     </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end">
+    <div class="modal-actions">
       <button class="btn btn-secondary" onclick="hideModal('mAgent')">Cancel</button>
-      <button class="btn btn-primary" onclick="createAgent()">Create</button>
+      <button class="btn btn-primary" id="naSave" onclick="saveAgent()">Create</button>
     </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="mUpload">
-  <div class="modal">
-    <div class="modal-title">Upload File</div>
-    <div style="margin-bottom:20px">
-      <input type="file" id="wsFileIn" class="input">
-    </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button class="btn btn-secondary" onclick="hideModal('mUpload')">Cancel</button>
-      <button class="btn btn-primary" onclick="uploadFile()">Upload</button>
-    </div>
-  </div>
-</div>
-
+<!-- New Task modal -->
 <div class="modal-overlay" id="mTask">
   <div class="modal">
-    <div class="modal-title">Create Task</div>
+    <div class="modal-title">New Task</div>
     <div style="margin-bottom:16px">
-      <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Title</label>
-      <input id="tTitle" class="input" placeholder="Task title">
-    </div>
-    <div style="margin-bottom:16px">
-      <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Agent</label>
-      <select id="tAgent" class="input"></select>
+      <label class="lbl">Title</label>
+      <input id="tkT" class="input" placeholder="What should be done?">
     </div>
     <div style="margin-bottom:16px">
-      <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Template</label>
-      <select id="tTemplate" class="input">
-        <option value="">None</option><option value="research">Research</option>
-        <option value="code_review">Code Review</option><option value="summarize">Summarize</option>
-        <option value="plan">Planning</option><option value="visualize">Visualize</option>
-      </select>
+      <label class="lbl">Description</label>
+      <textarea id="tkD" class="input" rows="3" placeholder="Details for the agent…"></textarea>
     </div>
-    <div style="margin-bottom:20px">
-      <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Input</label>
-      <textarea id="tInput" class="input" rows="3" placeholder="Task input..."></textarea>
+    <div style="display:flex;gap:12px;margin-bottom:20px">
+      <div style="flex:1">
+        <label class="lbl">Agent</label>
+        <select id="tkA" class="input"></select>
+      </div>
+      <div style="flex:1">
+        <label class="lbl">Priority</label>
+        <select id="tkP" class="input"><option>medium</option><option>high</option><option>low</option></select>
+      </div>
     </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end">
+    <div class="modal-actions">
       <button class="btn btn-secondary" onclick="hideModal('mTask')">Cancel</button>
       <button class="btn btn-primary" onclick="createTask()">Create</button>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     AUTH SCREEN
-     ═══════════════════════════════════════════════════════════════ -->
-<div id="authScreen" style="position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:300">
-  <div style="background:var(--bg-card);border-radius:var(--radius-xl);padding:40px;width:400px;box-shadow:var(--shadow-lg)">
-    <div style="text-align:center;margin-bottom:24px">
-      <img src="/static/logo-text-black.png" alt="Hive" style="max-width:200px;height:auto">
+<!-- Add Text Doc modal -->
+<div class="modal-overlay" id="mDoc">
+  <div class="modal">
+    <div class="modal-title">Add Text to Knowledge</div>
+    <div style="margin-bottom:16px">
+      <label class="lbl">Title / filename</label>
+      <input id="dcN" class="input" placeholder="e.g. product-notes">
     </div>
-    <p style="color:var(--text-secondary);font-size:13px;margin-bottom:28px">Your AI workforce. Self-hosted.</p>
-    <div style="display:flex;gap:4px;margin-bottom:24px;background:var(--secondary);padding:4px;border-radius:var(--radius-full)">
-      <div id="authTabLogin" class="auth-tab active" onclick="authTab(0)" style="flex:1;padding:10px;text-align:center;border-radius:var(--radius-full);cursor:pointer;font-size:13px;font-weight:600;background:var(--bg-card);box-shadow:var(--shadow-sm)">Sign in</div>
-      <div id="authTabRegister" class="auth-tab" onclick="authTab(1)" style="flex:1;padding:10px;text-align:center;border-radius:var(--radius-full);cursor:pointer;font-size:13px;font-weight:500;color:var(--text-secondary)">Register</div>
+    <div style="margin-bottom:20px">
+      <label class="lbl">Content</label>
+      <textarea id="dcT" class="input" rows="7" placeholder="Paste any text — it will be chunked and indexed…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="hideModal('mDoc')">Cancel</button>
+      <button class="btn btn-primary" onclick="addDoc()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- Auth -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <img src="/static/logo.png" alt="Hive">
+    </div>
+    <div class="auth-tabs">
+      <div id="authTabLogin" class="auth-tab active" onclick="authTab(0)">Sign in</div>
+      <div id="authTabRegister" class="auth-tab" onclick="authTab(1)">Register</div>
     </div>
     <div id="authLogin">
       <div style="margin-bottom:16px">
-        <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Username</label>
-        <input id="lU" class="input" placeholder="Username">
+        <input id="lU" class="input" placeholder="Username" autocomplete="username">
       </div>
       <div style="margin-bottom:20px">
-        <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Password</label>
-        <input id="lP" type="password" class="input" placeholder="Password">
+        <input id="lP" type="password" class="input" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
-      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doLogin()">Sign in</button>
-      <div id="lErr" style="color:var(--error);font-size:12px;margin-top:10px;display:none"></div>
+      <button class="btn btn-primary" style="width:100%;padding:12px" onclick="doLogin()">Sign in</button>
+      <div id="lErr" style="color:var(--error);font-size:12px;margin-top:12px;display:none;text-align:center"></div>
     </div>
     <div id="authRegister" style="display:none">
       <div style="margin-bottom:16px">
-        <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Username</label>
-        <input id="rU" class="input" placeholder="Choose username">
+        <input id="rU" class="input" placeholder="Username" autocomplete="username">
       </div>
       <div style="margin-bottom:16px">
-        <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Display name</label>
-        <input id="rN" class="input" placeholder="Your name">
+        <input id="rN" class="input" placeholder="Display name (optional)">
       </div>
       <div style="margin-bottom:20px">
-        <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px">Password</label>
-        <input id="rP" type="password" class="input" placeholder="Min 8 characters">
+        <input id="rP" type="password" class="input" placeholder="Password (min 8 chars)" autocomplete="new-password" onkeydown="if(event.key==='Enter')doRegister()">
       </div>
-      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doRegister()">Create account</button>
-      <div id="rErr" style="color:var(--error);font-size:12px;margin-top:10px;display:none"></div>
+      <button class="btn btn-primary" style="width:100%;padding:12px" onclick="doRegister()">Create account</button>
+      <div id="rErr" style="color:var(--error);font-size:12px;margin-top:12px;display:none;text-align:center"></div>
     </div>
   </div>
 </div>
 
 <script>
-/* ═══════════════════════════════════════════════════════════════
-   APP STATE & UTILITIES
-   ═══════════════════════════════════════════════════════════════ */
 let T = null, U = null, N = null, currentRoom = null, ws = null, wsRetry = 0, unread = {};
+let currentMessages = [];
+let editingAgentId = null;
 
 const $ = id => document.getElementById(id);
 const api = (u, o = {}) => {
@@ -857,28 +948,26 @@ const api = (u, o = {}) => {
   if (T) o.headers['Authorization'] = 'Bearer ' + T;
   return fetch(u, o).then(r => r.json());
 };
-const escHtml = s => s ? s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
+const escHtml = s => s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;').replace(/"/g,'&quot;') : '';
 
-// Safe markdown - escape HTML then apply basic formatting
-function safeMd(s) {
+marked.setOptions({ breaks: true, gfm: true });
+function renderMarkdown(s) {
   if (!s) return '';
-  return escHtml(s)
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/`(.+?)`/g, '<code style="background:var(--secondary);padding:2px 6px;border-radius:4px;font-size:12px">$1</code>')
-    .replace(/\n/g, '<br>');
+  try { return marked.parse(s); } catch (e) { return escHtml(s).replace(/\n/g, '<br>'); }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   AUTH
-   ═══════════════════════════════════════════════════════════════ */
+function toast(message, type = 'info') {
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.innerHTML = `<div class="toast-content">${message}</div><div class="toast-close" onclick="this.parentElement.remove()">✕</div>`;
+  $('toastContainer').appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+/* ===== Auth ===== */
 function authTab(i) {
-  $('authTabLogin').style.background = i === 0 ? 'var(--bg-card)' : 'transparent';
-  $('authTabLogin').style.fontWeight = i === 0 ? '600' : '500';
-  $('authTabLogin').style.boxShadow = i === 0 ? 'var(--shadow-sm)' : 'none';
-  $('authTabRegister').style.background = i === 1 ? 'var(--bg-card)' : 'transparent';
-  $('authTabRegister').style.fontWeight = i === 1 ? '600' : '500';
-  $('authTabRegister').style.boxShadow = i === 1 ? 'var(--shadow-sm)' : 'none';
+  $('authTabLogin').classList.toggle('active', i === 0);
+  $('authTabRegister').classList.toggle('active', i === 1);
   $('authLogin').style.display = i ? 'none' : 'block';
   $('authRegister').style.display = i ? 'block' : 'none';
 }
@@ -887,69 +976,69 @@ function doLogin() {
   const u = $('lU').value, p = $('lP').value;
   if (!u || !p) { $('lErr').textContent = 'Fill all fields'; $('lErr').style.display = 'block'; return; }
   api('/api/auth/login', { method: 'POST', body: JSON.stringify({ username: u, password: p }) })
-    .then(r => { if (r.token) { T = r.token; U = r.id; N = r.username; enterApp(); } else { $('lErr').textContent = r.detail || 'Invalid'; $('lErr').style.display = 'block'; }});
+    .then(r => {
+      if (r.token) { T = r.token; U = r.id; N = r.username; enterApp(); toast('Welcome back!', 'success'); }
+      else { $('lErr').textContent = r.detail || 'Invalid credentials'; $('lErr').style.display = 'block'; }
+    });
 }
 
 function doRegister() {
   const u = $('rU').value, p = $('rP').value, n = $('rN').value;
   if (!u || !p) { $('rErr').textContent = 'Fill all fields'; $('rErr').style.display = 'block'; return; }
+  if (p.length < 8) { $('rErr').textContent = 'Password must be at least 8 characters'; $('rErr').style.display = 'block'; return; }
   api('/api/auth/register', { method: 'POST', body: JSON.stringify({ username: u, password: p, display_name: n }) })
-    .then(r => { if (r.token) { T = r.token; U = r.id; N = r.username; enterApp(); } else { $('rErr').textContent = r.detail || 'Error'; $('rErr').style.display = 'block'; }});
+    .then(r => {
+      if (r.token) { T = r.token; U = r.id; N = r.username; enterApp(); toast('Account created!', 'success'); }
+      else { $('rErr').textContent = r.detail || 'Error'; $('rErr').style.display = 'block'; }
+    });
 }
 
-function logout() { T = null; U = null; N = null; if (ws) ws.close(); location.reload(); }
+function logout() { T = null; U = null; N = null; if (ws) ws.close(); localStorage.clear(); location.reload(); }
 
 function enterApp() {
   localStorage.setItem('ht', T);
   localStorage.setItem('hu', U);
   localStorage.setItem('hn', N);
   $('authScreen').style.display = 'none';
-  $('userName').textContent = N;
   $('userAvatar').textContent = N.charAt(0).toUpperCase();
+  $('userAvatar').title = N;
+  $('profileAvatar').textContent = N.charAt(0).toUpperCase();
+  $('profileName').textContent = N;
+  $('profileUsername').textContent = '@' + U;
   loadRooms();
   loadProviders();
 }
 
-// Auto-login if token exists
 if (localStorage.getItem('ht')) { T = localStorage.getItem('ht'); U = localStorage.getItem('hu'); N = localStorage.getItem('hn'); enterApp(); }
 
-/* ═══════════════════════════════════════════════════════════════
-   NAVIGATION
-   ═══════════════════════════════════════════════════════════════ */
-document.querySelectorAll('.rail-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const view = btn.dataset.view;
-    document.querySelectorAll('.rail-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
-    const el = $('view-' + view);
-    if (el) el.style.display = 'flex';
-    if (view === 'agents') loadAgents();
-    if (view === 'tasks') loadTasks();
-    if (view === 'files') loadFiles();
-    if (view === 'dashboard') loadDashboard();
-    if (view === 'settings') loadKeys();
-  });
-});
+/* ===== Navigation ===== */
+function showView(view) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.rail-btn').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  const el = $('view-' + view);
+  if (el) el.classList.add('active');
+  $('panel-chat').classList.toggle('show', view === 'chat');
+  if (view === 'agents') loadAgents();
+  if (view === 'tasks') loadTasks();
+  if (view === 'knowledge') loadDocs();
+  if (view === 'dashboard') loadDashboard();
+  if (view === 'settings') loadKeys();
+}
 
-/* ═══════════════════════════════════════════════════════════════
-   ROOMS
-   ═══════════════════════════════════════════════════════════════ */
+/* ===== Chat / rooms ===== */
 function loadRooms() {
   api('/api/rooms?user_id=' + U).then(rooms => {
     $('roomList').innerHTML = rooms.map(r => {
-      const badge = unread[r.id] ? `<span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:var(--accent);color:white;font-size:10px;padding:2px 8px;border-radius:var(--radius-full);font-weight:600">${unread[r.id]}</span>` : '';
-      return `<div class="list-item${currentRoom === r.id ? ' active' : ''}" onclick="openRoom('${r.id}','${escHtml(r.name || r.id)}')" style="position:relative">
-        <div class="list-item-icon" style="background:var(--gradient-blue)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        </div>
-        <div class="list-item-content">
-          <div class="list-item-title">${escHtml(r.name || r.id)}</div>
-          <div class="list-item-meta">${r.type}</div>
+      const badge = unread[r.id] ? `<div class="li-badge">${unread[r.id]}</div>` : '';
+      return `<div class="list-item${currentRoom === r.id ? ' active' : ''}" onclick="openRoom('${r.id}','${escHtml(r.name || r.id)}')">
+        <div class="li-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <div class="li-content">
+          <div class="li-title">${escHtml(r.name || r.id)}</div>
+          <div class="li-meta">${escHtml(r.type)}</div>
         </div>
         ${badge}
       </div>`;
-    }).join('') || '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px">No conversations yet</div>';
+    }).join('') || '<div style="padding:20px;text-align:center;color:var(--text-tertiary);font-size:13px">No conversations yet</div>';
   });
 }
 
@@ -957,11 +1046,13 @@ function openRoom(id, name) {
   currentRoom = id;
   unread[id] = 0;
   $('chatTitle').textContent = name;
+  $('chatSub').textContent = 'Live — connected via WebSocket';
   loadRooms();
   $('composer').style.display = 'block';
   connectWS(id);
   api('/api/rooms/' + id + '/messages').then(msgs => {
-    $('chatMessages').innerHTML = msgs.map(renderMessage).join('') || '<div class="empty"><div class="empty-title">No messages yet</div><div class="empty-desc">Start the conversation</div></div>';
+    currentMessages = msgs;
+    $('chatMessages').innerHTML = msgs.map(renderMessage).join('') || '<div class="empty"><div class="empty-title">No messages yet</div><div class="empty-desc">Say hello to your agents</div></div>';
     $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
   });
 }
@@ -969,52 +1060,33 @@ function openRoom(id, name) {
 function renderMessage(x) {
   const isUser = x.sender_id === U;
   const cls = isUser ? 'message-user' : 'message-agent';
-  const time = new Date(x.created_at * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const avatar = isUser
-    ? `<div class="message-avatar" style="background:var(--gradient-blue)">${N ? N.charAt(0).toUpperCase() : 'U'}</div>`
-    : `<div class="message-avatar" style="background:var(--gradient-orange)">AI</div>`;
-  return `<div class="message ${cls}">
-    ${avatar}
-    <div>
-      <div class="message-bubble">${safeMd(x.content)}</div>
-      <div style="font-size:11px;color:var(--text-muted);margin-top:4px;${isUser ? 'text-align:right' : ''}">${time}</div>
-    </div>
-  </div>`;
+  const avatar = isUser ? `<div class="message-avatar">${N ? N.charAt(0).toUpperCase() : 'U'}</div>` : `<div class="message-avatar">AI</div>`;
+  const content = isUser ? escHtml(x.content).replace(/\n/g, '<br>') : renderMarkdown(x.content);
+  return `<div class="message ${cls}">${avatar}<div class="message-bubble">${content}</div></div>`;
 }
-
-function openNewRoom() { openModal('mRoom'); }
 
 function createRoom() {
   const n = $('nrN').value, t = $('nrT').value;
   if (!n) return;
   api('/api/rooms?user_id=' + U, { method: 'POST', body: JSON.stringify({ name: n, type: t }) })
-    .then(() => { hideModal('mRoom'); loadRooms(); });
+    .then(() => { hideModal('mRoom'); $('nrN').value = ''; loadRooms(); toast('Conversation created', 'success'); });
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   WEBSOCKET
-   ═══════════════════════════════════════════════════════════════ */
 function connectWS(id) {
   if (ws) ws.close();
-  ws = new WebSocket('ws://' + location.host + '/ws/' + id + '?token=' + T);
+  const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(protocol + '//' + location.host + '/ws/' + id + '?token=' + T);
   ws.onopen = () => { wsRetry = 0; };
-  ws.onclose = () => {
-    if (T && currentRoom) {
-      const d = Math.min(1000 * Math.pow(2, wsRetry), 30000);
-      wsRetry++;
-      setTimeout(() => { if (currentRoom) connectWS(currentRoom); }, d);
-    }
-  };
+  ws.onclose = () => { if (T && currentRoom) setTimeout(() => { if (currentRoom) connectWS(currentRoom); }, Math.min(1000 * Math.pow(2, wsRetry++), 30000)); };
   ws.onmessage = e => {
     const d = JSON.parse(e.data);
     if (d.type === 'new_message') {
+      currentMessages.push(d.message);
       $('chatMessages').innerHTML += renderMessage(d.message);
       $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
-      if (d.message.sender_id !== U && currentRoom !== id) {
-        unread[id] = (unread[id] || 0) + 1;
-        loadRooms();
-      }
-    } else if (d.type === 'typing' && d.user_id !== U) {
+      $('processingIndicator').style.display = 'none';
+      if (d.message.sender_id !== U && currentRoom !== id) { unread[id] = (unread[id] || 0) + 1; loadRooms(); }
+    } else if (d.type === 'typing') {
       $('processingIndicator').style.display = 'flex';
       clearTimeout(window._tt);
       window._tt = setTimeout(() => { $('processingIndicator').style.display = 'none'; }, 3000);
@@ -1030,48 +1102,143 @@ function sendMessage() {
   api('/api/rooms/' + currentRoom + '/messages?user_id=' + U, { method: 'POST', body: JSON.stringify({ content: v }) });
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   AGENTS
-   ═══════════════════════════════════════════════════════════════ */
+function exportConversation() {
+  if (!currentRoom || !currentMessages.length) { toast('No messages to export', 'warning'); return; }
+  const content = currentMessages.map(m => {
+    const sender = m.sender_id === U ? 'You' : 'Agent';
+    const time = new Date(m.created_at * 1000).toLocaleString();
+    return `## ${sender} (${time})\n\n${m.content}\n\n---\n`;
+  }).join('\n');
+  const blob = new Blob([content], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `conversation-${Date.now()}.md`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Conversation exported', 'success');
+}
+
+/* ===== Agents ===== */
+const TEMPLATE_ICONS = {
+  coding_assistant: '💻', researcher: '🔬', writer: '✍️', data_analyst: '📊',
+  sysadmin: '🖥️', teacher: '📚', rag_assistant: '📄', creative: '🎨'
+};
+const AGENT_COLORS = ['#F59E0B','#F97316','#8B5CF6','#10B981','#3B82F6','#EF4444','#14B8A6','#EC4899'];
+
+function agentEmoji(id, name) {
+  let h = 0; for (const c of (id || name || 'a')) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return ['🤖','🐝','⚡','🧠','🛠️','🎯','📦','🔍','🧩','🚀'][h % 10];
+}
+
 function loadAgents() {
-  api('/api/agents').then(agents => {
-    $('agentsList').innerHTML = agents.map((x, i) => {
-      const gradients = ['var(--gradient-orange)', 'var(--gradient-blue)', 'var(--gradient-purple)', 'var(--gradient-green)'];
-      const grad = gradients[i % gradients.length];
-      return `<div class="card" style="display:flex;gap:16px;align-items:start">
-        <div style="width:48px;height:48px;border-radius:var(--radius);background:${grad};display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>
-        </div>
-        <div style="flex:1">
-          <div style="display:flex;justify-content:space-between;align-items:start">
-            <div>
-              <div style="font-weight:700;font-size:15px">${escHtml(x.name)}</div>
-              <div style="display:flex;gap:6px;margin-top:6px">
-                <span class="pill pill-accent">${x.provider}</span>
-                ${x.mode ? `<span class="pill pill-neutral">${x.mode}</span>` : ''}
-              </div>
+  Promise.all([api('/api/agents'), api('/api/templates')]).then(([agents, templates]) => {
+    const mine = agents.map((x, i) => `
+      <div class="agent-card">
+        <div class="agent-card-top">
+          <div class="agent-emoji">${agentEmoji(x.id, x.name)}</div>
+          <div style="min-width:0">
+            <div class="agent-name">${escHtml(x.name)}</div>
+            <div class="agent-pills">
+              <span class="pill pill-accent">${escHtml(x.provider || 'default')}</span>
+              ${x.model ? `<span class="pill pill-neutral">${escHtml(x.model)}</span>` : ''}
+              <span class="pill pill-neutral">t ${(x.temperature ?? 0.7).toFixed(1)}</span>
             </div>
-            <button class="btn btn-secondary btn-sm" onclick="deleteAgent('${x.id}')">Delete</button>
           </div>
-          <div style="font-size:13px;color:var(--text-secondary);margin-top:12px;line-height:1.5">${escHtml(x.system_prompt.substring(0, 200))}${x.system_prompt.length > 200 ? '...' : ''}</div>
         </div>
-      </div>`;
-    }).join('') || '<div class="empty"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/></svg></div><div class="empty-title">No agents yet</div><div class="empty-desc">Create your first AI agent</div></div>';
+        <div class="agent-desc">${escHtml(x.description || x.system_prompt || '')}</div>
+        <div class="agent-actions">
+          <button class="btn btn-secondary btn-sm" style="flex:1" onclick="openEditAgent('${x.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteAgent('${x.id}')">Delete</button>
+        </div>
+      </div>`).join('');
+
+    const tpl = templates.map(t => `
+      <div class="agent-card">
+        <div class="agent-card-top">
+          <div class="agent-emoji">${TEMPLATE_ICONS[t.id] || '🤖'}</div>
+          <div style="min-width:0">
+            <div class="agent-name">${escHtml(t.name)}</div>
+            <div class="agent-pills"><span class="pill pill-neutral">template</span></div>
+          </div>
+        </div>
+        <div class="agent-desc">${escHtml(t.description)}</div>
+        <div class="agent-actions">
+          <button class="btn btn-primary btn-sm" style="flex:1" onclick="createFromTemplate('${t.id}','${escHtml(t.name)}')">Add agent</button>
+        </div>
+      </div>`).join('');
+
+    $('agentsContent').innerHTML = `
+      <div class="section-head"><div class="section-title">Your agents (${agents.length})</div></div>
+      <div class="agent-grid" style="margin-bottom:28px">${mine || ''}
+        <div class="agent-add" onclick="openCreateAgent()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add agent
+        </div>
+      </div>
+      <div class="section-head"><div class="section-title">Start from a template</div></div>
+      <div class="agent-grid">${tpl}</div>`;
   });
 }
 
-function createAgent() {
-  const n = $('naN').value, p = $('naP').value, pr = $('naPr').value, m = $('naM').value;
-  if (!n) return;
-  api('/api/agents', { method: 'POST', body: JSON.stringify({ name: n, system_prompt: p, provider: pr, model: m }) })
-    .then(() => { hideModal('mAgent'); loadAgents(); });
+function openCreateAgent() {
+  editingAgentId = null;
+  $('mAgentTitle').textContent = 'Create Agent';
+  $('naSave').textContent = 'Create';
+  $('naN').value = ''; $('naD').value = '';
+  $('naP').value = 'You are a helpful assistant.';
+  $('naT').value = 0.7; $('naTv').textContent = '0.7';
+  openModal('mAgent');
+}
+
+function openEditAgent(id) {
+  api('/api/agents/' + id).then(a => {
+    editingAgentId = id;
+    $('mAgentTitle').textContent = 'Edit Agent';
+    $('naSave').textContent = 'Save';
+    $('naN').value = a.name || '';
+    $('naD').value = a.description || '';
+    $('naP').value = a.system_prompt || '';
+    $('naT').value = a.temperature ?? 0.7;
+    $('naTv').textContent = Number(a.temperature ?? 0.7).toFixed(1);
+    openModal('mAgent');
+  });
+}
+
+function saveAgent() {
+  const body = {
+    name: $('naN').value.trim(),
+    description: $('naD').value.trim(),
+    system_prompt: $('naP').value,
+    provider: $('naPr').value,
+    model: $('naM').value,
+    temperature: parseFloat($('naT').value)
+  };
+  if (!body.name) { toast('Name is required', 'warning'); return; }
+  const req = editingAgentId
+    ? api('/api/agents/' + editingAgentId, { method: 'PUT', body: JSON.stringify(body) })
+    : api('/api/agents', { method: 'POST', body: JSON.stringify(body) });
+  req.then(() => {
+    hideModal('mAgent');
+    loadAgents();
+    toast(editingAgentId ? 'Agent updated' : 'Agent created', 'success');
+  });
 }
 
 function deleteAgent(id) {
   if (!confirm('Delete this agent?')) return;
-  fetch('/api/agents/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + T, 'Content-Type': 'application/json' } }).then(() => loadAgents());
+  fetch('/api/agents/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + T, 'Content-Type': 'application/json' } })
+    .then(r => { if (!r.ok) throw new Error('Delete failed'); return r.json(); })
+    .then(() => { loadAgents(); toast('Agent deleted', 'success'); })
+    .catch(() => toast('Failed to delete agent', 'error'));
 }
 
+function createFromTemplate(templateId, name) {
+  api('/api/templates/create', { method: 'POST', body: JSON.stringify({ template_id: templateId }) })
+    .then(() => { loadAgents(); toast(`Agent "${name}" added`, 'success'); });
+}
+
+/* ===== Providers/models ===== */
 function loadProviders() {
   api('/api/providers/all?user_id=' + U).then(p => {
     let h = '';
@@ -1084,121 +1251,145 @@ function loadProviders() {
 function scanModels() {
   const p = $('naPr').value;
   if (!p) return;
-  $('modelStatus').textContent = 'scanning...';
   api('/api/providers/' + p + '/models?user_id=' + U).then(r => {
     const models = r.models || [];
     $('naM').innerHTML = '<option value="">Default</option>' + models.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
-    $('modelStatus').textContent = models.length + ' models';
   });
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   TASKS
-   ═══════════════════════════════════════════════════════════════ */
+/* ===== Tasks ===== */
+const TASK_STATUS = {
+  pending:   { c: 'var(--warning)', pill: 'pill-warning' },
+  running:   { c: 'var(--accent)',  pill: 'pill-accent' },
+  completed: { c: 'var(--success)', pill: 'pill-success' },
+  failed:    { c: 'var(--error)',   pill: 'pill-error' },
+  cancelled: { c: 'var(--text-tertiary)', pill: 'pill-neutral' }
+};
+
 function loadTasks() {
-  api('/api/tasks/stats').then(s => {
+  Promise.all([api('/api/tasks'), api('/api/tasks/stats'), api('/api/agents')]).then(([tasks, stats, agents]) => {
     $('taskStats').innerHTML = [
-      { k: 'pending', c: 'var(--warning)', l: 'Pending' },
-      { k: 'running', c: 'var(--accent)', l: 'Running' },
-      { k: 'completed', c: 'var(--success)', l: 'Completed' },
-      { k: 'failed', c: 'var(--error)', l: 'Failed' }
-    ].map(x => `<div class="card stat-card"><div class="stat-value" style="color:${x.c}">${s[x.k]}</div><div class="stat-label">${x.l}</div></div>`).join('');
-  });
-  api('/api/tasks/queue').then(q => {
-    $('taskQueue').innerHTML = q.map(t => `<div class="card" style="display:flex;justify-content:space-between;align-items:center">
-      <div><div style="font-weight:600">${escHtml(t.title)}</div><div style="font-size:12px;color:var(--text-muted);margin-top:2px">${t.agent_id} · ${t.priority}</div></div>
-      <span class="pill pill-warning">${t.status}</span>
-    </div>`).join('') || '<div style="color:var(--text-muted);font-size:13px;padding:12px">Empty</div>';
-  });
-  api('/api/tasks/history').then(h => {
-    $('taskHistory').innerHTML = h.map(t => {
-      const cls = t.status === 'completed' ? 'pill-success' : 'pill-error';
-      return `<div class="card"><div style="display:flex;justify-content:space-between"><div style="font-weight:600">${escHtml(t.title)}</div><span class="pill ${cls}">${t.status}</span></div>${t.result ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:8px;max-height:100px;overflow-y:auto;background:var(--bg-elevated);padding:10px;border-radius:var(--radius-sm)">${escHtml(t.result.substring(0, 300))}</div>` : ''}</div>`;
-    }).join('') || '<div style="color:var(--text-muted);font-size:13px;padding:12px">No history</div>';
-  });
-}
+      { v: stats.total || 0, l: 'Total' },
+      { v: stats.pending || 0, l: 'Pending' },
+      { v: stats.running || 0, l: 'Running' },
+      { v: stats.completed || 0, l: 'Completed' },
+      { v: stats.failed || 0, l: 'Failed' }
+    ].map(x => `<div class="stat-card"><div class="stat-value">${x.v}</div><div class="stat-label">${x.l}</div></div>`).join('');
 
-function openTaskModal() {
-  api('/api/agents').then(a => {
-    $('tAgent').innerHTML = a.map(x => `<option value="${x.id}">${x.name}</option>`).join('') || '<option>No agents</option>';
-    openModal('mTask');
+    $('tkA').innerHTML = agents.map(a => `<option value="${a.id}">${escHtml(a.name)}</option>`).join('')
+      || '<option value="">No agents</option>';
+
+    $('tasksList').innerHTML = tasks.map(t => {
+      const st = TASK_STATUS[t.status] || TASK_STATUS.pending;
+      const time = t.created_at ? new Date(t.created_at * 1000).toLocaleString() : '';
+      return `<div class="task-row">
+        <div class="task-status-dot" style="background:${st.c}"></div>
+        <div style="flex:1;min-width:0">
+          <div class="task-title">${escHtml(t.title || t.id)}</div>
+          <div class="task-meta">${escHtml(t.agent_id || 'unassigned')} · ${time} · ${escHtml(t.priority || 'medium')}</div>
+        </div>
+        <span class="pill ${st.pill}">${escHtml(t.status)}</span>
+        ${t.status === 'pending' ? `<button class="btn btn-ghost btn-sm" onclick="cancelTask('${t.id}')">Cancel</button>` : ''}
+        ${t.status !== 'pending' && t.status !== 'running' ? `<button class="btn btn-ghost btn-sm" onclick="deleteTask('${t.id}')">Delete</button>` : ''}
+      </div>`;
+    }).join('') || '<div class="empty"><div class="empty-title">No tasks yet</div><div class="empty-desc">Create a background task for an agent</div></div>';
   });
 }
 
 function createTask() {
-  const t = $('tTitle').value, a = $('tAgent').value;
-  if (!t || !a) return;
-  api('/api/tasks', { method: 'POST', body: JSON.stringify({ title: t, agent_id: a, template: $('tTemplate').value, input_data: $('tInput').value }) })
-    .then(() => { hideModal('mTask'); loadTasks(); });
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   FILES
-   ═══════════════════════════════════════════════════════════════ */
-function loadFiles() {
-  api('/api/files').then(files => {
-    $('filesList').innerHTML = files.map(f => {
-      const size = f.size > 1024 ? Math.round(f.size / 1024) + ' KB' : f.size + ' B';
-      return `<div class="card" style="display:flex;justify-content:space-between;align-items:center">
-        <div style="display:flex;gap:12px;align-items:center">
-          <div style="width:40px;height:40px;border-radius:var(--radius-sm);background:var(--secondary);display:flex;align-items:center;justify-content:center">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          </div>
-          <div><div style="font-weight:600">${escHtml(f.name)}</div><div style="font-size:12px;color:var(--text-muted);margin-top:2px">${size} · ${f.type}</div></div>
-        </div>
-        <button class="btn btn-secondary btn-sm" onclick="deleteFile('${f.name}')">Delete</button>
-      </div>`;
-    }).join('') || '<div class="empty"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><div class="empty-title">No files</div><div class="empty-desc">Upload files for agents to work with</div></div>';
+  const body = { title: $('tkT').value.trim(), description: $('tkD').value, agent_id: $('tkA').value, priority: $('tkP').value };
+  if (!body.title) { toast('Title is required', 'warning'); return; }
+  api('/api/tasks', { method: 'POST', body: JSON.stringify(body) }).then(() => {
+    hideModal('mTask'); $('tkT').value = ''; $('tkD').value = '';
+    loadTasks(); toast('Task created', 'success');
   });
 }
 
-function uploadFile() {
-  const f = $('wsFileIn').files[0];
-  if (!f) return;
-  const r = new FileReader();
-  r.onload = () => {
-    api('/api/files', { method: 'POST', body: JSON.stringify({ filename: f.name, content: r.result.split(',')[1] }) })
-      .then(() => { hideModal('mUpload'); loadFiles(); });
-  };
-  r.readAsDataURL(f);
+function cancelTask(id) {
+  api('/api/tasks/' + id + '/cancel', { method: 'POST' }).then(() => { loadTasks(); toast('Task cancelled', 'success'); });
+}
+function deleteTask(id) {
+  fetch('/api/tasks/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + T } })
+    .then(() => { loadTasks(); toast('Task deleted', 'success'); });
 }
 
-function deleteFile(name) {
-  if (!confirm('Delete ' + name + '?')) return;
-  fetch('/api/files/' + name, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + T } }).then(() => loadFiles());
+/* ===== Knowledge (RAG) ===== */
+function loadDocs() {
+  api('/api/rag/documents').then(r => {
+    const docs = r.documents || [];
+    $('docCount').textContent = `${docs.length} docs · ${r.total_chunks || 0} chunks`;
+    $('docsList').innerHTML = docs.map(d => `<div class="doc-row">
+      <div class="li-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <div style="flex:1;min-width:0">
+        <div class="doc-title">${escHtml(d.filename || d.doc_id)}</div>
+        <div class="doc-meta">${d.chunks || 0} chunks</div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deleteDoc('${d.doc_id}')">Remove</button>
+    </div>`).join('') || '<div class="empty"><div class="empty-title">No documents yet</div><div class="empty-desc">Add text so agents can search your knowledge</div></div>';
+  });
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   DASHBOARD
-   ═══════════════════════════════════════════════════════════════ */
+function addDoc() {
+  const n = $('dcN').value.trim() || 'note-' + Date.now(), t = $('dcT').value;
+  if (!t) { toast('Content is required', 'warning'); return; }
+  api('/api/rag/ingest/text', { method: 'POST', body: JSON.stringify({ text: t, filename: n }) }).then(r => {
+    hideModal('mDoc'); $('dcN').value = ''; $('dcT').value = '';
+    loadDocs(); toast(`Indexed ${r.chunks || '?'} chunks`, 'success');
+  });
+}
+
+function deleteDoc(id) {
+  if (!confirm('Remove this document?')) return;
+  fetch('/api/rag/documents/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + T } })
+    .then(() => { loadDocs(); toast('Document removed', 'success'); });
+}
+
+function runRagQuery() {
+  const q = $('ragQuery').value.trim();
+  if (!q) return;
+  $('ragResults').innerHTML = '<div class="processing" style="padding:12px 0"><div class="processing-dots"><div class="processing-dot"></div><div class="processing-dot"></div><div class="processing-dot"></div></div><div class="processing-text">Searching…</div></div>';
+  api('/api/rag/query', { method: 'POST', body: JSON.stringify({ question: q, top_k: 4 }) }).then(r => {
+    const res = r.results || [];
+    $('ragResults').innerHTML = res.length
+      ? res.map(x => `<div class="rag-answer"><strong>${escHtml(x.filename || x.doc_id || 'doc')} · chunk ${x.chunk_index ?? 0} · relevance ${(x.relevance_score ?? 0).toFixed(2)}</strong>\n${escHtml((x.content || '').substring(0, 500))}</div>`).join('')
+      : '<div class="rag-answer">No matching content found in your knowledge base.</div>';
+  });
+}
+
+/* ===== Dashboard ===== */
 function loadDashboard() {
-  Promise.all([
-    api('/api/tasks/stats'),
-    api('/api/agents'),
-    api('/api/files'),
-    api('/api/rooms?user_id=' + U)
-  ]).then(([tasks, agents, files, rooms]) => {
-    $('dashStats').innerHTML = [
-      { v: agents.length, l: 'Agents', g: 'var(--gradient-orange)' },
-      { v: rooms.length, l: 'Conversations', g: 'var(--gradient-blue)' },
-      { v: tasks.completed, l: 'Tasks Done', g: 'var(--gradient-green)' },
-      { v: files.length, l: 'Files', g: 'var(--gradient-purple)' }
-    ].map(x => `<div class="card" style="background:${x.g};color:white;border:none">
-      <div style="font-size:32px;font-weight:800">${x.v}</div>
-      <div style="font-size:12px;opacity:0.9;margin-top:4px">${x.l}</div>
-    </div>`).join('');
-  });
+  Promise.all([api('/api/tasks/stats'), api('/api/agents'), api('/api/files'), api('/api/rooms?user_id=' + U), api('/api/hardware'), api('/api/rag/documents')])
+    .then(([tasks, agents, files, rooms, hw, rag]) => {
+      $('dashStats').innerHTML = [
+        { v: agents.length, l: 'Agents' },
+        { v: rooms.length, l: 'Conversations' },
+        { v: tasks.completed || 0, l: 'Tasks Done' },
+        { v: files.length, l: 'Files' },
+        { v: (rag.documents || []).length, l: 'Knowledge Docs' }
+      ].map(x => `<div class="stat-card"><div class="stat-value">${x.v}</div><div class="stat-label">${x.l}</div></div>`).join('');
+      const h = hw.hardware || {};
+      const gpu = h.gpu && h.gpu !== 'unknown' ? `${h.gpu}${h.gpu_vram_gb ? ` (${h.gpu_vram_gb} GB VRAM)` : ''}` : 'none detected';
+      const line = (k, v) => v ? `<div><span style="color:var(--text-tertiary)">${k}:</span> ${escHtml(String(v))}</div>` : '';
+      $('hwCard').innerHTML = [
+        line('OS', `${h.os || '?'} ${h.arch || ''}`.trim()),
+        line('CPU cores', h.cpu_cores),
+        line('RAM', h.ram_gb ? `${h.ram_gb} GB` : ''),
+        line('GPU', gpu),
+        line('Local model fit', hw.recommendation || '')
+      ].join('') || 'Hardware info unavailable.';
+    }).catch(() => {});
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   SETTINGS
-   ═══════════════════════════════════════════════════════════════ */
+/* ===== Settings / keys ===== */
 function loadKeys() {
   api('/api/users/keys?user_id=' + U).then(keys => {
-    $('keysList').innerHTML = keys.map(k => `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
-      <span style="font-weight:500">${k.provider}${k.model ? ' (' + k.model + ')' : ''}</span>
-      <button class="btn btn-secondary btn-sm" onclick="deleteKey('${k.provider}')">Remove</button>
-    </div>`).join('') || '<div style="color:var(--text-muted);font-size:13px;padding:8px 0">No keys configured</div>';
+    $('keysList').innerHTML = keys.map(k => `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border-subtle)">
+      <div>
+        <div style="font-weight:500;font-size:13px">${escHtml(k.provider)}</div>
+        ${k.model ? `<div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">${escHtml(k.model)}</div>` : ''}
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deleteKey('${escHtml(k.provider)}')">Remove</button>
+    </div>`).join('') || '<div style="color:var(--text-tertiary);font-size:13px;padding:8px 0">No keys configured</div>';
   });
 }
 
@@ -1206,67 +1397,21 @@ function saveKey() {
   const p = $('keyProvider').value, k = $('keyValue').value;
   if (!k) return;
   api('/api/users/keys?user_id=' + U, { method: 'POST', body: JSON.stringify({ provider: p, api_key: k }) })
-    .then(() => { $('keyValue').value = ''; loadKeys(); });
+    .then(() => { $('keyValue').value = ''; loadKeys(); toast('API key saved', 'success'); });
 }
 
 function deleteKey(p) {
-  fetch('/api/users/keys/' + p + '?user_id=' + U, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + T } }).then(() => loadKeys());
+  fetch('/api/users/keys/' + p + '?user_id=' + U, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + T } })
+    .then(() => { loadKeys(); toast('API key removed', 'success'); });
 }
 
-function dangerAction(action) {
-  const msgs = { keys: 'Delete all API keys?', everything: 'DELETE EVERYTHING? This cannot be undone.' };
-  if (!confirm(msgs[action])) return;
-  let url = '/api/danger/' + action;
-  if (action === 'keys' || action === 'user') url += '?user_id=' + U;
-  fetch(url, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + T } })
-    .then(r => r.json())
-    .then(d => {
-      if (action === 'user') setTimeout(logout, 1500);
-      if (action === 'everything') setTimeout(() => location.reload(), 2000);
-      loadKeys(); loadAgents(); loadRooms();
-    });
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   MODALS
-   ═══════════════════════════════════════════════════════════════ */
+/* ===== Modals ===== */
 function openModal(id) { $(id).classList.add('show'); }
 function hideModal(id) { $(id).classList.remove('show'); }
 
-// Close modal on overlay click
 document.querySelectorAll('.modal-overlay').forEach(m => {
   m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });
 });
-
-// Close modal on Escape
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.show').forEach(m => m.classList.remove('show'));
-});
-
-/* ═══════════════════════════════════════════════════════════════
-   SEARCH
-   ═══════════════════════════════════════════════════════════════ */
-function toggleSearch() {
-  const bar = $('searchBar');
-  if (!bar) {
-    const topbar = document.querySelector('#view-chat .topbar');
-    const searchBar = document.createElement('div');
-    searchBar.id = 'searchBar';
-    searchBar.style.cssText = 'padding:12px 24px;border-bottom:1px solid var(--border);background:var(--bg-card)';
-    searchBar.innerHTML = '<input class="input" style="border-radius:var(--radius-full);background:var(--secondary);border:none" placeholder="Search messages..." oninput="doSearch(this.value)">';
-    topbar.after(searchBar);
-  }
-  bar = $('searchBar');
-  bar.style.display = bar.style.display === 'none' ? 'block' : 'none';
-  if (bar.style.display === 'block') bar.querySelector('input').focus();
-}
-
-function doSearch(q) {
-  if (!q || !currentRoom) { if (currentRoom) openRoom(currentRoom, $('chatTitle').textContent); return; }
-  api('/api/messages/search?room_id=' + currentRoom + '&q=' + encodeURIComponent(q)).then(msgs => {
-    $('chatMessages').innerHTML = msgs.map(m => `<div class="message message-agent"><div class="message-avatar" style="background:var(--gradient-orange)">AI</div><div class="message-bubble">${safeMd(m.content)}</div></div>`).join('') || '<div class="empty"><div class="empty-title">No results</div></div>';
-  });
-}
 </script>
 </body>
 </html>

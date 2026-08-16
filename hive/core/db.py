@@ -1,28 +1,80 @@
 """
-Database layer — SQLite for agent configs, conversations, and usage logs.
+Database layer — Async SQLite with migration support.
+Uses aiosqlite for non-blocking database operations.
 """
 
 import json
 import time
+import uuid
+import logging
 import sqlite3
 from pathlib import Path
 from typing import Optional
 
+import aiosqlite
+
 from hive.core.agent import AgentConfig
 
+logger = logging.getLogger(__name__)
+
 DB_PATH = Path("hive.db")
+MIGRATIONS_PATH = Path("migrations")
+
+# Current schema version
+SCHEMA_VERSION = 4
 
 
 def get_connection() -> sqlite3.Connection:
+    """Get a synchronous database connection (for legacy sync code)."""
     conn = sqlite3.connect(str(DB_PATH))
     conn.row_factory = sqlite3.Row
     return conn
 
 
-def init_db():
-    """Create tables if they don't exist."""
-    conn = get_connection()
-    conn.executescript("""
+async def get_async_connection() -> aiosqlite.Connection:
+    """Get an async database connection."""
+    conn = await aiosqlite.connect(str(DB_PATH))
+    conn.row_factory = aiosqlite.Row
+    await conn.execute("PRAGMA journal_mode=WAL")
+    await conn.execute("PRAGMA foreign_keys=ON")
+    return conn
+
+
+async def init_db():
+    """Initialize database with migrations."""
+    conn = await get_async_connection()
+    
+    # Create migrations tracking table
+    await conn.execute("""
+        CREATE TABLE IF NOT EXISTS schema_migrations (
+            version INTEGER PRIMARY KEY,
+            applied_at REAL NOT NULL,
+            description TEXT NOT NULL DEFAULT ''
+        )
+    """)
+    
+    # Check current version
+    cursor = await conn.execute("SELECT MAX(version) FROM schema_migrations")
+    row = await cursor.fetchone()
+    current_version = row[0] if row and row[0] else 0
+    
+    # Apply migrations
+    if current_version < 1:
+        await _migrate_v1(conn)
+    if current_version < 2:
+        await _migrate_v2(conn)
+    if current_version < 3:
+        await _migrate_v3(conn)
+    if current_version < 4:
+        await _migrate_v4(conn)
+    
+    await conn.close()
+    logger.info(f"Database initialized at schema version {SCHEMA_VERSION}")
+
+
+async def _migrate_v1(conn: aiosqlite.Connection):
+    """Initial schema — core tables."""
+    await conn.executescript("""
         CREATE TABLE IF NOT EXISTS agents (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
@@ -87,7 +139,18 @@ def init_db():
             FOREIGN KEY (user_id) REFERENCES users(id),
             UNIQUE(user_id, provider)
         );
+    """)
+    await conn.execute(
+        "INSERT INTO schema_migrations (version, applied_at, description) VALUES (?, ?, ?)",
+        (1, time.time(), "Initial schema — core tables")
+    )
+    await conn.commit()
+    logger.info("Applied migration v1: Initial schema")
 
+
+async def _migrate_v2(conn: aiosqlite.Connection):
+    """Add rooms and messaging tables."""
+    await conn.executescript("""
         CREATE TABLE IF NOT EXISTS rooms (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL DEFAULT '',
@@ -140,7 +203,18 @@ def init_db():
             FOREIGN KEY (room_id) REFERENCES rooms(id)
         );
         CREATE INDEX IF NOT EXISTS idx_files_room ON shared_files(room_id, created_at);
+    """)
+    await conn.execute(
+        "INSERT INTO schema_migrations (version, applied_at, description) VALUES (?, ?, ?)",
+        (2, time.time(), "Add rooms and messaging")
+    )
+    await conn.commit()
+    logger.info("Applied migration v2: Rooms and messaging")
 
+
+async def _migrate_v3(conn: aiosqlite.Connection):
+    """Add P2P and E2EE tables."""
+    await conn.executescript("""
         CREATE TABLE IF NOT EXISTS p2p_peers (
             did TEXT PRIMARY KEY,
             peer_id TEXT NOT NULL,
@@ -188,8 +262,26 @@ def init_db():
             created_at REAL NOT NULL
         );
     """)
-    conn.commit()
-    conn.close()
+    await conn.execute(
+        "INSERT INTO schema_migrations (version, applied_at, description) VALUES (?, ?, ?)",
+        (3, time.time(), "Add P2P and E2EE tables")
+    )
+    await conn.commit()
+    logger.info("Applied migration v3: P2P and E2EE")
+
+
+async def _migrate_v4(conn: aiosqlite.Connection):
+    """Add description column to agents."""
+    cursor = await conn.execute("PRAGMA table_info(agents)")
+    columns = [row[1] for row in await cursor.fetchall()]
+    if "description" not in columns:
+        await conn.execute("ALTER TABLE agents ADD COLUMN description TEXT NOT NULL DEFAULT ''")
+    await conn.execute(
+        "INSERT INTO schema_migrations (version, applied_at, description) VALUES (?, ?, ?)",
+        (4, time.time(), "Add agent descriptions")
+    )
+    await conn.commit()
+    logger.info("Applied migration v4: Agent descriptions")
 
 
 # ---------------------------------------------------------------------------
@@ -197,73 +289,91 @@ def init_db():
 # ---------------------------------------------------------------------------
 
 async def create_agent(config: AgentConfig) -> dict:
-    import uuid
+    """Create a new agent."""
     agent_id = str(uuid.uuid4())[:8]
     now = time.time()
-    conn = get_connection()
-    conn.execute(
-        "INSERT INTO agents (id, name, system_prompt, provider, model, tools, temperature, max_tokens, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        (agent_id, config.name, config.system_prompt, config.provider, config.model,
-         json.dumps(config.tools), config.temperature, config.max_tokens, now, now)
-    )
-    conn.commit()
-    conn.close()
-    return {"id": agent_id, **_agent_to_dict(config), "created_at": now}
+    conn = await get_async_connection()
+    try:
+        await conn.execute(
+            "INSERT INTO agents (id, name, system_prompt, description, provider, model, tools, temperature, max_tokens, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (agent_id, config.name, config.system_prompt, config.description, config.provider, config.model,
+             json.dumps(config.tools), config.temperature, config.max_tokens, now, now)
+        )
+        await conn.commit()
+        return {"id": agent_id, **_agent_to_dict(config), "created_at": now}
+    finally:
+        await conn.close()
 
 
 async def get_agent(agent_id: str) -> Optional[dict]:
-    conn = get_connection()
-    row = conn.execute("SELECT * FROM agents WHERE id = ?", (agent_id,)).fetchone()
-    conn.close()
-    if not row:
-        return None
-    return dict(row)
+    """Get an agent by ID."""
+    conn = await get_async_connection()
+    try:
+        cursor = await conn.execute("SELECT * FROM agents WHERE id = ?", (agent_id,))
+        row = await cursor.fetchone()
+        if not row:
+            return None
+        return dict(row)
+    finally:
+        await conn.close()
 
 
 async def get_all_agents() -> list[dict]:
-    conn = get_connection()
-    rows = conn.execute("SELECT * FROM agents ORDER BY created_at DESC").fetchall()
-    conn.close()
-    return [dict(r) for r in rows]
+    """Get all agents."""
+    conn = await get_async_connection()
+    try:
+        cursor = await conn.execute("SELECT * FROM agents ORDER BY created_at DESC")
+        rows = await cursor.fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        await conn.close()
 
 
 async def update_agent(agent_id: str, updates: dict) -> Optional[dict]:
-    conn = get_connection()
-    existing = conn.execute("SELECT * FROM agents WHERE id = ?", (agent_id,)).fetchone()
-    if not existing:
-        conn.close()
-        return None
+    """Update an agent."""
+    conn = await get_async_connection()
+    try:
+        cursor = await conn.execute("SELECT * FROM agents WHERE id = ?", (agent_id,))
+        existing = await cursor.fetchone()
+        if not existing:
+            return None
 
-    fields = []
-    values = []
-    for key, val in updates.items():
-        if key in ("tools",) and isinstance(val, list):
-            val = json.dumps(val)
-        fields.append(f"{key} = ?")
-        values.append(val)
-    fields.append("updated_at = ?")
-    values.append(time.time())
-    values.append(agent_id)
+        fields = []
+        values = []
+        for key, val in updates.items():
+            if key in ("tools",) and isinstance(val, list):
+                val = json.dumps(val)
+            fields.append(f"{key} = ?")
+            values.append(val)
+        fields.append("updated_at = ?")
+        values.append(time.time())
+        values.append(agent_id)
 
-    conn.execute(f"UPDATE agents SET {', '.join(fields)} WHERE id = ?", values)
-    conn.commit()
-    conn.close()
-    return await get_agent(agent_id)
+        await conn.execute(f"UPDATE agents SET {', '.join(fields)} WHERE id = ?", values)
+        await conn.commit()
+        return await get_agent(agent_id)
+    finally:
+        await conn.close()
 
 
 async def delete_agent(agent_id: str) -> bool:
-    conn = get_connection()
-    cursor = conn.execute("DELETE FROM agents WHERE id = ?", (agent_id,))
-    conn.execute("DELETE FROM conversations WHERE agent_id = ?", (agent_id,))
-    conn.commit()
-    conn.close()
-    return cursor.rowcount > 0
+    """Delete an agent and its conversations."""
+    conn = await get_async_connection()
+    try:
+        cursor = await conn.execute("DELETE FROM agents WHERE id = ?", (agent_id,))
+        await conn.execute("DELETE FROM conversations WHERE agent_id = ?", (agent_id,))
+        await conn.commit()
+        return cursor.rowcount > 0
+    finally:
+        await conn.close()
 
 
 def _agent_to_dict(config: AgentConfig) -> dict:
+    """Convert AgentConfig to dict."""
     return {
         "name": config.name,
         "system_prompt": config.system_prompt,
+        "description": config.description,
         "provider": config.provider,
         "model": config.model,
         "tools": config.tools,
@@ -277,48 +387,61 @@ def _agent_to_dict(config: AgentConfig) -> dict:
 # ---------------------------------------------------------------------------
 
 async def create_conversation(agent_id: str) -> str:
-    import uuid
+    """Create a new conversation."""
     conv_id = str(uuid.uuid4())[:8]
     now = time.time()
-    conn = get_connection()
-    conn.execute(
-        "INSERT INTO conversations (id, agent_id, messages, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
-        (conv_id, agent_id, "[]", now, now)
-    )
-    conn.commit()
-    conn.close()
-    return conv_id
+    conn = await get_async_connection()
+    try:
+        await conn.execute(
+            "INSERT INTO conversations (id, agent_id, messages, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+            (conv_id, agent_id, "[]", now, now)
+        )
+        await conn.commit()
+        return conv_id
+    finally:
+        await conn.close()
 
 
 async def get_conversation(conv_id: str) -> Optional[dict]:
-    conn = get_connection()
-    row = conn.execute("SELECT * FROM conversations WHERE id = ?", (conv_id,)).fetchone()
-    conn.close()
-    if not row:
-        return None
-    d = dict(row)
-    d["messages"] = json.loads(d["messages"])
-    return d
+    """Get a conversation by ID."""
+    conn = await get_async_connection()
+    try:
+        cursor = await conn.execute("SELECT * FROM conversations WHERE id = ?", (conv_id,))
+        row = await cursor.fetchone()
+        if not row:
+            return None
+        d = dict(row)
+        d["messages"] = json.loads(d["messages"])
+        return d
+    finally:
+        await conn.close()
 
 
 async def save_messages(conv_id: str, messages: list[dict]):
-    conn = get_connection()
-    conn.execute(
-        "UPDATE conversations SET messages = ?, updated_at = ? WHERE id = ?",
-        (json.dumps(messages), time.time(), conv_id)
-    )
-    conn.commit()
-    conn.close()
+    """Save messages to a conversation."""
+    conn = await get_async_connection()
+    try:
+        await conn.execute(
+            "UPDATE conversations SET messages = ?, updated_at = ? WHERE id = ?",
+            (json.dumps(messages), time.time(), conv_id)
+        )
+        await conn.commit()
+    finally:
+        await conn.close()
 
 
 async def get_agent_conversations(agent_id: str) -> list[dict]:
-    conn = get_connection()
-    rows = conn.execute(
-        "SELECT id, created_at, updated_at FROM conversations WHERE agent_id = ? ORDER BY updated_at DESC",
-        (agent_id,)
-    ).fetchall()
-    conn.close()
-    return [dict(r) for r in rows]
+    """Get all conversations for an agent."""
+    conn = await get_async_connection()
+    try:
+        cursor = await conn.execute(
+            "SELECT id, created_at, updated_at FROM conversations WHERE agent_id = ? ORDER BY updated_at DESC",
+            (agent_id,)
+        )
+        rows = await cursor.fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        await conn.close()
 
 
 # ---------------------------------------------------------------------------
@@ -327,44 +450,51 @@ async def get_agent_conversations(agent_id: str) -> list[dict]:
 
 async def log_usage(agent_id: str, provider: str, model: str, tokens_in: int, tokens_out: int,
                     cost_usd: float, latency_ms: float, tool_calls: int, llm_calls: int):
-    conn = get_connection()
-    conn.execute(
-        "INSERT INTO usage_logs (agent_id, provider, model, tokens_in, tokens_out, cost_usd, latency_ms, tool_calls, llm_calls, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        (agent_id, provider, model, tokens_in, tokens_out, cost_usd, latency_ms, tool_calls, llm_calls, time.time())
-    )
-    conn.commit()
-    conn.close()
+    """Log usage metrics."""
+    conn = await get_async_connection()
+    try:
+        await conn.execute(
+            "INSERT INTO usage_logs (agent_id, provider, model, tokens_in, tokens_out, cost_usd, latency_ms, tool_calls, llm_calls, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (agent_id, provider, model, tokens_in, tokens_out, cost_usd, latency_ms, tool_calls, llm_calls, time.time())
+        )
+        await conn.commit()
+    finally:
+        await conn.close()
 
 
 async def get_usage_summary(agent_id: str = None, days: int = 7) -> dict:
-    conn = get_connection()
-    since = time.time() - (days * 86400)
-    where = "WHERE timestamp > ?"
-    params = [since]
-    if agent_id:
-        where += " AND agent_id = ?"
-        params.append(agent_id)
+    """Get usage summary for a time period."""
+    conn = await get_async_connection()
+    try:
+        since = time.time() - (days * 86400)
+        where = "WHERE timestamp > ?"
+        params = [since]
+        if agent_id:
+            where += " AND agent_id = ?"
+            params.append(agent_id)
 
-    row = conn.execute(f"""
-        SELECT
-            COUNT(*) as total_requests,
-            SUM(tokens_in) as total_tokens_in,
-            SUM(tokens_out) as total_tokens_out,
-            SUM(cost_usd) as total_cost,
-            AVG(latency_ms) as avg_latency,
-            SUM(tool_calls) as total_tool_calls,
-            SUM(llm_calls) as total_llm_calls
-        FROM usage_logs {where}
-    """, params).fetchone()
-    conn.close()
+        cursor = await conn.execute(f"""
+            SELECT
+                COUNT(*) as total_requests,
+                SUM(tokens_in) as total_tokens_in,
+                SUM(tokens_out) as total_tokens_out,
+                SUM(cost_usd) as total_cost,
+                AVG(latency_ms) as avg_latency,
+                SUM(tool_calls) as total_tool_calls,
+                SUM(llm_calls) as total_llm_calls
+            FROM usage_logs {where}
+        """, params)
+        row = await cursor.fetchone()
 
-    return {
-        "period_days": days,
-        "total_requests": row[0] or 0,
-        "total_tokens_in": row[1] or 0,
-        "total_tokens_out": row[2] or 0,
-        "total_cost_usd": round(row[3] or 0, 6),
-        "avg_latency_ms": round(row[4] or 0, 1),
-        "total_tool_calls": row[5] or 0,
-        "total_llm_calls": row[6] or 0,
-    }
+        return {
+            "period_days": days,
+            "total_requests": row[0] or 0,
+            "total_tokens_in": row[1] or 0,
+            "total_tokens_out": row[2] or 0,
+            "total_cost_usd": round(row[3] or 0, 6),
+            "avg_latency_ms": round(row[4] or 0, 1),
+            "total_tool_calls": row[5] or 0,
+            "total_llm_calls": row[6] or 0,
+        }
+    finally:
+        await conn.close()

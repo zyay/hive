@@ -42,12 +42,15 @@ p2p_network = None
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global p2p_network
-    init_db()
+    await init_db()
     init_routes()
     from hive.core.skills import init_skills
     from hive.core.files import init_uploads
     init_skills()
     init_uploads()
+
+    # Register extra tools (web search, code execution, image gen, etc.)
+    import hive.core.tools_extra  # noqa: F401 — registers tools via decorators
 
     # Auto-create identity if none exists
     from hive.core.identity import identity_exists, generate_identity, save_identity, load_identity
@@ -76,7 +79,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Hive",
     description="Self-hosted multi-agent AI platform — swarm, arena, memory, voice",
-    version="0.3.0",
+    version="1.0.0",
     lifespan=lifespan,
 )
 
@@ -148,6 +151,7 @@ async def auth_middleware(request: Request, call_next):
 class AgentCreate(BaseModel):
     name: str
     system_prompt: str = "You are a helpful assistant."
+    description: str = ""
     provider: str = "ollama"
     model: str = ""
     tools: list[str] = []
@@ -158,6 +162,7 @@ class AgentCreate(BaseModel):
 class AgentUpdate(BaseModel):
     name: Optional[str] = None
     system_prompt: Optional[str] = None
+    description: Optional[str] = None
     provider: Optional[str] = None
     model: Optional[str] = None
     tools: Optional[list[str]] = None
@@ -177,7 +182,7 @@ class ChatRequest(BaseModel):
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "version": "0.3.0"}
+    return {"status": "ok", "version": "1.0.0"}
 
 
 @app.get("/api/providers")
@@ -794,6 +799,23 @@ async def remove_member_endpoint(room_id: str, member_type: str, member_id: str)
     if not ok:
         raise HTTPException(404, "Member not found")
     return {"removed": True}
+
+
+@app.delete("/api/rooms/{room_id}")
+async def delete_room(room_id: str, user_id: str = ""):
+    """Delete a room and all its messages."""
+    conn = get_connection()
+    try:
+        conn.execute("DELETE FROM messages WHERE room_id = ?", (room_id,))
+        conn.execute("DELETE FROM room_members WHERE room_id = ?", (room_id,))
+        conn.execute("DELETE FROM shared_files WHERE room_id = ?", (room_id,))
+        cursor = conn.execute("DELETE FROM rooms WHERE id = ?", (room_id,))
+        conn.commit()
+        if cursor.rowcount == 0:
+            raise HTTPException(404, "Room not found")
+        return {"deleted": True, "room_id": room_id}
+    finally:
+        conn.close()
 
 
 @app.get("/api/rooms/{room_id}/messages")
@@ -1909,6 +1931,138 @@ def search_messages(room_id: str, q: str, limit: int = 20):
     conn.close()
     return [dict(r) for r in rows]
 
+
+# ---------------------------------------------------------------------------
+# RAG Pipeline
+# ---------------------------------------------------------------------------
+
+class RAGIngestRequest(BaseModel):
+    filename: str
+    content: str  # base64 or raw text
+    metadata: Optional[dict] = None
+
+class RAGQueryRequest(BaseModel):
+    question: str
+    top_k: int = 5
+
+@app.post("/api/rag/ingest")
+async def rag_ingest(body: RAGIngestRequest):
+    """Ingest a document into the RAG pipeline."""
+    from hive.core.rag import RAGPipeline, UPLOAD_DIR
+    import base64
+
+    UPLOAD_DIR.mkdir(exist_ok=True)
+    file_path = UPLOAD_DIR / body.filename
+
+    try:
+        content_bytes = base64.b64decode(body.content)
+        file_path.write_bytes(content_bytes)
+    except Exception:
+        file_path.write_text(body.content, encoding="utf-8")
+
+    try:
+        pipeline = RAGPipeline()
+        doc = pipeline.ingest_file(str(file_path), metadata=body.metadata)
+        return {
+            "status": "ingested",
+            "doc_id": doc.id,
+            "filename": doc.filename,
+            "chunks": len(doc.chunks),
+            "chars": len(doc.content),
+        }
+    except Exception as e:
+        raise HTTPException(400, str(e))
+
+class RAGIngestTextRequest(BaseModel):
+    text: str
+    filename: str = "inline"
+    metadata: Optional[dict] = None
+
+@app.post("/api/rag/ingest/text")
+async def rag_ingest_text(body: RAGIngestTextRequest):
+    """Ingest raw text into the RAG pipeline."""
+    from hive.core.rag import RAGPipeline
+    try:
+        pipeline = RAGPipeline()
+        doc = pipeline.ingest_text(body.text, filename=body.filename, metadata=body.metadata)
+        return {
+            "status": "ingested",
+            "doc_id": doc.id,
+            "filename": doc.filename,
+            "chunks": len(doc.chunks),
+        }
+    except Exception as e:
+        raise HTTPException(400, str(e))
+
+@app.post("/api/rag/query")
+async def rag_query(body: RAGQueryRequest):
+    """Query the RAG pipeline for relevant document chunks."""
+    from hive.core.rag import RAGPipeline
+    pipeline = RAGPipeline()
+    results = pipeline.query(body.question, top_k=body.top_k)
+    return {"results": results, "count": len(results)}
+
+@app.get("/api/rag/documents")
+async def rag_list_documents():
+    """List all ingested documents."""
+    from hive.core.rag import RAGPipeline
+    pipeline = RAGPipeline()
+    return {"documents": pipeline.list_documents(), "total_chunks": pipeline.count}
+
+@app.delete("/api/rag/documents/{doc_id}")
+async def rag_delete_document(doc_id: str):
+    """Delete a document from the RAG pipeline."""
+    from hive.core.rag import RAGPipeline
+    pipeline = RAGPipeline()
+    pipeline.delete_document(doc_id)
+    return {"deleted": True, "doc_id": doc_id}
+
+@app.post("/api/rag/context")
+async def rag_build_context(body: RAGQueryRequest):
+    """Build a context string from RAG for LLM augmentation."""
+    from hive.core.rag import RAGPipeline
+    pipeline = RAGPipeline()
+    context = pipeline.build_context(body.question, top_k=body.top_k)
+    return {"context": context, "length": len(context)}
+
+
+# ---------------------------------------------------------------------------
+# Agent Templates
+# ---------------------------------------------------------------------------
+
+@app.get("/api/templates")
+async def list_agent_templates():
+    """List all available agent templates."""
+    from hive.core.templates import list_templates
+    return list_templates()
+
+@app.get("/api/templates/{template_id}")
+async def get_agent_template(template_id: str):
+    """Get a specific agent template."""
+    from hive.core.templates import get_template
+    template = get_template(template_id)
+    if not template:
+        raise HTTPException(404, "Template not found")
+    return template
+
+class TemplateCreateRequest(BaseModel):
+    template_id: str
+    name: Optional[str] = None
+
+@app.post("/api/templates/create")
+async def create_agent_from_template(body: TemplateCreateRequest):
+    """Create an agent from a template."""
+    from hive.core.templates import create_from_template
+    try:
+        result = await create_from_template(body.template_id, body.name)
+        return result
+    except ValueError as e:
+        raise HTTPException(404, str(e))
+
+
+# ---------------------------------------------------------------------------
+# Serve UI
+# ---------------------------------------------------------------------------
 
 @app.get("/", response_class=HTMLResponse)
 def ui():

@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hive"
-version = "0.3.0"
-description = "Decentralized P2P E2EE multi-agent AI platform"
+version = "1.0.0"
+description = "Self-hosted Multi-Agent AI Platform — RAG, swarm, P2P, E2EE"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.11"

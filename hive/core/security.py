@@ -4,6 +4,7 @@ Security utilities — input validation, sanitization, rate limiting.
 
 import re
 import time
+import asyncio
 import hashlib
 import logging
 from pathlib import Path
@@ -120,16 +121,23 @@ chat_limiter = RateLimiter(max_requests=30, window_seconds=60)  # 30 messages pe
 
 
 def rate_limit(limiter: RateLimiter):
-    """Decorator for rate limiting endpoints."""
+    """Decorator for per-user/IP rate limiting."""
     def decorator(fn):
         @wraps(fn)
-        def wrapper(*args, **kwargs):
-            # Use a simple key based on function name
+        async def wrapper(*args, **kwargs):
+            from fastapi import Request, HTTPException
+            # Extract client identifier (user_id or IP)
             key = fn.__name__
+            for arg in args:
+                if isinstance(arg, Request):
+                    # Try user_id from auth middleware first
+                    user_id = getattr(arg.state, "user_id", None)
+                    client_ip = arg.client.host if arg.client else "unknown"
+                    key = f"{fn.__name__}:{user_id or client_ip}"
+                    break
             if not limiter.is_allowed(key):
-                from fastapi import HTTPException
                 raise HTTPException(429, "Rate limit exceeded. Please try again later.")
-            return fn(*args, **kwargs)
+            return await fn(*args, **kwargs) if asyncio.iscoroutinefunction(fn) else fn(*args, **kwargs)
         return wrapper
     return decorator
 

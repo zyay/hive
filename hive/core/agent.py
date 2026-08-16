@@ -19,6 +19,7 @@ class AgentConfig:
     """Configuration for an AI agent."""
     name: str
     system_prompt: str
+    description: str = ""
     provider: str = "ollama"
     model: str = ""
     tools: list[str] = field(default_factory=list)
@@ -177,20 +178,16 @@ def builtin_get_time() -> str:
     name="list_agents",
     description="List all available agents in the hive.",
 )
-def builtin_list_agents() -> str:
+async def builtin_list_agents() -> str:
     from hive.core.db import get_all_agents
-    import asyncio
     try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            import concurrent.futures
-            with concurrent.futures.ThreadPoolExecutor() as pool:
-                agents = pool.submit(asyncio.run, get_all_agents()).result()
-        else:
-            agents = loop.run_until_complete(get_all_agents())
-    except Exception:
-        agents = []
-    return f"Available agents: {len(agents)}"
+        agents = await get_all_agents()
+        if not agents:
+            return "No agents available."
+        names = [a["name"] for a in agents]
+        return f"Available agents ({len(names)}): {', '.join(names)}"
+    except Exception as e:
+        return f"Error listing agents: {e}"
 
 
 # ---------------------------------------------------------------------------

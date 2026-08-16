@@ -1,5 +1,53 @@
 # Changelog
 
+## [1.0.0] — 2026-08-16
+
+### 🎉 Major Release — Production Ready
+
+### New Features
+- **RAG Pipeline** — Document upload, chunking, embedding, and retrieval-augmented generation
+  - Supports PDF, TXT, MD, code files
+  - ChromaDB vector storage with semantic search
+  - API endpoints: `/api/rag/ingest`, `/api/rag/query`, `/api/rag/documents`
+- **Agent Templates** — 8 pre-configured agent archetypes
+  - Coding Assistant, Research Agent, Writer, Data Analyst, DevOps, Tutor, Knowledge Assistant, Creative Agent
+  - API endpoints: `/api/templates`, `/api/templates/create`
+- **Web Search Tool** — DuckDuckGo search (no API key required)
+- **Code Execution Sandbox** — Safe Python code execution in subprocess
+- **Image Generation** — DALL-E 3 integration via OpenAI API
+- **URL Fetcher** — Extract text content from any URL
+- **World Clock** — Multi-timezone time display
+
+### UI/UX Overhaul
+- **Dark/Light Theme** — System preference detection + manual toggle
+- **Mobile Responsive** — Bottom navigation, adaptive layouts
+- **Enhanced Markdown** — Full GFM support with code syntax highlighting (highlight.js)
+- **Conversation Export** — Export as JSON or Markdown
+- **Toast Notifications** — Real-time feedback for all actions
+- **Agent Builder** — Temperature slider, max tokens, model selection
+- **Profile Section** — User avatar, name display in settings
+
+### Architecture
+- **Async Database** — Migrated from sync sqlite3 to aiosqlite (non-blocking)
+- **Migration System** — Versioned schema migrations (v1→v2→v3)
+- **WAL Mode** — Write-Ahead Logging for better concurrent performance
+- **Proper Resource Cleanup** — try/finally blocks on all DB connections
+
+### Infrastructure
+- **CI/CD Pipeline** — GitHub Actions with lint, test, build, Docker jobs
+- **Multi-stage Docker** — Smaller images, non-root user, health checks
+- **Docker Compose** — Health checks, restart policies, proper volume mounts
+- **Code Coverage** — pytest-cov integration with Codecov upload
+
+### Improvements
+- Structured logging throughout
+- Better error messages and HTTP status codes
+- Input validation on all endpoints
+- Rate limiting on auth endpoints
+- Security headers and CORS configuration
+
+---
+
 ## [0.3.0] — 2026-08-11
 
 ### New Features
@@ -39,12 +87,6 @@
 - Cost tracking per request with pricing table
 - Auth middleware for API key protection
 - Background scheduler loop (asyncio task)
-
-### 📊 Performance
-- Agent loop latency: ~200ms (local Ollama)
-- Swarm delegation: ~400ms (2 agent calls)
-- Arena (3 providers): ~2s parallel
-- Cost per 1K tokens: $0.00015 (GPT-4o-mini) vs $0.00 (Ollama local)
 
 ---
 

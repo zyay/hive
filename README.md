@@ -7,9 +7,9 @@
   <a href="https://github.com/zyay/hive/actions/workflows/ci.yml"><img src="https://github.com/zyay/hive/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 </p>
 
-> **v0.3** — 10 LLM providers · Swarm orchestration · Vector memory · SSE streaming · JWT auth · Benchmark suite · MCP integrations · 92 tests
+> **v1.0.0** — 10 LLM providers · RAG pipeline · Agent templates · 5 new tools · Dark/light UI · Multi-stage Docker · Backup/restore · CI/CD · 92+ tests
 
-Create, manage, and chat with AI agents powered by any LLM provider — all running on your own machine. Agents can delegate to each other, compare models side-by-side, remember across sessions, and run on schedule.
+Create, manage, and chat with AI agents powered by any LLM provider — all running on your own machine. Agents can delegate to each other, compare models side-by-side, remember across sessions, run on schedule, and query your documents with retrieval-augmented generation.
 
 ## What is Hive?
 
@@ -24,15 +24,17 @@ Instead of being locked into one AI provider, Hive lets you switch between 10+ p
 |---|---|
 | **Multi-provider LLM layer** | 10 providers via 2 adapters (OpenAI-compat + Anthropic native) |
 | **Agent management** | Create, edit, delete agents with custom prompts, models, and tools |
+| **Agent templates** | 8 pre-configured archetypes — one-click agent creation |
 | **Tool calling** | Built-in tools + extensible `@register_tool` decorator |
 | **Cost tracking** | Per-request cost estimation, token counting, latency monitoring |
-| **Conversation memory** | Persistent conversations in SQLite |
-| **Web UI** | Professional dark dashboard — 7 tabs (Chat, Models, Router, Arena, Costs, API Keys, Settings) |
-| **Docker Compose** | One command: `docker compose up` |
+| **Conversation memory** | Persistent conversations with async SQLite (aiosqlite) |
+| **Web UI** | Dark/light theme, mobile responsive, markdown + code highlighting, export |
+| **Docker Compose** | One command: `docker compose up` — multi-stage, non-root, health checks |
 
 ### Advanced
 | Feature | Description |
 |---|---|
+| **RAG pipeline** | Document upload, chunking, embedding (sentence-transformers), semantic retrieval |
 | **Swarm orchestration** | Agent-to-agent delegation via `call_agent` tool |
 | **Model Arena** | Compare N models on same prompt — latency, cost, response side-by-side |
 | **Model Router** | Intelligent model selection based on task analysis (coding, reasoning, budget, speed) |
@@ -47,23 +49,95 @@ Instead of being locked into one AI provider, Hive lets you switch between 10+ p
 | **Benchmark suite** | 18 prompts across 4 categories (reasoning, coding, factual, creative) |
 | **Voice I/O** | Whisper STT + OpenAI TTS integration |
 | **Scheduled automations** | Cron-based agent tasks with background scheduler loop |
+| **Backup / restore** | One-command backup and restore of all data (DB, keys, uploads, memory) |
+| **CI/CD** | GitHub Actions — lint, test, build, Docker with coverage + Codecov |
+
+## RAG Pipeline
+
+Upload documents and query them with retrieval-augmented generation. Hive handles the full lifecycle:
+
+1. **Ingest** — upload PDF, TXT, MD, CSV, or code files via the API
+2. **Chunk** — split into overlapping chunks (500 tokens, 50 overlap)
+3. **Embed** — vectorize with `all-MiniLM-L6-v2` (sentence-transformers)
+4. **Store** — persist in ChromaDB for semantic search
+5. **Retrieve** — query returns relevant chunks, injected into agent context
+
+```bash
+# Ingest a document
+curl -X POST http://localhost:8000/api/rag/ingest \
+  -H "Content-Type: application/json" \
+  -d '{"filename": "report.pdf", "content_base64": "..."}'
+
+# Query your documents
+curl -X POST http://localhost:8000/api/rag/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "What is the revenue growth?", "top_k": 5}'
+```
+
+Supported formats: PDF, TXT, MD, CSV, and 20+ code file extensions (.py, .js, .ts, .go, .rs, .java, .c, .cpp, .h, .rb, .php, .swift, .kt, and more).
+
+## Agent Templates
+
+8 pre-configured archetypes to get started instantly — each with tuned system prompts, default models, and tool access:
+
+| Template | Description | Tools |
+|---|---|---|
+| **Code Assistant** | Debug, refactor, write code | calculator, execute_code, web_search |
+| **Research Agent** | Deep research with web access | web_search, fetch_url |
+| **Writing Assistant** | Draft, edit, improve text | — (temperature 0.8) |
+| **Data Analyst** | Analyze data, run calculations | calculator, execute_code |
+| **DevOps Agent** | Infrastructure and automation | calculator, execute_code, web_search |
+| **Tutor** | Teach and explain concepts | calculator, web_search |
+| **Knowledge Assistant** | RAG-grounded document Q&A | RAG context builder |
+| **Creative Agent** | Brainstorm, generate images | generate_image (temperature 1.2) |
+
+```bash
+# List all templates
+curl http://localhost:8000/api/templates
+
+# Create an agent from a template
+curl -X POST http://localhost:8000/api/templates/create \
+  -H "Content-Type: application/json" \
+  -d '{"template_id": "coding_assistant", "name": "My Coder"}'
+```
+
+## Tools
+
+Beyond the built-in calculator and `call_agent`, Hive includes 5 additional tools:
+
+| Tool | Description |
+|---|---|
+| **web_search** | Search the web via DuckDuckGo — no API key required |
+| **fetch_url** | Fetch and extract content from any URL |
+| **execute_code** | Run Python code in a sandboxed subprocess (30s timeout) |
+| **generate_image** | Generate images via DALL-E 3 (requires OpenAI API key) |
+| **world_clock** | Display current time across multiple timezones |
+
+All tools are registered via the `@register_tool` decorator and can be assigned to agents individually.
 
 ## Architecture
 
 ```
-Web UI (7 tabs)
+Web UI (dark/light, mobile responsive)
     |
     v
-FastAPI Backend
+FastAPI Backend (async, aiosqlite)
     |
     +-- Agent Loop (tool calling, multi-turn)
     +-- Model Layer (10 providers, 2 adapters)
     +-- Swarm (agent-to-agent delegation)
     +-- Model Router (intelligent selection)
     +-- Adaptive Reasoning (complexity detection)
+    +-- Agent Templates (8 archetypes)
+    |
+    +-- RAG Pipeline
+    |   +-- Document Ingestion (PDF, TXT, MD, CSV, code)
+    |   +-- Chunking (500 tokens, 50 overlap)
+    |   +-- Embedding (all-MiniLM-L6-v2)
+    |   +-- Retrieval (ChromaDB semantic search)
     |
     +-- Memory
-    |   +-- SQLite (keyword-based)
+    |   +-- SQLite (async, keyword-based, WAL mode)
     |   +-- ChromaDB (vector embeddings)
     |
     +-- Streaming (SSE real-time)
@@ -71,6 +145,7 @@ FastAPI Backend
     +-- Metrics (Prometheus)
     +-- Cron (full 5-field parser)
     +-- Cost Optimizer
+    +-- Backup / Restore
     |
     +-- MCP Integrations
     |   +-- mcp-agent-tools (19 tools)
@@ -80,7 +155,7 @@ FastAPI Backend
     +-- Voice I/O (Whisper + TTS)
     |
     v
-SQLite + ChromaDB (persistent storage)
+SQLite (async) + ChromaDB (persistent storage)
 ```
 
 ## Quick start
@@ -100,6 +175,18 @@ python main.py
 ```bash
 docker compose up --build
 ```
+
+The Docker image uses a multi-stage build (smaller final image), runs as a non-root `hive` user, and includes a health check at `/health` every 30 seconds.
+
+### Backup & restore
+
+```bash
+python backup.py backup          # create timestamped archive
+python backup.py list            # list available backups
+python backup.py restore backups/hive_20250816_120000.tar.gz
+```
+
+Backs up: databases, keystore, uploads, memory, skills, scheduler state.
 
 ### Tailscale (share with team)
 
@@ -181,6 +268,23 @@ docker compose -f docker-compose.tailscale.yml up
 | `/api/chat/stream` | POST | SSE streaming chat |
 | `/api/usage` | GET | Usage statistics |
 
+### RAG
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/rag/ingest` | POST | Upload and ingest a document |
+| `/api/rag/ingest/text` | POST | Ingest raw text |
+| `/api/rag/query` | POST | Semantic search over documents |
+| `/api/rag/documents` | GET | List ingested documents |
+| `/api/rag/documents/{id}` | DELETE | Delete a document |
+| `/api/rag/context` | POST | Build retrieval context for LLM |
+
+### Templates
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/templates` | GET | List all agent templates |
+| `/api/templates/{id}` | GET | Get a specific template |
+| `/api/templates/create` | POST | Create agent from template |
+
 ### Intelligence
 | Endpoint | Method | Description |
 |---|---|---|
@@ -216,21 +320,38 @@ docker compose -f docker-compose.tailscale.yml up
 ## Testing
 
 ```bash
-pytest tests/ -v          # 92 tests
+pytest tests/ -v          # 92+ tests
 pytest --cov=hive         # with coverage
 ```
+
+CI runs automatically on every push and PR: lint (ruff), test (pytest + coverage on Python 3.11/3.12), build, and Docker image.
+
+## Tech stack
+
+| Component | Technology |
+|---|---|
+| **Backend** | Python 3.12, FastAPI, aiosqlite |
+| **Frontend** | Vanilla HTML/CSS/JS, marked.js, highlight.js |
+| **Database** | SQLite (WAL mode, async via aiosqlite) with migration system |
+| **Vector store** | ChromaDB + sentence-transformers (all-MiniLM-L6-v2) |
+| **Docker** | Multi-stage build, non-root user, health checks |
+| **CI/CD** | GitHub Actions (lint → test → build → docker) |
+| **Auth** | JWT (zero-dep HMAC-SHA256) |
+| **Metrics** | Prometheus-compatible endpoint |
 
 ## Design decisions
 
 | Decision | Why |
 |---|---|
 | **Adapter pattern** | 2 adapters (OpenAI-compat + Anthropic) cover 10 providers |
-| **SQLite** | Zero-config, single-file, perfect for self-hosted |
+| **aiosqlite** | Non-blocking DB access — no event loop stalls under load |
+| **Migration system** | Versioned schema migrations — safe upgrades without data loss |
 | **ChromaDB for vectors** | Persistent, embedded, no separate server |
 | **Zero-dep JWT** | No jose/pyjwt needed — pure HMAC-SHA256 |
 | **Zero-dep cron** | No croniter needed — full 5-field parser built-in |
 | **AST calculator** | No `eval()` — security-first math evaluation |
 | **Prometheus format** | Industry standard — works with Grafana out of the box |
+| **Multi-stage Docker** | Smaller image, non-root for security, health checks for orchestration |
 | **MCP integrations** | Reuse existing tools from sibling projects |
 
 ## Related projects
@@ -252,40 +373,40 @@ graph TB
     subgraph "User Node"
         UI[Web UI / CLI]
         API[FastAPI REST + WebSocket]
-        
+
         subgraph "Core"
             ID[Identity<br/>Ed25519 + X25519]
             CRYPTO[Crypto<br/>NaCl E2EE]
             SIG[Signal Protocol<br/>Double Ratchet]
             ROUTER[Model Router<br/>Intelligent Selection]
         end
-        
+
         subgraph "P2P Layer"
             P2P[P2P Network<br/>UDP + mDNS]
             NAT[NAT Traversal<br/>STUN + Hole Punch]
             RELAY[Relay<br/>Store & Forward]
         end
-        
+
         subgraph "AI Layer"
             AGENT[Agent Peer<br/>Own Identity]
             OLLAMA[Local LLM<br/>Ollama]
             CLOUD[Cloud API<br/>OpenAI/Anthropic]
             VECMEM[Vector Memory<br/>ChromaDB]
         end
-        
+
         subgraph "Storage"
             DB[(SQLCipher<br/>Encrypted DB)]
             KS[(Keystore<br/>Key Pairs)]
             FILES[(E2EE Files<br/>Encrypted Chunks)]
         end
     end
-    
+
     subgraph "Network"
         PEER1[Peer 1]
         PEER2[Peer 2]
         RELAYNODE[Relay Node<br/>Encrypted Only]
     end
-    
+
     UI --> API
     API --> ID & CRYPTO & SIG
     CRYPTO --> P2P

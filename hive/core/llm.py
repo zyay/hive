@@ -5,6 +5,7 @@ Includes cost tracking and latency measurement.
 """
 
 import time
+import asyncio
 import logging
 from dataclasses import dataclass, field
 from typing import Optional
@@ -68,15 +69,35 @@ async def chat_openai_compat(
         payload["tools"] = tools
 
     start = time.time()
-    async with httpx.AsyncClient(timeout=120) as client:
-        resp = await client.post(url, json=payload, headers=headers)
-        resp.raise_for_status()
-        data = resp.json()
+    timeout = httpx.Timeout(connect=10.0, read=120.0, write=10.0, pool=10.0)
+    max_retries = 3
 
+    async with httpx.AsyncClient(timeout=timeout) as client:
+        for attempt in range(max_retries):
+            try:
+                resp = await client.post(url, json=payload, headers=headers)
+                resp.raise_for_status()
+                break
+            except (httpx.ConnectError, httpx.ConnectTimeout) as e:
+                if attempt == max_retries - 1:
+                    raise
+                await asyncio.sleep(2 ** attempt)
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code in (429, 503) and attempt < max_retries - 1:
+                    retry_after = int(e.response.headers.get("retry-after", 2 ** attempt))
+                    await asyncio.sleep(retry_after)
+                else:
+                    raise
+
+    data = resp.json()
     latency = (time.time() - start) * 1000
 
-    choice = data["choices"][0]
-    message = choice["message"]
+    choices = data.get("choices", [])
+    if not choices:
+        raise ValueError("Empty response from LLM provider")
+
+    choice = choices[0]
+    message = choice.get("message", {})
     usage = data.get("usage", {})
 
     tokens_in = usage.get("prompt_tokens", 0)
@@ -137,7 +158,8 @@ async def chat_anthropic(
         ]
 
     start = time.time()
-    async with httpx.AsyncClient(timeout=120) as client:
+    timeout = httpx.Timeout(connect=10.0, read=120.0, write=10.0, pool=10.0)
+    async with httpx.AsyncClient(timeout=timeout) as client:
         resp = await client.post(url, json=payload, headers=headers)
         resp.raise_for_status()
         data = resp.json()
@@ -250,7 +272,8 @@ async def chat_stream(
     if tools:
         payload["tools"] = tools
 
-    async with httpx.AsyncClient(timeout=120) as client:
+    timeout = httpx.Timeout(connect=10.0, read=120.0, write=10.0, pool=10.0)
+    async with httpx.AsyncClient(timeout=timeout) as client:
         async with client.stream("POST", url, json=payload, headers=headers) as resp:
             resp.raise_for_status()
             async for line in resp.aiter_lines():
