@@ -46,11 +46,63 @@ async def broadcast(room_id: str, event: dict, exclude=None):
         _connections[room_id].discard(ws)
 
 
+def _slugify(name: str) -> str:
+    """Lowercase and strip everything except letters and digits."""
+    return "".join(c for c in name.lower() if c.isalnum())
+
+
+async def resolve_mentioned_agents(room_id: str, content: str) -> list[str]:
+    """Return agent member IDs that should respond to this message.
+
+    An agent responds when it is @mentioned by id, by name (exact or
+    slug-normalized, e.g. "@Research Agent" or "@researchagent"), via the
+    generic "@bot"/"@agent"/"@all" handle, or automatically in DM rooms.
+    """
+    from hive.core.rooms import get_room_members
+    from hive.core.db import get_all_agents
+
+    members = await get_room_members(room_id)
+    bots = [m["member_id"] for m in members if m["member_type"] == "agent"]
+    if not bots:
+        return []
+
+    room = await _get_room(room_id)
+    if room and room.get("type") == "dm":
+        return bots
+
+    text = content.lower()
+    if "@bot" in text or "@agent" in text or "@all" in text:
+        return bots
+
+    agents_by_id = {a["id"]: a for a in await get_all_agents()}
+    mentioned = []
+    for bot_id in bots:
+        agent = agents_by_id.get(bot_id)
+        name = (agent or {}).get("name", "")
+        targets = [f"@{bot_id.lower()}"]
+        if name:
+            targets.append(f"@{name.lower()}")
+            slug = _slugify(name)
+            if slug:
+                targets.append(f"@{slug}")
+        if any(t in text for t in targets):
+            mentioned.append(bot_id)
+    return mentioned
+
+
+async def trigger_agent_responses(room_id: str, content: str):
+    """Fire background responses for every mentioned agent in a room.
+
+    Used by both the WebSocket and REST message paths so agents reply
+    regardless of how the message was submitted.
+    """
+    for agent_id in await resolve_mentioned_agents(room_id, content):
+        asyncio.create_task(_generate_bot_response(room_id, agent_id, content))
+
+
 async def handle_ws_message(room_id: str, data: dict, user_id: str):
     """Process an incoming WebSocket message."""
-    from hive.core.rooms import send_message, get_room_members
-    from hive.core.agent import run_agent, AgentConfig
-    from hive.core.db import get_agent
+    from hive.core.rooms import send_message
 
     msg_type = data.get("type", "message")
 
@@ -73,21 +125,8 @@ async def handle_ws_message(room_id: str, data: dict, user_id: str):
         }
         await broadcast(room_id, event)
 
-        # Check if any bots should respond
-        members = await get_room_members(room_id)
-        bots = [m for m in members if m["member_type"] == "agent"]
-
-        for bot in bots:
-            # Bot responds if @mentioned or if it's a DM
-            should_respond = False
-            room = await _get_room(room_id)
-            if room and room.get("type") == "dm":
-                should_respond = True
-            elif f"@{bot['member_id']}" in content.lower() or "@bot" in content.lower():
-                should_respond = True
-
-            if should_respond:
-                asyncio.create_task(_generate_bot_response(room_id, bot["member_id"], content))
+        # Mentioned agents respond
+        await trigger_agent_responses(room_id, content)
 
     elif msg_type == "typing":
         await broadcast(room_id, {

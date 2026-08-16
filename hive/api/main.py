@@ -838,6 +838,9 @@ async def send_room_message(room_id: str, user_id: str, body: SendMessageRequest
         raise HTTPException(400, "Message cannot be empty")
     msg = await send_message(room_id, "user", user_id, content)
     await broadcast(room_id, {"type": "new_message", "message": msg})
+    # Mentioned agents (or all agents in a DM) reply in the background
+    from hive.core.ws import trigger_agent_responses
+    await trigger_agent_responses(room_id, content)
     return msg
 
 

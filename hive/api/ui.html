@@ -459,13 +459,6 @@ label.lbl {
 }
 .agent-card:hover { border-color: var(--border-default); transform: translateY(-2px); box-shadow: var(--shadow-md); }
 .agent-card-top { display: flex; align-items: center; gap: 12px; }
-.agent-emoji {
-  width: 42px; height: 42px; border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-elevated));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px; flex-shrink: 0;
-  border: 1px solid var(--border-subtle);
-}
 .agent-name { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
 .agent-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
 .agent-desc {
@@ -499,6 +492,121 @@ label.lbl {
 .processing-dot:nth-child(3) { animation-delay: 0.4s; }
 @keyframes pulse { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
 .processing-text { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+
+/* Monogram avatars (no emoji) */
+.monogram {
+  width: 42px; height: 42px; border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; letter-spacing: 0.02em;
+  flex-shrink: 0;
+  color: #fafafa;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.monogram-sm {
+  width: 30px; height: 30px; border-radius: var(--radius-sm);
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; color: #fafafa;
+}
+.monogram-msg {
+  width: 32px; height: 32px; border-radius: 50%;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; color: #fafafa;
+}
+
+/* Category headers in library */
+.category-head {
+  display: flex; align-items: center; gap: 10px;
+  margin: 26px 0 12px;
+}
+.category-head:first-child { margin-top: 0; }
+.category-title {
+  font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+}
+.category-line { flex: 1; height: 1px; background: var(--border-subtle); }
+
+/* Mention autocomplete */
+.mention-menu {
+  position: absolute;
+  bottom: 100%;
+  left: 16px; right: 16px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  max-height: 220px;
+  overflow-y: auto;
+  display: none;
+  z-index: 50;
+  margin-bottom: 6px;
+}
+.mention-menu.show { display: block; }
+.mention-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.mention-item:hover, .mention-item.sel { background: var(--bg-hover); }
+.mention-name { font-size: 13px; font-weight: 500; }
+.mention-sub { font-size: 11px; color: var(--text-tertiary); }
+
+/* Agent chips above composer */
+.composer-chips {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;
+}
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-default);
+  font-size: 12px; font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  color: var(--text-secondary);
+}
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip-add { border-style: dashed; color: var(--text-tertiary); }
+
+/* Agents-in-chat panel section */
+.panel-section-label {
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  padding: 10px 10px 6px;
+}
+.room-agent-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 8px; border-radius: var(--radius-md);
+}
+.room-agent-row:hover { background: var(--bg-tertiary); }
+.room-agent-name { flex: 1; min-width: 0; font-size: 12.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.room-agent-x {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); padding: 2px;
+  display: flex; align-items: center;
+}
+.room-agent-x:hover { color: var(--error); }
+.room-agent-x svg { width: 13px; height: 13px; }
+
+/* Message sender label */
+.msg-sender {
+  font-size: 11px; font-weight: 600; color: var(--accent);
+  margin-bottom: 4px; letter-spacing: 0.01em;
+}
+
+/* Template modal hint */
+.modal-hint {
+  font-size: 12px; color: var(--text-tertiary);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 10px 12px; margin-bottom: 16px; line-height: 1.5;
+}
 
 /* Task rows */
 .task-row {
@@ -627,6 +735,13 @@ label.lbl {
       <div class="panel-sub">Your chat history</div>
     </div>
     <div class="panel-content" id="roomList"></div>
+    <div id="roomAgentsPanel" style="display:none; border-top:1px solid var(--border-subtle); padding: 6px 8px 10px; max-height: 40%; overflow-y: auto;">
+      <div class="panel-section-label">Agents in this chat</div>
+      <div id="roomAgentsList"></div>
+      <div class="room-agent-row">
+        <div class="chip chip-add" style="flex:1; justify-content:center" onclick="openAddAgentToRoom()">+ Add agent</div>
+      </div>
+    </div>
   </div>
 
   <!-- Main area -->
@@ -665,11 +780,15 @@ label.lbl {
         <div class="processing-text">Agent is thinking…</div>
       </div>
       <div class="composer" id="composer" style="display:none">
-        <div class="composer-input">
-          <input id="chatInput" placeholder="Ask anything…" onkeydown="if(event.key==='Enter')sendMessage()">
-          <button class="composer-send" onclick="sendMessage()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
-          </button>
+        <div class="composer-chips" id="composerChips"></div>
+        <div style="position:relative">
+          <div class="mention-menu" id="mentionMenu"></div>
+          <div class="composer-input">
+            <input id="chatInput" placeholder="Message… type @ to call an agent" autocomplete="off">
+            <button class="composer-send" onclick="sendMessage()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -804,9 +923,13 @@ label.lbl {
       <label class="lbl">Name</label>
       <input id="nrN" class="input" placeholder="Conversation name">
     </div>
-    <div style="margin-bottom:20px">
+    <div style="margin-bottom:16px">
       <label class="lbl">Type</label>
       <select id="nrT" class="input"><option value="group">Group</option><option value="dm">Direct Message</option></select>
+    </div>
+    <div style="margin-bottom:20px">
+      <label class="lbl">Add agents to this chat (optional)</label>
+      <div id="nrAgents" style="max-height:180px;overflow-y:auto;border:1px solid var(--border-default);border-radius:var(--radius-md);padding:8px;background:var(--bg-tertiary)"></div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="hideModal('mRoom')">Cancel</button>
@@ -819,6 +942,7 @@ label.lbl {
 <div class="modal-overlay" id="mAgent">
   <div class="modal">
     <div class="modal-title" id="mAgentTitle">Create Agent</div>
+    <div class="modal-hint" id="naHint" style="display:none"></div>
     <div style="margin-bottom:16px">
       <label class="lbl">Name</label>
       <input id="naN" class="input" placeholder="Agent name">
@@ -829,7 +953,7 @@ label.lbl {
     </div>
     <div style="margin-bottom:16px">
       <label class="lbl">System Prompt</label>
-      <textarea id="naP" class="input" rows="4" placeholder="Define the agent's behavior…">You are a helpful assistant.</textarea>
+      <textarea id="naP" class="input" rows="5" placeholder="Define the agent's behavior…">You are a helpful assistant.</textarea>
     </div>
     <div style="display:flex;gap:12px;margin-bottom:16px">
       <div style="flex:1">
@@ -840,6 +964,10 @@ label.lbl {
         <label class="lbl">Model</label>
         <select id="naM" class="input"><option value="">Default</option></select>
       </div>
+    </div>
+    <div style="margin-bottom:16px">
+      <label class="lbl">Tools (comma-separated)</label>
+      <input id="naTools" class="input" placeholder="e.g. web_search, calculator">
     </div>
     <div style="margin-bottom:20px">
       <label class="lbl">Temperature: <span id="naTv">0.7</span></label>
@@ -940,6 +1068,9 @@ label.lbl {
 let T = null, U = null, N = null, currentRoom = null, ws = null, wsRetry = 0, unread = {};
 let currentMessages = [];
 let editingAgentId = null;
+let AGENTS = [];            // cache of user agents
+let roomAgentIds = [];      // agents in the open room
+let mentionState = { open: false, items: [], sel: 0, start: -1 };
 
 const $ = id => document.getElementById(id);
 const api = (u, o = {}) => {
@@ -1007,6 +1138,15 @@ function enterApp() {
   $('profileUsername').textContent = '@' + U;
   loadRooms();
   loadProviders();
+  refreshAgentCache();
+}
+
+function refreshAgentCache() {
+  api('/api/agents').then(agents => {
+    AGENTS = agents;
+    renderNrAgents();
+    renderRoomAgents();
+  });
 }
 
 if (localStorage.getItem('ht')) { T = localStorage.getItem('ht'); U = localStorage.getItem('hu'); N = localStorage.getItem('hn'); enterApp(); }
@@ -1046,30 +1186,163 @@ function openRoom(id, name) {
   currentRoom = id;
   unread[id] = 0;
   $('chatTitle').textContent = name;
-  $('chatSub').textContent = 'Live — connected via WebSocket';
+  $('chatSub').textContent = 'Type @ to call an agent';
   loadRooms();
   $('composer').style.display = 'block';
   connectWS(id);
+  api('/api/rooms/' + id + '/members').then(members => {
+    roomAgentIds = members.filter(m => m.member_type === 'agent').map(m => m.member_id);
+    renderRoomAgents();
+  });
   api('/api/rooms/' + id + '/messages').then(msgs => {
     currentMessages = msgs;
-    $('chatMessages').innerHTML = msgs.map(renderMessage).join('') || '<div class="empty"><div class="empty-title">No messages yet</div><div class="empty-desc">Say hello to your agents</div></div>';
+    $('chatMessages').innerHTML = msgs.map(renderMessage).join('') || '<div class="empty"><div class="empty-title">No messages yet</div><div class="empty-desc">Type @ in the composer to call an agent</div></div>';
     $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
   });
+}
+
+/* Agents attached to the current room */
+function renderRoomAgents() {
+  const panel = $('roomAgentsPanel'), list = $('roomAgentsList'), chips = $('composerChips');
+  if (!panel || !currentRoom) return;
+  panel.style.display = currentRoom ? 'block' : 'none';
+  list.innerHTML = roomAgentIds.map(id => `
+    <div class="room-agent-row">
+      ${monoBadge(id, agentName(id), 'monogram-sm')}
+      <div class="room-agent-name">${escHtml(agentName(id))}</div>
+      <button class="room-agent-x" onclick="removeAgentFromRoom('${id}')" title="Remove from chat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>`).join('') || '<div style="padding:4px 8px 8px;font-size:12px;color:var(--text-tertiary)">No agents yet — add one to call it with @</div>';
+  chips.innerHTML = roomAgentIds.map(id =>
+    `<div class="chip" onclick="insertMention('${escHtml(agentName(id))}')">@${escHtml(agentName(id))}</div>`).join('');
+}
+
+function openAddAgentToRoom() {
+  const available = AGENTS.filter(a => !roomAgentIds.includes(a.id));
+  if (!available.length) { toast('All your agents are already in this chat', 'info'); return; }
+  const html = available.map(a =>
+    `<div class="list-item" onclick="addAgentToRoom('${a.id}')">
+      ${monoBadge(a.id, a.name, 'monogram-sm')}
+      <div class="li-content"><div class="li-title">${escHtml(a.name)}</div></div>
+    </div>`).join('');
+  $('roomAgentsList').innerHTML = `<div style="padding:4px 8px 8px;font-size:11px;color:var(--text-tertiary)">Select an agent to add</div>` + html +
+    `<div class="room-agent-row"><div class="chip chip-add" style="flex:1;justify-content:center" onclick="renderRoomAgents()">Cancel</div></div>`;
+}
+
+function addAgentToRoom(agentId) {
+  api('/api/rooms/' + currentRoom + '/members', { method: 'POST', body: JSON.stringify({ member_type: 'agent', member_id: agentId }) })
+    .then(() => {
+      roomAgentIds.push(agentId);
+      renderRoomAgents();
+      toast(agentName(agentId) + ' added to chat — call it with @' + agentName(agentId), 'success');
+    });
+}
+
+function removeAgentFromRoom(agentId) {
+  fetch('/api/rooms/' + currentRoom + '/members/agent/' + agentId, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + T } })
+    .then(() => {
+      roomAgentIds = roomAgentIds.filter(i => i !== agentId);
+      renderRoomAgents();
+      toast('Agent removed from chat', 'success');
+    });
+}
+
+/* @mention autocomplete */
+function insertMention(name) {
+  const inp = $('chatInput');
+  if (mentionState.open && mentionState.start >= 0) {
+    inp.value = inp.value.slice(0, mentionState.start) + '@' + name + ' ' + inp.value.slice(inp.selectionStart);
+  } else {
+    inp.value += (inp.value && !inp.value.endsWith(' ') ? ' ' : '') + '@' + name + ' ';
+  }
+  closeMentionMenu();
+  inp.focus();
+}
+
+function closeMentionMenu() {
+  mentionState.open = false;
+  $('mentionMenu').classList.remove('show');
+}
+
+function updateMentionMenu() {
+  const inp = $('chatInput');
+  const pos = inp.selectionStart;
+  const before = inp.value.slice(0, pos);
+  const at = before.lastIndexOf('@');
+  if (at === -1 || /[\s]/.test(before.slice(at + 1))) { closeMentionMenu(); return; }
+  const query = before.slice(at + 1).toLowerCase();
+  const items = AGENTS.filter(a => roomAgentIds.includes(a.id) &&
+    a.name.toLowerCase().includes(query)).slice(0, 6);
+  if (!items.length) { closeMentionMenu(); return; }
+  mentionState = { open: true, items, sel: 0, start: at };
+  $('mentionMenu').innerHTML = items.map((a, i) => `
+    <div class="mention-item${i === 0 ? ' sel' : ''}" data-i="${i}" onclick="insertMention('${escHtml(a.name)}')" onmouseenter="this.parentElement.querySelectorAll('.mention-item').forEach(e=>e.classList.remove('sel'));this.classList.add('sel')">
+      ${monoBadge(a.id, a.name, 'monogram-sm')}
+      <div><div class="mention-name">${escHtml(a.name)}</div><div class="mention-sub">${escHtml(a.provider || 'default')}</div></div>
+    </div>`).join('');
+  $('mentionMenu').classList.add('show');
+}
+
+function mentionKeydown(e) {
+  if (!mentionState.open) return false;
+  const items = $('mentionMenu').querySelectorAll('.mention-item');
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    mentionState.sel = (mentionState.sel + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+    items.forEach((el, i) => el.classList.toggle('sel', i === mentionState.sel));
+    return true;
+  }
+  if (e.key === 'Enter' || e.key === 'Tab') {
+    e.preventDefault();
+    insertMention(mentionState.items[mentionState.sel].name);
+    return true;
+  }
+  if (e.key === 'Escape') {
+    closeMentionMenu();
+    return true;
+  }
+  return false;
 }
 
 function renderMessage(x) {
   const isUser = x.sender_id === U;
   const cls = isUser ? 'message-user' : 'message-agent';
-  const avatar = isUser ? `<div class="message-avatar">${N ? N.charAt(0).toUpperCase() : 'U'}</div>` : `<div class="message-avatar">AI</div>`;
+  const name = isUser ? (N || 'You') : agentName(x.sender_id);
+  const avatar = isUser
+    ? `<div class="message-avatar">${N ? N.charAt(0).toUpperCase() : 'U'}</div>`
+    : monoBadge(x.sender_id, name, 'monogram-msg');
+  const label = isUser ? '' : `<div class="msg-sender">${escHtml(name)}</div>`;
   const content = isUser ? escHtml(x.content).replace(/\n/g, '<br>') : renderMarkdown(x.content);
-  return `<div class="message ${cls}">${avatar}<div class="message-bubble">${content}</div></div>`;
+  return `<div class="message ${cls}">${avatar}<div>${label}<div class="message-bubble">${content}</div></div></div>`;
 }
 
 function createRoom() {
   const n = $('nrN').value, t = $('nrT').value;
   if (!n) return;
+  const selected = [...document.querySelectorAll('#nrAgents input:checked')].map(c => c.value);
   api('/api/rooms?user_id=' + U, { method: 'POST', body: JSON.stringify({ name: n, type: t }) })
-    .then(() => { hideModal('mRoom'); $('nrN').value = ''; loadRooms(); toast('Conversation created', 'success'); });
+    .then(r => {
+      const roomId = r.id;
+      return Promise.all(selected.map(aid =>
+        api('/api/rooms/' + roomId + '/members', { method: 'POST', body: JSON.stringify({ member_type: 'agent', member_id: aid }) })
+      )).then(() => roomId);
+    })
+    .then(roomId => {
+      hideModal('mRoom'); $('nrN').value = '';
+      loadRooms();
+      openRoom(roomId, n);
+      toast('Conversation created' + (selected.length ? ' with ' + selected.length + ' agent(s)' : ''), 'success');
+    });
+}
+
+function renderNrAgents() {
+  $('nrAgents').innerHTML = AGENTS.map(a => `
+    <label style="display:flex;align-items:center;gap:8px;padding:5px 4px;cursor:pointer">
+      <input type="checkbox" value="${a.id}" style="accent-color:var(--accent)">
+      ${monoBadge(a.id, a.name, 'monogram-sm')}
+      <span style="font-size:13px">${escHtml(a.name)}</span>
+    </label>`).join('') || '<div style="font-size:12px;color:var(--text-tertiary);padding:4px">No agents yet — create some in the Agents section</div>';
 }
 
 function connectWS(id) {
@@ -1120,23 +1393,43 @@ function exportConversation() {
 }
 
 /* ===== Agents ===== */
-const TEMPLATE_ICONS = {
-  coding_assistant: '💻', researcher: '🔬', writer: '✍️', data_analyst: '📊',
-  sysadmin: '🖥️', teacher: '📚', rag_assistant: '📄', creative: '🎨'
-};
-const AGENT_COLORS = ['#F59E0B','#F97316','#8B5CF6','#10B981','#3B82F6','#EF4444','#14B8A6','#EC4899'];
+const MONO_COLORS = ['#475569','#7C2D12','#78350F','#1E3A5F','#3B0764','#134E4A','#3F3F46','#44403C','#0F2B1B','#312E81'];
 
-function agentEmoji(id, name) {
-  let h = 0; for (const c of (id || name || 'a')) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return ['🤖','🐝','⚡','🧠','🛠️','🎯','📦','🔍','🧩','🚀'][h % 10];
+function monoColor(seed) {
+  let h = 0; for (const c of String(seed || 'x')) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return MONO_COLORS[h % MONO_COLORS.length];
+}
+function monogram(name) {
+  const parts = String(name || 'A').trim().split(/\s+/);
+  const init = (parts.length > 1 ? parts[0][0] + parts[1][0] : parts[0].slice(0, 2)).toUpperCase();
+  return init;
+}
+function monoBadge(seed, name, cls) {
+  return `<div class="${cls || 'monogram'}" style="background:${monoColor(seed + name)}">${escHtml(monogram(name))}</div>`;
+}
+function agentById(id) { return AGENTS.find(a => a.id === id); }
+function agentName(id) { const a = agentById(id); return a ? a.name : 'Agent'; }
+
+const CATEGORY_ICONS = {
+  'General': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l2 2"/></svg>',
+  'Growth & Sales': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg>',
+  'Client Delivery': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+  'Client Success': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>',
+  'Operations': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+  'Analytics': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="20" x2="6" y2="12"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="14"/></svg>',
+  'Creative': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="19" cy="13" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="10" cy="19" r="2.5"/><line x1="12" y1="8.5" x2="17.5" y2="11.5"/><line x1="7.5" y1="13.5" x2="11.5" y2="17.5"/><line x1="8" y1="11" x2="11" y2="8"/><line x1="16.5" y1="14.5" x2="13" y2="17.5"/></svg>',
+};
+function categoryIcon(cat) {
+  return `<span style="width:14px;height:14px;display:inline-flex;color:var(--text-tertiary)">${CATEGORY_ICONS[cat] || CATEGORY_ICONS['General']}</span>`;
 }
 
 function loadAgents() {
   Promise.all([api('/api/agents'), api('/api/templates')]).then(([agents, templates]) => {
-    const mine = agents.map((x, i) => `
+    AGENTS = agents;
+    const mine = agents.map(x => `
       <div class="agent-card">
         <div class="agent-card-top">
-          <div class="agent-emoji">${agentEmoji(x.id, x.name)}</div>
+          ${monoBadge(x.id, x.name)}
           <div style="min-width:0">
             <div class="agent-name">${escHtml(x.name)}</div>
             <div class="agent-pills">
@@ -1148,24 +1441,31 @@ function loadAgents() {
         </div>
         <div class="agent-desc">${escHtml(x.description || x.system_prompt || '')}</div>
         <div class="agent-actions">
-          <button class="btn btn-secondary btn-sm" style="flex:1" onclick="openEditAgent('${x.id}')">Edit</button>
+          <button class="btn btn-secondary btn-sm" style="flex:1" onclick="openEditAgent('${x.id}')">Configure</button>
           <button class="btn btn-danger btn-sm" onclick="deleteAgent('${x.id}')">Delete</button>
         </div>
       </div>`).join('');
 
-    const tpl = templates.map(t => `
-      <div class="agent-card">
-        <div class="agent-card-top">
-          <div class="agent-emoji">${TEMPLATE_ICONS[t.id] || '🤖'}</div>
-          <div style="min-width:0">
-            <div class="agent-name">${escHtml(t.name)}</div>
-            <div class="agent-pills"><span class="pill pill-neutral">template</span></div>
-          </div>
-        </div>
-        <div class="agent-desc">${escHtml(t.description)}</div>
-        <div class="agent-actions">
-          <button class="btn btn-primary btn-sm" style="flex:1" onclick="createFromTemplate('${t.id}','${escHtml(t.name)}')">Add agent</button>
-        </div>
+    const cats = {};
+    templates.forEach(t => { (cats[t.category || 'General'] = cats[t.category || 'General'] || []).push(t); });
+    const catOrder = ['General', 'Growth & Sales', 'Client Delivery', 'Client Success', 'Operations', 'Analytics', 'Creative'];
+    const lib = catOrder.filter(c => cats[c]).map(c => `
+      <div class="category-head">${categoryIcon(c)}<div class="category-title">${escHtml(c)}</div><div class="category-line"></div></div>
+      <div class="agent-grid">
+        ${cats[c].map(t => `
+          <div class="agent-card">
+            <div class="agent-card-top">
+              ${monoBadge(t.id, t.name)}
+              <div style="min-width:0">
+                <div class="agent-name">${escHtml(t.name)}</div>
+                <div class="agent-pills"><span class="pill pill-neutral">template</span></div>
+              </div>
+            </div>
+            <div class="agent-desc">${escHtml(t.description)}</div>
+            <div class="agent-actions">
+              <button class="btn btn-primary btn-sm" style="flex:1" onclick="openFromTemplate('${t.id}')">Configure & add</button>
+            </div>
+          </div>`).join('')}
       </div>`).join('');
 
     $('agentsContent').innerHTML = `
@@ -1176,8 +1476,9 @@ function loadAgents() {
           Add agent
         </div>
       </div>
-      <div class="section-head"><div class="section-title">Start from a template</div></div>
-      <div class="agent-grid">${tpl}</div>`;
+      <div class="section-head"><div class="section-title">Agent library — pick a template, set your config</div></div>
+      ${lib}`;
+    renderRoomAgents();
   });
 }
 
@@ -1185,20 +1486,43 @@ function openCreateAgent() {
   editingAgentId = null;
   $('mAgentTitle').textContent = 'Create Agent';
   $('naSave').textContent = 'Create';
+  $('naHint').style.display = 'none';
   $('naN').value = ''; $('naD').value = '';
   $('naP').value = 'You are a helpful assistant.';
+  $('naTools').value = '';
   $('naT').value = 0.7; $('naTv').textContent = '0.7';
   openModal('mAgent');
+}
+
+function openFromTemplate(templateId) {
+  api('/api/templates/' + templateId).then(t => {
+    editingAgentId = null;
+    $('mAgentTitle').textContent = 'Add Agent from Template';
+    $('naSave').textContent = 'Create';
+    $('naHint').style.display = 'block';
+    $('naHint').innerHTML = `Template <strong>${escHtml(t.name)}</strong> pre-filled the prompt, tools and temperature below. Select your provider, model and settings — the agent is created with your configuration.`;
+    $('naN').value = t.name;
+    $('naD').value = t.description || '';
+    $('naP').value = t.system_prompt || '';
+    $('naTools').value = (t.tools || []).join(', ');
+    $('naT').value = t.temperature ?? 0.7;
+    $('naTv').textContent = Number(t.temperature ?? 0.7).toFixed(1);
+    openModal('mAgent');
+  });
 }
 
 function openEditAgent(id) {
   api('/api/agents/' + id).then(a => {
     editingAgentId = id;
-    $('mAgentTitle').textContent = 'Edit Agent';
+    $('mAgentTitle').textContent = 'Configure Agent';
     $('naSave').textContent = 'Save';
+    $('naHint').style.display = 'none';
     $('naN').value = a.name || '';
     $('naD').value = a.description || '';
     $('naP').value = a.system_prompt || '';
+    let tools = a.tools || [];
+    if (typeof tools === 'string') { try { tools = JSON.parse(tools); } catch (e) { tools = []; } }
+    $('naTools').value = tools.join(', ');
     $('naT').value = a.temperature ?? 0.7;
     $('naTv').textContent = Number(a.temperature ?? 0.7).toFixed(1);
     openModal('mAgent');
@@ -1212,7 +1536,8 @@ function saveAgent() {
     system_prompt: $('naP').value,
     provider: $('naPr').value,
     model: $('naM').value,
-    temperature: parseFloat($('naT').value)
+    temperature: parseFloat($('naT').value),
+    tools: $('naTools').value.split(',').map(s => s.trim()).filter(Boolean)
   };
   if (!body.name) { toast('Name is required', 'warning'); return; }
   const req = editingAgentId
@@ -1221,6 +1546,7 @@ function saveAgent() {
   req.then(() => {
     hideModal('mAgent');
     loadAgents();
+    refreshAgentCache();
     toast(editingAgentId ? 'Agent updated' : 'Agent created', 'success');
   });
 }
@@ -1229,13 +1555,15 @@ function deleteAgent(id) {
   if (!confirm('Delete this agent?')) return;
   fetch('/api/agents/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + T, 'Content-Type': 'application/json' } })
     .then(r => { if (!r.ok) throw new Error('Delete failed'); return r.json(); })
-    .then(() => { loadAgents(); toast('Agent deleted', 'success'); })
+    .then(() => { loadAgents(); refreshAgentCache(); toast('Agent deleted', 'success'); })
     .catch(() => toast('Failed to delete agent', 'error'));
 }
 
 function createFromTemplate(templateId, name) {
+  // Legacy direct-create; the UI now routes through openFromTemplate so the
+  // user picks provider/model/temperature before the agent is created.
   api('/api/templates/create', { method: 'POST', body: JSON.stringify({ template_id: templateId }) })
-    .then(() => { loadAgents(); toast(`Agent "${name}" added`, 'success'); });
+    .then(() => { loadAgents(); refreshAgentCache(); toast(`Agent "${name}" added`, 'success'); });
 }
 
 /* ===== Providers/models ===== */
@@ -1412,6 +1740,15 @@ function hideModal(id) { $(id).classList.remove('show'); }
 document.querySelectorAll('.modal-overlay').forEach(m => {
   m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });
 });
+
+/* Chat input: @mention autocomplete + Enter to send */
+const chatInputEl = document.getElementById('chatInput');
+chatInputEl.addEventListener('input', updateMentionMenu);
+chatInputEl.addEventListener('keydown', e => {
+  if (mentionKeydown(e)) return;
+  if (e.key === 'Enter') sendMessage();
+});
+chatInputEl.addEventListener('blur', () => setTimeout(closeMentionMenu, 150));
 </script>
 </body>
 </html>
