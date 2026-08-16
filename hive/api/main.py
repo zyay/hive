@@ -780,6 +780,12 @@ async def get_room_endpoint(room_id: str):
     return {**room, "members": members}
 
 
+@app.get("/api/rooms/{room_id}/members")
+async def get_room_members(room_id: str):
+    from hive.core.rooms import get_room_members
+    return await get_room_members(room_id)
+
+
 @app.post("/api/rooms/{room_id}/members")
 async def invite_member(room_id: str, body: InviteRequest):
     from hive.core.rooms import add_member, invite_bot
