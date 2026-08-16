@@ -643,6 +643,99 @@ label.lbl { font-size: 12px; font-weight: 600; color: var(--text-secondary); dis
 /* Hardware card */
 .hw-card { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.9; color: var(--text-secondary); }
 
+/* ═══════════ Progress rings ═══════════ */
+.ring-card {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--bg-solid-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--dur-base) var(--ease-sheet), border-color var(--dur-base);
+  animation: cardIn var(--dur-slow) var(--ease-sheet) backwards;
+  position: relative; overflow: hidden;
+}
+.ring-card:hover { border-color: var(--border-strong); transform: translateY(-3px); }
+.ring-svg { width: 64px; height: 64px; flex-shrink: 0; transform: rotate(-90deg); }
+.ring-bg { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 6; }
+.ring-val { fill: none; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 900ms var(--ease-sheet); }
+.ring-num {
+  position: absolute; inset: 0; width: 64px; height: 64px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.ring-label { font-size: 12px; font-weight: 700; letter-spacing: 0.02em; }
+.ring-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 3px; }
+
+/* ═══════════ Honeycomb activity (GitHub-style hex grid) ═══════════ */
+.honey-card { margin-bottom: 20px; }
+.honey-wrap { overflow-x: auto; padding-bottom: 6px; }
+.honey-wrap svg { display: block; }
+.honey-wrap polygon {
+  stroke: rgba(0,0,0,0.35); stroke-width: 1;
+  animation: hexIn 420ms var(--ease-sheet) backwards;
+  cursor: default;
+}
+@keyframes hexIn { from { opacity: 0; transform: scale(0.3); } to { opacity: 1; transform: scale(1); } }
+.honey-wrap polygon.lv0 { fill: rgba(255,255,255,0.055); }
+.honey-wrap polygon.lv1 { fill: rgba(10,132,255,0.3); }
+.honey-wrap polygon.lv2 { fill: rgba(10,132,255,0.5); }
+.honey-wrap polygon.lv3 { fill: rgba(10,132,255,0.75); }
+.honey-wrap polygon.lv4 { fill: #409CFF; }
+.honey-wrap polygon:hover { stroke: #fff; stroke-width: 1.4; }
+.honey-legend { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-tertiary); }
+.honey-legend .hx { width: 11px; height: 11px; clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); display: inline-block; }
+.hx.lv0 { background: rgba(255,255,255,0.055); }
+.hx.lv1 { background: rgba(10,132,255,0.3); }
+.hx.lv2 { background: rgba(10,132,255,0.5); }
+.hx.lv3 { background: rgba(10,132,255,0.75); }
+.hx.lv4 { background: #409CFF; }
+
+/* ═══════════ Task rows v2 ═══════════ */
+.task-row { flex-direction: column; align-items: stretch; gap: 8px; padding: 15px 18px; }
+.task-row-top { display: flex; align-items: center; gap: 12px; }
+.task-prog {
+  height: 5px; border-radius: 99px;
+  background: rgba(255,255,255,0.07);
+  overflow: hidden;
+}
+.task-prog > div {
+  height: 100%; border-radius: 99px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+  background-size: 200% 100%;
+  animation: progSlide 1.6s linear infinite;
+  transition: width 800ms var(--ease-sheet);
+}
+@keyframes progSlide { from { background-position: 0% 0; } to { background-position: -200% 0; } }
+.task-result {
+  font-size: 12.5px; color: var(--text-secondary); line-height: 1.55;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  max-height: 120px; overflow-y: auto;
+  white-space: pre-wrap;
+  animation: fadeIn var(--dur-base) ease;
+}
+.task-status-dot.running { animation: pulse 1.2s infinite ease-in-out; }
+.prio-high { color: var(--error); }
+.prio-critical { color: var(--error); }
+
+/* Dashboard agents strip */
+.dash-agent-row {
+  display: flex; align-items: center; gap: 11px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  transition: background var(--dur-fast);
+  animation: cardIn var(--dur-slow) var(--ease-sheet) backwards;
+}
+.dash-agent-row:hover { background: rgba(255,255,255,0.06); }
+.dash-agent-name { font-size: 13px; font-weight: 600; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dash-agent-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
+
+@media (max-width: 1100px) { .dash-cols { grid-template-columns: 1fr !important; } }
+
 /* ═══════════ Auth ═══════════ */
 .auth-screen {
   position: fixed; inset: 0;
@@ -1107,6 +1200,20 @@ label.lbl { font-size: 12px; font-weight: 600; color: var(--text-secondary); dis
       </div>
       <div class="content">
         <div class="stats-grid" id="taskStats"></div>
+        <div class="card honey-card">
+          <div class="section-head" style="margin-bottom:10px">
+            <div>
+              <div class="section-title" style="font-size:15px">Activity</div>
+              <div style="font-size:12px;color:var(--text-tertiary)">Task runs over the last 12 weeks</div>
+            </div>
+            <div class="honey-legend">
+              <span>Less</span>
+              <i class="hx lv0"></i><i class="hx lv1"></i><i class="hx lv2"></i><i class="hx lv3"></i><i class="hx lv4"></i>
+              <span>More</span>
+            </div>
+          </div>
+          <div id="taskHoney" class="honey-wrap"></div>
+        </div>
         <div class="section-head"><div class="section-title">All tasks</div></div>
         <div id="tasksList"></div>
       </div>
@@ -1153,6 +1260,26 @@ label.lbl { font-size: 12px; font-weight: 600; color: var(--text-secondary); dis
       </div>
       <div class="content">
         <div class="stats-grid" id="dashStats"></div>
+        <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:20px" class="dash-cols">
+          <div class="card honey-card">
+            <div class="section-head" style="margin-bottom:10px">
+              <div>
+                <div class="section-title" style="font-size:15px">Activity</div>
+                <div style="font-size:12px;color:var(--text-tertiary)">Tasks and messages over the last 12 weeks</div>
+              </div>
+              <div class="honey-legend">
+                <span>Less</span>
+                <i class="hx lv0"></i><i class="hx lv1"></i><i class="hx lv2"></i><i class="hx lv3"></i><i class="hx lv4"></i>
+                <span>More</span>
+              </div>
+            </div>
+            <div id="dashHoney" class="honey-wrap"></div>
+          </div>
+          <div class="card" style="display:flex;flex-direction:column">
+            <div class="section-title" style="font-size:15px;margin-bottom:12px">Your agents</div>
+            <div id="dashAgents" style="display:flex;flex-direction:column;gap:8px;flex:1;overflow-y:auto"></div>
+          </div>
+        </div>
         <div class="section-head"><div class="section-title">Hardware</div></div>
         <div class="card hw-card" id="hwCard"></div>
       </div>
@@ -2145,17 +2272,99 @@ const TASK_STATUS = {
   cancelled: { c: 'var(--text-tertiary)', pill: 'pill-neutral' }
 };
 
+/* ── Animated progress ring ── */
+function ringCard(value, label, sub, color, delay) {
+  const R = 26, C = 2 * Math.PI * R;
+  const max = Math.max(value, 5);
+  const frac = Math.max(0, Math.min(1, value / Math.max(max, 1)));
+  const gid = 'rg' + label.replace(/\W/g, '');
+  return `<div class="ring-card" style="animation-delay:${delay}ms">
+    <div style="position:relative;width:64px;height:64px;flex-shrink:0">
+      <svg class="ring-svg" viewBox="0 0 64 64">
+        <circle class="ring-bg" cx="32" cy="32" r="${R}"/>
+        <circle class="ring-val" cx="32" cy="32" r="${R}" stroke="${color}"
+          stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${C.toFixed(1)}"
+          data-target="${(C * (1 - frac)).toFixed(1)}"/>
+      </svg>
+      <div class="ring-num" data-count="${value}">0</div>
+    </div>
+    <div>
+      <div class="ring-label">${escHtml(label)}</div>
+      <div class="ring-sub">${escHtml(sub)}</div>
+    </div>
+  </div>`;
+}
+function animateRings(scope) {
+  document.querySelectorAll(scope + ' .ring-val').forEach(el => {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      el.style.strokeDashoffset = el.dataset.target;
+    }));
+  });
+  document.querySelectorAll(scope + ' .ring-num').forEach(el => countUp(el, +el.dataset.count));
+}
+
+/* ── GitHub-style honeycomb activity grid ──
+   Counts events per day; renders 12 weeks of pointy-top hexagons. */
+function honeycomb(events, mount) {
+  const weeks = 12, days = 7;
+  // bucket events (unix seconds) per YYYY-MM-DD
+  const counts = {};
+  for (const ts of events) {
+    if (!ts) continue;
+    const d = new Date(ts * 1000);
+    const key = d.toISOString().slice(0, 10);
+    counts[key] = (counts[key] || 0) + 1;
+  }
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const start = new Date(today);
+  start.setDate(start.getDate() - (weeks * 7 - 1));
+  // align to Sunday
+  start.setDate(start.getDate() - start.getDay());
+
+  const r = 9;                        // hex radius
+  const hw = Math.sqrt(3) * r;        // hex width
+  const vh = 1.5 * r;                 // vertical step
+  const pad = 4;
+  const W = pad * 2 + weeks * hw;
+  const H = pad * 2 + (days - 1) * vh + 2 * r;
+
+  let hexes = '', idx = 0;
+  const maxC = Math.max(1, ...Object.values(counts));
+  for (let w = 0; w < weeks; w++) {
+    for (let d = 0; d < days; d++) {
+      const date = new Date(start);
+      date.setDate(start.getDate() + w * 7 + d);
+      if (date > today) continue;
+      const key = date.toISOString().slice(0, 10);
+      const c = counts[key] || 0;
+      const lv = c === 0 ? 0 : c <= maxC * 0.25 ? 1 : c <= maxC * 0.5 ? 2 : c <= maxC * 0.75 ? 3 : 4;
+      const cx = pad + w * hw + hw / 2 + (d % 2 ? hw / 2 : 0);
+      const cy = pad + r + d * vh;
+      const pts = [[0, -r], [hw / 2, -r / 2], [hw / 2, r / 2], [0, r], [-hw / 2, r / 2], [-hw / 2, -r / 2]]
+        .map(p => `${(cx + p[0]).toFixed(1)},${(cy + p[1]).toFixed(1)}`).join(' ');
+      hexes += `<polygon class="lv${lv}" points="${pts}" style="animation-delay:${Math.min(idx * 6, 500)}ms"><title>${key} — ${c} event${c === 1 ? '' : 's'}</title></polygon>`;
+      idx++;
+    }
+  }
+  mount.innerHTML = `<svg width="${W.toFixed(0)}" height="${H.toFixed(0)}" viewBox="0 0 ${W.toFixed(0)} ${H.toFixed(0)}">${hexes}</svg>`;
+}
+
 function loadTasks() {
   Promise.all([api('/api/tasks'), api('/api/tasks/stats'), api('/api/agents')]).then(([tasks, stats, agents]) => {
     AGENTS = agents;
+    const done = stats.completed || 0, failed = stats.failed || 0;
+    const successRate = (done + failed) ? Math.round(done / (done + failed) * 100) : 100;
     $('taskStats').innerHTML = [
-      { v: stats.total || 0, l: 'Total' },
-      { v: stats.pending || 0, l: 'Pending' },
-      { v: stats.running || 0, l: 'Running' },
-      { v: stats.completed || 0, l: 'Completed' },
-      { v: stats.failed || 0, l: 'Failed' }
-    ].map((x, i) => `<div class="stat-card" style="animation-delay:${i * 60}ms"><div class="stat-value" data-count="${x.v}">0</div><div class="stat-label">${x.l}</div></div>`).join('');
-    document.querySelectorAll('#taskStats .stat-value').forEach(el => countUp(el, +el.dataset.count));
+      ringCard(stats.total || 0, 'Total', 'all tasks ever', 'var(--text-primary)', 0),
+      ringCard(stats.running || 0, 'Running', 'executing now', 'var(--accent)', 60),
+      ringCard(done, 'Completed', 'successfully finished', 'var(--success)', 120),
+      ringCard(failed, 'Failed', 'needs attention', 'var(--error)', 180),
+      ringCard(successRate, 'Success %', 'completion rate', 'var(--brand)', 240),
+    ].join('');
+    animateRings('#taskStats');
+
+    honeycomb(tasks.map(t => t.created_at), $('taskHoney'));
 
     $('tkA').innerHTML = agents.map(a => `<option value="${a.id}">${escHtml(a.name)}</option>`).join('')
       || '<option value="">No agents</option>';
@@ -2163,17 +2372,27 @@ function loadTasks() {
     $('tasksList').innerHTML = tasks.map((t, i) => {
       const st = TASK_STATUS[t.status] || TASK_STATUS.pending;
       const time = t.created_at ? new Date(t.created_at * 1000).toLocaleString() : '';
+      const prio = t.priority || 'medium';
+      const runningBar = t.status === 'running'
+        ? `<div class="task-prog"><div style="width:65%"></div></div>` : '';
+      const pendingBar = t.status === 'pending'
+        ? `<div class="task-prog"><div style="width:12%;animation:none;background:var(--warning);opacity:.7"></div></div>` : '';
+      const result = (t.status === 'completed' && t.result)
+        ? `<div class="task-result">${escHtml(String(t.result).substring(0, 600))}</div>` : '';
       return `<div class="task-row" style="animation-delay:${Math.min(i * 35, 350)}ms">
-        <div class="task-status-dot ${t.status}" style="background:${st.c}"></div>
-        <div style="flex:1;min-width:0">
-          <div class="task-title">${escHtml(t.title || t.id)}</div>
-          <div class="task-meta">${escHtml(agentName(t.agent_id))} · ${time} · ${escHtml(t.priority || 'medium')}</div>
+        <div class="task-row-top">
+          <div class="task-status-dot ${t.status}" style="background:${st.c}"></div>
+          <div style="flex:1;min-width:0">
+            <div class="task-title">${escHtml(t.title || t.id)}</div>
+            <div class="task-meta">${escHtml(agentName(t.agent_id))} · ${time} · <span class="prio-${escHtml(prio)}">${escHtml(prio)}</span></div>
+          </div>
+          <span class="pill ${st.pill}">${escHtml(t.status)}</span>
+          ${t.status === 'pending' ? `<button class="btn btn-ghost btn-sm" onclick="cancelTask('${t.id}')">Cancel</button>` : ''}
+          ${t.status !== 'pending' && t.status !== 'running' ? `<button class="btn btn-ghost btn-sm" onclick="deleteTask('${t.id}')">Delete</button>` : ''}
         </div>
-        <span class="pill ${st.pill}">${escHtml(t.status)}</span>
-        ${t.status === 'pending' ? `<button class="btn btn-ghost btn-sm" onclick="cancelTask('${t.id}')">Cancel</button>` : ''}
-        ${t.status !== 'pending' && t.status !== 'running' ? `<button class="btn btn-ghost btn-sm" onclick="deleteTask('${t.id}')">Delete</button>` : ''}
+        ${runningBar}${pendingBar}${result}
       </div>`;
-    }).join('') || '<div class="empty"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="empty-title">No tasks yet</div><div class="empty-desc">A task is a background job for an agent — it runs the full agent loop and stores the result.</div></div>';
+    }).join('') || '<div class="empty"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="empty-title">No tasks yet</div><div class="empty-desc">A task is a background job for an agent — it runs the full agent loop and stores the result. Create one and watch it light up the honeycomb.</div></div>';
   });
 }
 
@@ -2247,17 +2466,40 @@ function loadDashboard() {
     api('/api/rooms?user_id=' + U).catch(() => null),
     api('/api/hardware').catch(() => null),
     api('/api/rag/documents').catch(() => null),
-  ]).then(([tasks, agents, files, rooms, hw, rag]) => {
-    agents = agents || []; rooms = rooms || []; tasks = tasks || {};
+    api('/api/tasks').catch(() => null),
+  ]).then(([tasks, agents, files, rooms, hw, rag, allTasks]) => {
+    agents = agents || []; rooms = rooms || []; tasks = tasks || {}; allTasks = allTasks || [];
     AGENTS = agents;
+
+    // Rings row: hive size + throughput
+    const done = tasks.completed || 0;
     $('dashStats').innerHTML = [
-      { v: agents.length, l: 'Agents' },
-      { v: rooms.length, l: 'Chats' },
-      { v: tasks.completed || 0, l: 'Tasks Done' },
-      { v: (files || []).length, l: 'Files' },
-      { v: ((rag || {}).documents || []).length, l: 'Knowledge Docs' }
-    ].map((x, i) => `<div class="stat-card" style="animation-delay:${i * 60}ms"><div class="stat-value" style="color:${['var(--accent-hover)','var(--success)','var(--brand)','var(--text-primary)','var(--text-primary)'][i]}" data-count="${x.v}">0</div><div class="stat-label">${x.l}</div></div>`).join('');
-    document.querySelectorAll('#dashStats .stat-value').forEach(el => countUp(el, +el.dataset.count));
+      ringCard(agents.length, 'Agents', 'your AI workforce', 'var(--accent-hover)', 0),
+      ringCard(rooms.length, 'Chats', 'conversations', 'var(--success)', 60),
+      ringCard(done, 'Tasks Done', `${tasks.running || 0} running now`, 'var(--brand)', 120),
+      ringCard((files || []).length, 'Files', 'shared in chats', 'var(--text-primary)', 180),
+      ringCard(((rag || {}).documents || []).length, 'Knowledge', 'indexed documents', '#AF52DE', 240),
+    ].join('');
+    animateRings('#dashStats');
+
+    // Honeycomb: tasks + message events per day
+    const events = allTasks.map(t => t.created_at);
+    Promise.all(rooms.map(rm => api('/api/rooms/' + rm.id + '/messages?limit=50').catch(() => [])))
+      .then(msgBatches => {
+        msgBatches.forEach(batch => events.push(...(batch || []).map(m => m.created_at)));
+        honeycomb(events, $('dashHoney'));
+      });
+
+    // Agents strip with faces
+    $('dashAgents').innerHTML = agents.slice(0, 8).map((a, i) => `
+      <div class="dash-agent-row" style="animation-delay:${i * 50}ms" onclick="showView('agents')" title="Configure in Agents">
+        ${faceBadge(a.id, a.name, 'monogram-sm')}
+        <div style="min-width:0">
+          <div class="dash-agent-name">${escHtml(a.name)}</div>
+          <div class="dash-agent-sub">${escHtml(a.provider || 'default')}${a.model ? ' · ' + escHtml(a.model) : ''}</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>`).join('') || '<div style="color:var(--text-tertiary);font-size:13px;padding:10px 0;line-height:1.6">No agents yet.<br>Create one from the Agents library.</div>';
 
     const h = (hw || {}).hardware || {};
     const usage = (hw || {}).usage || {};
