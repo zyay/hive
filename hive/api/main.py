@@ -414,7 +414,7 @@ async def chat_endpoint(body: ChatRequest):
     await log_usage(
         agent_id=body.agent_id,
         provider=config.provider,
-        model=config.model or settings.PROVIDERS[config.provider]["model"],
+        model=config.model or (settings.PROVIDERS.get(config.provider) or {}).get("model", ""),
         tokens_in=result.total_tokens_in,
         tokens_out=result.total_tokens_out,
         cost_usd=result.total_cost_usd,
@@ -1245,22 +1245,7 @@ def list_modes():
 import json as json_module
 from pathlib import Path as PathLib
 
-CUSTOM_PROVIDERS_FILE = PathLib("custom_providers.json")
-
-
-def load_custom_providers() -> dict:
-    """Load custom providers from file."""
-    if CUSTOM_PROVIDERS_FILE.exists():
-        try:
-            return json_module.loads(CUSTOM_PROVIDERS_FILE.read_text())
-        except Exception:
-            return {}
-    return {}
-
-
-def save_custom_providers(providers: dict):
-    """Save custom providers to file."""
-    CUSTOM_PROVIDERS_FILE.write_text(json_module.dumps(providers, indent=2))
+from hive.core.config import load_custom_providers, save_custom_providers
 
 
 async def fetch_openai_models(base_url: str, api_key: str) -> list[dict]:

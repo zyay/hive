@@ -3,7 +3,26 @@ Hive configuration — loads from environment variables.
 Updated Aug 2026 with latest models from Artificial Analysis leaderboard.
 """
 
+import json
 import os
+from pathlib import Path
+
+CUSTOM_PROVIDERS_FILE = Path("custom_providers.json")
+
+
+def load_custom_providers() -> dict:
+    """Load user-defined OpenAI-compatible providers from file."""
+    if CUSTOM_PROVIDERS_FILE.exists():
+        try:
+            return json.loads(CUSTOM_PROVIDERS_FILE.read_text())
+        except Exception:
+            return {}
+    return {}
+
+
+def save_custom_providers(providers: dict):
+    """Save user-defined providers to file."""
+    CUSTOM_PROVIDERS_FILE.write_text(json.dumps(providers, indent=2))
 
 
 class Settings:
@@ -53,6 +72,38 @@ class Settings:
     DEEPSEEK_MODEL: str = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
     DEEPSEEK_BASE_URL: str = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
 
+    TOGETHER_API_KEY: str = os.getenv("TOGETHER_API_KEY", "")
+    TOGETHER_MODEL: str = os.getenv("TOGETHER_MODEL", "meta-llama/Llama-3.3-70B-Instruct-Turbo")
+    TOGETHER_BASE_URL: str = os.getenv("TOGETHER_BASE_URL", "https://api.together.xyz/v1")
+
+    FIREWORKS_API_KEY: str = os.getenv("FIREWORKS_API_KEY", "")
+    FIREWORKS_MODEL: str = os.getenv("FIREWORKS_MODEL", "accounts/fireworks/models/llama-v3p3-70b-instruct")
+    FIREWORKS_BASE_URL: str = os.getenv("FIREWORKS_BASE_URL", "https://api.fireworks.ai/inference/v1")
+
+    CEREBRAS_API_KEY: str = os.getenv("CEREBRAS_API_KEY", "")
+    CEREBRAS_MODEL: str = os.getenv("CEREBRAS_MODEL", "llama-3.3-70b")
+    CEREBRAS_BASE_URL: str = os.getenv("CEREBRAS_BASE_URL", "https://api.cerebras.ai/v1")
+
+    DEEPINFRA_API_KEY: str = os.getenv("DEEPINFRA_API_KEY", "")
+    DEEPINFRA_MODEL: str = os.getenv("DEEPINFRA_MODEL", "meta-llama/Meta-Llama-3.1-70B-Instruct")
+    DEEPINFRA_BASE_URL: str = os.getenv("DEEPINFRA_BASE_URL", "https://api.deepinfra.com/v1/openai")
+
+    PERPLEXITY_API_KEY: str = os.getenv("PERPLEXITY_API_KEY", "")
+    PERPLEXITY_MODEL: str = os.getenv("PERPLEXITY_MODEL", "sonar")
+    PERPLEXITY_BASE_URL: str = os.getenv("PERPLEXITY_BASE_URL", "https://api.perplexity.ai")
+
+    COHERE_API_KEY: str = os.getenv("COHERE_API_KEY", "")
+    COHERE_MODEL: str = os.getenv("COHERE_MODEL", "command-r-plus-08-2024")
+    COHERE_BASE_URL: str = os.getenv("COHERE_BASE_URL", "https://api.cohere.com/compatibility/v1")
+
+    NOVITA_API_KEY: str = os.getenv("NOVITA_API_KEY", "")
+    NOVITA_MODEL: str = os.getenv("NOVITA_MODEL", "meta-llama/llama-3.3-70b-instruct")
+    NOVITA_BASE_URL: str = os.getenv("NOVITA_BASE_URL", "https://api.novita.ai/v3/openai")
+
+    HYPERBOLIC_API_KEY: str = os.getenv("HYPERBOLIC_API_KEY", "")
+    HYPERBOLIC_MODEL: str = os.getenv("HYPERBOLIC_MODEL", "meta-llama/Meta-Llama-3.1-70B-Instruct")
+    HYPERBOLIC_BASE_URL: str = os.getenv("HYPERBOLIC_BASE_URL", "https://api.hyperbolic.xyz/v1")
+
     # Database
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///hive.db")
 
@@ -68,6 +119,14 @@ class Settings:
         "openrouter": {"base_url": OPENROUTER_BASE_URL, "api_key": OPENROUTER_API_KEY, "model": OPENROUTER_MODEL, "type": "openai_compat"},
         "xai": {"base_url": XAI_BASE_URL, "api_key": XAI_API_KEY, "model": XAI_MODEL, "type": "openai_compat"},
         "deepseek": {"base_url": DEEPSEEK_BASE_URL, "api_key": DEEPSEEK_API_KEY, "model": DEEPSEEK_MODEL, "type": "openai_compat"},
+        "together": {"base_url": TOGETHER_BASE_URL, "api_key": TOGETHER_API_KEY, "model": TOGETHER_MODEL, "type": "openai_compat"},
+        "fireworks": {"base_url": FIREWORKS_BASE_URL, "api_key": FIREWORKS_API_KEY, "model": FIREWORKS_MODEL, "type": "openai_compat"},
+        "cerebras": {"base_url": CEREBRAS_BASE_URL, "api_key": CEREBRAS_API_KEY, "model": CEREBRAS_MODEL, "type": "openai_compat"},
+        "deepinfra": {"base_url": DEEPINFRA_BASE_URL, "api_key": DEEPINFRA_API_KEY, "model": DEEPINFRA_MODEL, "type": "openai_compat"},
+        "perplexity": {"base_url": PERPLEXITY_BASE_URL, "api_key": PERPLEXITY_API_KEY, "model": PERPLEXITY_MODEL, "type": "openai_compat"},
+        "cohere": {"base_url": COHERE_BASE_URL, "api_key": COHERE_API_KEY, "model": COHERE_MODEL, "type": "openai_compat"},
+        "novita": {"base_url": NOVITA_BASE_URL, "api_key": NOVITA_API_KEY, "model": NOVITA_MODEL, "type": "openai_compat"},
+        "hyperbolic": {"base_url": HYPERBOLIC_BASE_URL, "api_key": HYPERBOLIC_API_KEY, "model": HYPERBOLIC_MODEL, "type": "openai_compat"},
     }
 
     # ── Pricing per 1M tokens (input, output) USD — Aug 2026 ─

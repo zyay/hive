@@ -1183,13 +1183,23 @@ label.lbl { font-size: 12px; font-weight: 600; color: var(--text-secondary); dis
           <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:10px">Connect a provider so your agents can run. Keys stay on your machine.</div>
           <div id="keysList"></div>
           <div style="display:flex;gap:8px;margin-top:16px">
-            <select id="keyProvider" class="input" style="width:160px">
-              <option>openai</option><option>anthropic</option><option>groq</option>
-              <option>mistral</option><option>openrouter</option><option>xai</option>
-              <option>deepseek</option><option>gemini</option>
-            </select>
+            <select id="keyProvider" class="input" style="width:170px"></select>
             <input id="keyValue" class="input" placeholder="sk-…" style="flex:1">
             <button class="btn btn-primary btn-sm" onclick="saveKey()">Save</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:18px">
+          <div style="font-weight:700;margin-bottom:4px;font-size:15px;letter-spacing:-0.01em">Custom Providers</div>
+          <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:10px">Connect any OpenAI-compatible endpoint — vLLM, LiteLLM, llama.cpp, private gateways. Stored locally in custom_providers.json.</div>
+          <div id="customProvidersList"></div>
+          <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:12px">
+            <input id="cpName" class="input" placeholder="Name (e.g. vllm-local)">
+            <input id="cpUrl" class="input" placeholder="Base URL (e.g. http://localhost:8000/v1)">
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <input id="cpKey" class="input" placeholder="API key (optional, e.g. none for local)" style="flex:1">
+            <button class="btn btn-primary btn-sm" onclick="addCustomProvider()">Add</button>
           </div>
         </div>
 
@@ -2280,7 +2290,16 @@ function loadDashboard() {
 
 /* ═══════════ Settings / keys ═══════════ */
 function loadKeys() {
-  api('/api/users/keys?user_id=' + U).then(keys => {
+  Promise.all([api('/api/users/keys?user_id=' + U), api('/api/providers/custom')]).then(([keys, custom]) => {
+    // Dynamic provider selector: built-ins from /api/providers/all + custom
+    api('/api/providers/all?user_id=' + U).then(provs => {
+      const names = Object.keys(provs);
+      const cur = $('keyProvider').value;
+      $('keyProvider').innerHTML = names.map(n =>
+        `<option value="${escHtml(n)}"${provs[n].type === 'custom' ? ' disabled' : ''}>${escHtml(n)}${provs[n].type === 'custom' ? ' (custom — below)' : ''}</option>`).join('');
+      if (cur && names.includes(cur)) $('keyProvider').value = cur;
+    });
+
     $('keysList').innerHTML = keys.map(k => `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
       <div>
         <div style="font-weight:600;font-size:13px">${escHtml(k.provider)}</div>
@@ -2288,7 +2307,36 @@ function loadKeys() {
       </div>
       <button class="btn btn-danger btn-sm" onclick="deleteKey('${escHtml(k.provider)}')">Remove</button>
     </div>`).join('') || '<div style="color:var(--text-tertiary);font-size:13px;padding:8px 0">No keys configured — add one above so your agents can run.</div>';
+
+    const clist = (custom && (custom.providers || custom)) || {};
+    const items = Array.isArray(clist) ? clist : Object.values(clist);
+    $('customProvidersList').innerHTML = items.map(c => `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
+      <div style="min-width:0">
+        <div style="font-weight:600;font-size:13px">${escHtml(c.name || '')} <span class="pill pill-neutral" style="margin-left:6px">custom</span></div>
+        <div style="font-size:11px;color:var(--text-tertiary);margin-top:2px;font-family:var(--font-mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(c.base_url || '')}</div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deleteCustomProvider('${escHtml(c.name || '')}')">Remove</button>
+    </div>`).join('') || '<div style="color:var(--text-tertiary);font-size:13px;padding:8px 0">No custom providers yet.</div>';
   });
+}
+
+function addCustomProvider() {
+  const name = $('cpName').value.trim(), url = $('cpUrl').value.trim(), key = $('cpKey').value.trim();
+  if (!name || !url) { toast('Name and base URL are required', 'warning'); return; }
+  api('/api/providers/custom', { method: 'POST', body: JSON.stringify({ name, base_url: url, api_key: key }) })
+    .then(r => {
+      if (r.status === 'added' || r.name) {
+        $('cpName').value = ''; $('cpUrl').value = ''; $('cpKey').value = '';
+        loadKeys(); loadProviders();
+        toast(`Custom provider "${name}" added`, 'success');
+      } else toast(r.detail || 'Failed to add provider', 'error');
+    });
+}
+
+function deleteCustomProvider(name) {
+  if (!confirm(`Remove custom provider "${name}"?`)) return;
+  fetch('/api/providers/custom/' + encodeURIComponent(name), { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + T } })
+    .then(() => { loadKeys(); loadProviders(); toast('Custom provider removed', 'success'); });
 }
 
 function saveKey() {

@@ -12,9 +12,25 @@ from typing import Optional
 
 import httpx
 
-from hive.core.config import settings
+from hive.core.config import settings, load_custom_providers
 
 logger = logging.getLogger(__name__)
+
+
+def _resolve_provider(provider: str) -> Optional[dict]:
+    """Provider config from built-ins, then user-defined custom providers."""
+    cfg = settings.PROVIDERS.get(provider)
+    if cfg:
+        return cfg
+    custom = load_custom_providers().get(provider)
+    if custom:
+        return {
+            "base_url": custom["base_url"],
+            "api_key": custom.get("api_key", ""),
+            "model": "",
+            "type": "openai_compat",
+        }
+    return None
 
 
 @dataclass
@@ -44,8 +60,8 @@ async def chat_openai_compat(
     temperature: float = 0.7,
     max_tokens: int = 4096,
 ) -> LLMResponse:
-    """Call an OpenAI-compatible API (OpenAI, Groq, Mistral, OpenRouter, Gemini, Ollama, LM Studio)."""
-    cfg = settings.PROVIDERS.get(provider)
+    """Call an OpenAI-compatible API (OpenAI, Groq, Mistral, OpenRouter, Gemini, Ollama, LM Studio, custom)."""
+    cfg = _resolve_provider(provider)
     if not cfg:
         raise ValueError(f"Unknown provider: {provider}")
 
@@ -222,9 +238,9 @@ async def chat(
     if messages is None:
         raise ValueError("messages required")
 
-    cfg = settings.PROVIDERS.get(provider)
+    cfg = _resolve_provider(provider)
     if not cfg:
-        raise ValueError(f"Unknown provider: {provider}. Available: {list(settings.PROVIDERS.keys())}")
+        raise ValueError(f"Unknown provider: {provider}. Available: {list(settings.PROVIDERS.keys())} + custom")
 
     if cfg["type"] == "anthropic":
         return await chat_anthropic(
@@ -251,7 +267,7 @@ async def chat_stream(
     Only works with OpenAI-compatible providers.
     """
     provider = provider or settings.DEFAULT_PROVIDER
-    cfg = settings.PROVIDERS.get(provider)
+    cfg = _resolve_provider(provider)
     if not cfg:
         raise ValueError(f"Unknown provider: {provider}")
     if cfg["type"] == "anthropic":
@@ -292,7 +308,7 @@ async def chat_stream(
 async def list_models(provider: str = None) -> list[dict]:
     """List available models for a provider."""
     provider = provider or settings.DEFAULT_PROVIDER
-    cfg = settings.PROVIDERS.get(provider)
+    cfg = _resolve_provider(provider)
     if not cfg:
         return []
 
@@ -312,7 +328,10 @@ async def list_models(provider: str = None) -> list[dict]:
 def get_providers() -> list[dict]:
     """List all configured providers with their status."""
     result = []
-    for name, cfg in settings.PROVIDERS.items():
+    all_providers = {**settings.PROVIDERS}
+    for name, cfg in load_custom_providers().items():
+        all_providers[name] = {"base_url": cfg.get("base_url", ""), "api_key": cfg.get("api_key", ""), "model": "", "type": "openai_compat"}
+    for name, cfg in all_providers.items():
         has_key = bool(cfg["api_key"]) or name == "ollama"
         result.append({
             "name": name,

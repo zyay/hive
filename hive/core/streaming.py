@@ -86,7 +86,7 @@ async def stream_chat_response(
     await log_usage(
         agent_id=agent_id,
         provider=config.provider,
-        model=config.model or settings.PROVIDERS[config.provider]["model"],
+        model=config.model or (settings.PROVIDERS.get(config.provider) or {}).get("model", ""),
         tokens_in=tokens_out * 4,  # rough estimate
         tokens_out=tokens_out,
         cost_usd=0,
