@@ -158,12 +158,27 @@ def suggest_models(hw: dict) -> list[dict]:
     return suggestions
 
 
+def _get_live_usage() -> dict:
+    """Live CPU/memory usage via psutil (empty dict if unavailable)."""
+    try:
+        import psutil
+        mem = psutil.virtual_memory()
+        return {
+            "cpu_percent": psutil.cpu_percent(interval=None),
+            "mem_percent": mem.percent,
+            "ram_used_gb": round(mem.used / (1024**3), 1),
+        }
+    except Exception:
+        return {}
+
+
 def get_system_report() -> dict:
     """Full system report with hardware info and model suggestions."""
     hw = detect_hardware()
     suggestions = suggest_models(hw)
     return {
         "hardware": hw,
+        "usage": _get_live_usage(),
         "suggested_models": suggestions,
         "recommendation": _get_recommendation(hw),
     }

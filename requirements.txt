@@ -10,3 +10,4 @@ bcrypt
 websockets
 pynacl
 zeroconf
+psutil>=5.9

@@ -49,6 +49,15 @@ class TestSkills:
         conn.commit()
         conn.close()
 
+    def teardown_method(self):
+        # Tests create agents in the dev DB — clean them so none leak into the app
+        from hive.core.db import get_connection
+        conn = get_connection()
+        conn.execute("DELETE FROM agent_skills")
+        conn.execute("DELETE FROM agents")
+        conn.commit()
+        conn.close()
+
     @pytest.mark.asyncio
     async def test_add_and_get_skill(self):
         from hive.core.users import register
