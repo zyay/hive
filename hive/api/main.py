@@ -346,6 +346,77 @@ async def list_agents():
     return await get_all_agents()
 
 
+@app.get("/api/agents/stats")
+async def agent_stats():
+    """Get real statistics for all agents based on usage logs."""
+    from hive.core.db import get_connection
+    conn = get_connection()
+    
+    # Get all agents
+    agents = await get_all_agents()
+    stats = {}
+    
+    for agent in agents:
+        agent_id = agent["id"]
+        
+        # Query usage logs for this agent
+        usage_row = conn.execute("""
+            SELECT 
+                COUNT(*) as total_calls,
+                SUM(tokens_in + tokens_out) as total_tokens,
+                AVG(latency_ms) as avg_latency,
+                COUNT(CASE WHEN tokens_out > 0 THEN 1 END) as successful_calls
+            FROM usage_logs 
+            WHERE agent_id = ?
+        """, (agent_id,)).fetchone()
+        
+        # Query message count from conversations
+        msg_row = conn.execute("""
+            SELECT COUNT(*) as msg_count
+            FROM messages m
+            JOIN conversations c ON m.conversation_id = c.id
+            WHERE c.agent_id = ?
+        """, (agent_id,)).fetchone()
+        
+        total_calls = usage_row[0] if usage_row else 0
+        total_tokens = usage_row[1] if usage_row and usage_row[1] else 0
+        avg_latency = usage_row[2] if usage_row and usage_row[2] else 0
+        successful_calls = usage_row[3] if usage_row else 0
+        msg_count = msg_row[0] if msg_row else 0
+        
+        # Calculate success rate
+        success_rate = int((successful_calls / total_calls * 100) if total_calls > 0 else 0)
+        
+        # Determine status based on recent activity
+        recent_row = conn.execute("""
+            SELECT timestamp FROM usage_logs 
+            WHERE agent_id = ? 
+            ORDER BY timestamp DESC 
+            LIMIT 1
+        """, (agent_id,)).fetchone()
+        
+        import time
+        status = 'offline'
+        if recent_row:
+            last_active = recent_row[0]
+            time_diff = time.time() - last_active
+            if time_diff < 300:  # 5 minutes
+                status = 'active'
+            elif time_diff < 3600:  # 1 hour
+                status = 'idle'
+        
+        stats[agent_id] = {
+            'messages': msg_count,
+            'avg_response': round(avg_latency / 1000, 1) if avg_latency else 0,  # Convert ms to seconds
+            'success_rate': success_rate,
+            'tokens_used': int(total_tokens),
+            'status': status
+        }
+    
+    conn.close()
+    return stats
+
+
 @app.get("/api/agents/{agent_id}")
 async def get_agent_endpoint(agent_id: str):
     agent = await get_agent(agent_id)

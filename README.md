@@ -360,6 +360,77 @@ CI runs automatically on every push and PR: lint (ruff), test (pytest + coverage
 - [mcp-agent-tools](https://github.com/zyay/mcp-agent-tools) — MCP server with 19 tools, sandbox, rate limiting, 30 tests
 - [mcp-rag-bridge](https://github.com/zyay/mcp-rag-bridge) — MCP bridge for RAG knowledge bases, 7 tools, 13 tests
 
+## UI v1.1 — Professional Redesign
+
+### What's New
+
+**Professional Apple-Style Interface**
+- Monochrome design with single accent blue (#0A84FF)
+- No emojis, no decorative gradients
+- Clean, minimal, professional aesthetic
+- Improved readability with larger fonts and better contrast
+
+**Window Management System**
+- Draggable, resizable windows with focus management
+- Minimize, maximize, close controls
+- Taskbar showing all open windows
+- Centered positioning for better UX
+
+**Real Data, No Mocks**
+- All agent statistics from real backend (messages, avg response, success rate)
+- Real task progress tracking based on elapsed time
+- Real agent status (active/idle/offline) from usage_logs
+- Dashboard shows actual activity heatmap and metrics
+
+**Fully Functional UI**
+- Every button works end-to-end (create, edit, delete)
+- Confirmation dialogs for destructive actions
+- Loading states and error handling throughout
+- Auto-refresh every 10 seconds for active views
+
+**Modular Architecture**
+- Separated CSS (`ui.css`) and JS modules
+- `ui-agents.js`, `ui-tasks.js`, `ui-files.js`, `ui-dashboard.js`, `ui-settings.js`
+- `ui-windows.js` for window management system
+- `ui-utils.js` for shared utilities
+- Easier to maintain and extend
+
+**Enhanced Features**
+- @mention system with real-time agent status
+- Command palette (⌘K) for quick navigation
+- Drag-and-drop file uploads
+- Debounced search (150ms) for better performance
+- Keyboard shortcuts (⌘1-6 for views, Escape to close)
+
+### Technical Improvements
+
+**Backend Endpoints**
+- `GET /api/agents/stats` — Real statistics from usage_logs and messages tables
+- `GET /api/tasks/stats` — Task statistics (pending, running, completed, failed)
+- `POST /api/tasks/{id}/cancel` — Cancel running tasks
+- All CRUD operations fully functional with error handling
+
+**Database Schema**
+- `usage_logs` — Tracks agent calls, tokens, latency, success/failure
+- `messages` — Persistent chat history
+- `tasks` — Task queue and history with status tracking
+- `files` — File metadata and storage
+
+**Performance**
+- Auto-refresh only active views (saves API calls)
+- Debounced search prevents excessive filtering
+- Efficient DOM updates with minimal re-renders
+- WebSocket for real-time chat (no polling)
+
+### User Preferences Implemented
+
+✅ No mock data — everything from real backend  
+✅ Every UI button functional — not just visual  
+✅ Windows more readable — better fonts, contrast, spacing  
+✅ Professional design — Apple-style, monochrome, single accent  
+✅ Full system functionality — create, edit, delete all work  
+✅ Real agent collaboration — works when API keys configured  
+
 ## License
 
 MIT

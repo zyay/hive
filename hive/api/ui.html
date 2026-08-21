@@ -2,2766 +2,1046 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Hive — AI Agent Platform</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
+
+<!-- Hive UI Styles -->
+<link rel="stylesheet" href="/static/ui.css">
+
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* Additional inline styles for core layout */
+*, *::before, *::after { box-sizing: border-box; }
 
-:root {
-  --bg-primary: #000000;
-  --bg-solid-2: #1C1C1E;
-  --bg-solid-3: #2C2C2E;
-  --bg-raise: #3A3A3C;
-  --glass: rgba(28,28,30,0.72);
-  --glass-strong: rgba(28,28,30,0.86);
-  --border: rgba(255,255,255,0.09);
-  --border-strong: rgba(255,255,255,0.16);
-  --text-primary: #F5F5F7;
-  --text-secondary: rgba(235,235,245,0.62);
-  --text-tertiary: rgba(235,235,245,0.32);
-  --accent: #0A84FF;
-  --accent-hover: #409CFF;
-  --accent-soft: rgba(10,132,255,0.14);
-  --brand: #F59E0B;
-  --success: #30D158;
-  --success-soft: rgba(48,209,88,0.14);
-  --warning: #FFD60A;
-  --warning-soft: rgba(255,214,10,0.12);
-  --error: #FF453A;
-  --error-soft: rgba(255,69,58,0.14);
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-xl: 26px;
-  --radius-pill: 980px;
-  --shadow-card: 0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 30px rgba(0,0,0,0.45);
-  --shadow-float: 0 20px 60px rgba(0,0,0,0.6);
-  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI Variable Display', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, Consolas, monospace;
-  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
-  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.2);
-  --dur-fast: 140ms;
-  --dur-base: 260ms;
-  --dur-slow: 420ms;
+/* Animations */
+@keyframes viewIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-html, body {
-  height: 100vh;
-  overflow: hidden;
-  font-family: var(--font-sans);
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--text-primary);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  letter-spacing: -0.01em;
-}
-body {
-  background:
-    radial-gradient(1200px 600px at 85% -10%, rgba(10,132,255,0.07), transparent 60%),
-    radial-gradient(900px 500px at -10% 110%, rgba(245,158,11,0.05), transparent 60%),
-    var(--bg-primary);
+@keyframes windowIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-input, textarea, select, button { font-family: inherit; font-size: inherit; letter-spacing: inherit; }
-a { color: inherit; text-decoration: none; }
-
-::-webkit-scrollbar { width: 9px; height: 9px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); border-radius: 99px; border: 2px solid transparent; background-clip: content-box; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.26); background-clip: content-box; border: 2px solid transparent; }
-
-/* Reduce motion preference (Settings toggle) */
-body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after {
-  animation-duration: 0.001s !important;
-  transition-duration: 0.001s !important;
+@keyframes windowOut {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
 }
 
-/* ═══════════ Layout ═══════════ */
-.app { display: flex; height: 100vh; }
-
-.rail {
-  width: 68px;
-  height: 100vh;
-  background: var(--glass);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border-right: 1px solid var(--border);
-  display: flex; flex-direction: column; align-items: center;
-  padding: 16px 0; gap: 4px;
-  flex-shrink: 0; z-index: 20;
+/* Taskbar */
+.taskbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background: var(--bg2);
+  border-top: 1px solid var(--bd);
+  display: none;
+  align-items: center;
+  padding: 0 16px;
+  gap: 8px;
+  z-index: 99;
 }
 
-.rail-logo {
-  width: 42px; height: 42px;
-  border-radius: var(--radius-md);
-  background: linear-gradient(145deg, #2C2C2E, #1C1C1E);
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 14px;
+.taskbarItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg3);
+  border: 1px solid var(--bd);
+  border-radius: var(--r8);
   cursor: pointer;
-  transition: transform var(--dur-base) var(--ease-spring), box-shadow var(--dur-base);
-  box-shadow: 0 4px 16px rgba(245,158,11,0.18);
-}
-.rail-logo:hover { transform: scale(1.07) rotate(-2deg); }
-.rail-logo:active { transform: scale(0.94); }
-.rail-logo img { width: 28px; height: 28px; }
-
-.rail-btn {
-  width: 46px; height: 46px;
-  border-radius: var(--radius-md);
-  background: transparent; border: none; cursor: pointer;
-  color: var(--text-secondary);
-  display: flex; align-items: center; justify-content: center;
-  transition: background var(--dur-fast), color var(--dur-fast), transform var(--dur-fast) var(--ease-spring);
-  position: relative;
-}
-.rail-btn:hover { background: rgba(255,255,255,0.07); color: var(--text-primary); }
-.rail-btn:active { transform: scale(0.9); }
-.rail-btn.active { background: var(--accent); color: #fff; box-shadow: 0 6px 18px rgba(10,132,255,0.35); }
-.rail-btn svg { width: 21px; height: 21px; stroke-width: 1.8; }
-.rail-btn .rail-tip {
-  position: absolute; left: 56px; top: 50%; transform: translateY(-50%) translateX(-6px);
-  background: var(--glass-strong);
-  backdrop-filter: blur(30px);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
-  font-size: 12px; font-weight: 600;
-  padding: 6px 12px; border-radius: var(--radius-sm);
-  white-space: nowrap;
-  opacity: 0; pointer-events: none;
-  transition: opacity var(--dur-fast), transform var(--dur-base) var(--ease-spring);
-  z-index: 60;
-}
-.rail-btn:hover .rail-tip { opacity: 1; transform: translateY(-50%) translateX(0); }
-
-.rail-spacer { flex: 1; }
-
-.rail-avatar {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  background: linear-gradient(145deg, #3A3A3C, #2C2C2E);
-  color: var(--text-primary);
-  font-size: 13px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  border: 1.5px solid var(--border-strong);
-  transition: transform var(--dur-base) var(--ease-spring), border-color var(--dur-fast);
-}
-.rail-avatar:hover { transform: scale(1.08); border-color: var(--accent); }
-.rail-avatar:active { transform: scale(0.94); }
-
-/* Contextual panel */
-.panel {
-  width: 272px; height: 100vh;
-  background: var(--glass);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border-right: 1px solid var(--border);
-  display: none; flex-direction: column;
-  overflow: hidden; flex-shrink: 0;
-}
-.panel.show { display: flex; animation: panelIn var(--dur-slow) var(--ease-sheet); }
-@keyframes panelIn { from { opacity: 0; transform: translateX(-14px); } to { opacity: 1; transform: translateX(0); } }
-
-.panel-header { padding: 20px 18px 12px; border-bottom: 1px solid var(--border); }
-.panel-title { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; }
-.panel-sub { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
-.panel-content { flex: 1; overflow-y: auto; padding: 10px 10px; }
-
-.list-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 9px 10px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: background var(--dur-fast), transform var(--dur-fast) var(--ease-spring);
-  margin-bottom: 2px; position: relative;
-}
-.list-item:hover { background: rgba(255,255,255,0.06); }
-.list-item:active { transform: scale(0.98); }
-.list-item.active { background: var(--bg-solid-3); }
-
-.li-icon {
-  width: 32px; height: 32px;
-  border-radius: 9px;
-  background: var(--bg-solid-3);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; color: var(--text-secondary);
-  transition: color var(--dur-fast);
-}
-.list-item.active .li-icon { color: var(--accent); }
-.li-icon svg { width: 16px; height: 16px; }
-
-.li-content { flex: 1; min-width: 0; }
-.li-title { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.li-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
-.li-badge {
-  background: var(--accent); color: #fff;
-  font-size: 10px; font-weight: 700;
-  padding: 2px 7px; border-radius: var(--radius-pill);
-  min-width: 18px; text-align: center;
+  transition: all 0.2s ease;
+  font-size: 12px;
+  font-weight: 500;
 }
 
-/* ═══════════ Buttons ═══════════ */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  padding: 9px 16px;
-  border-radius: var(--radius-pill);
-  font-size: 13px; font-weight: 600;
-  cursor: pointer;
-  transition: background var(--dur-fast), transform var(--dur-fast) var(--ease-spring), box-shadow var(--dur-base), border-color var(--dur-fast);
-  border: none; outline: none; white-space: nowrap;
-  -webkit-tap-highlight-color: transparent;
+.taskbarItem:hover {
+  background: var(--bg4);
+  border-color: var(--bd2);
 }
-.btn:active { transform: scale(0.955); }
 
-.btn-primary { background: var(--accent); color: #fff; box-shadow: 0 4px 14px rgba(10,132,255,0.28); }
-.btn-primary:hover { background: var(--accent-hover); box-shadow: 0 6px 20px rgba(10,132,255,0.4); }
-
-.btn-secondary { background: rgba(255,255,255,0.08); color: var(--text-primary); }
-.btn-secondary:hover { background: rgba(255,255,255,0.13); }
-
-.btn-ghost { background: transparent; color: var(--text-secondary); }
-.btn-ghost:hover { background: rgba(255,255,255,0.07); color: var(--text-primary); }
-
-.btn-danger { background: var(--error-soft); color: var(--error); }
-.btn-danger:hover { background: var(--error); color: #fff; }
-
-.btn-sm { padding: 6px 12px; font-size: 12px; }
-.btn-icon {
-  width: 34px; height: 34px; padding: 0;
-  border-radius: var(--radius-sm);
-  background: transparent; border: none; cursor: pointer;
-  color: var(--text-secondary);
-  transition: background var(--dur-fast), color var(--dur-fast), transform var(--dur-fast) var(--ease-spring);
-  display: flex; align-items: center; justify-content: center;
+.taskbarItem.minimized {
+  opacity: 0.6;
 }
-.btn-icon:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
-.btn-icon:active { transform: scale(0.9); }
-.btn svg { width: 15px; height: 15px; }
 
-/* ═══════════ Cards & inputs ═══════════ */
-.card {
-  background: var(--bg-solid-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 18px;
-  box-shadow: var(--shadow-card);
-  transition: border-color var(--dur-base), transform var(--dur-base) var(--ease-sheet), box-shadow var(--dur-base);
+/* Auth screen */
+.authScreen {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
 }
-.card:hover { border-color: var(--border-strong); }
 
-.input {
+.authCard {
+  background: var(--bg2);
+  border: 1px solid var(--bd);
+  border-radius: var(--r16);
+  padding: 40px;
   width: 100%;
-  padding: 10px 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: rgba(255,255,255,0.05);
-  color: var(--text-primary);
+  max-width: 400px;
+}
+
+.authLogo {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 24px;
+  background: var(--bg3);
+  border-radius: var(--r16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.authTitle {
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.authSubtitle {
   font-size: 14px;
-  transition: border-color var(--dur-fast), box-shadow var(--dur-fast), background var(--dur-fast);
+  color: var(--tx2);
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+/* Slider */
+.slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--bg4);
   outline: none;
-}
-.input::placeholder { color: var(--text-tertiary); }
-.input:focus { border-color: var(--accent); box-shadow: 0 0 0 3.5px var(--accent-soft); background: rgba(255,255,255,0.07); }
-textarea.input { resize: vertical; min-height: 80px; }
-select.input option { background: var(--bg-solid-2); color: var(--text-primary); }
-
-label.lbl { font-size: 12px; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 6px; }
-
-.pill {
-  display: inline-flex; align-items: center;
-  padding: 3px 9px;
-  border-radius: var(--radius-pill);
-  font-size: 11px; font-weight: 600;
-}
-.pill-accent { background: var(--accent-soft); color: var(--accent-hover); }
-.pill-success { background: var(--success-soft); color: var(--success); }
-.pill-warning { background: var(--warning-soft); color: var(--warning); }
-.pill-error { background: var(--error-soft); color: var(--error); }
-.pill-neutral { background: rgba(255,255,255,0.08); color: var(--text-secondary); }
-
-/* ═══════════ Main / views ═══════════ */
-.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
-
-.topbar {
-  padding: 16px 28px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-  background: var(--glass);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  min-height: 68px;
-}
-.topbar-title { font-size: 22px; font-weight: 700; letter-spacing: -0.025em; }
-.topbar-subtitle { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; letter-spacing: 0; }
-.topbar-actions { display: flex; gap: 8px; align-items: center; }
-
-.content { flex: 1; overflow-y: auto; padding: 26px 28px; }
-
-.view { display: none; }
-.view.active { display: flex; flex-direction: column; flex: 1; min-height: 0; animation: viewIn var(--dur-slow) var(--ease-sheet); }
-@keyframes viewIn { from { opacity: 0; transform: translateY(10px) scale(0.996); } to { opacity: 1; transform: translateY(0) scale(1); } }
-
-/* ═══════════ Chat ═══════════ */
-.chat-messages { flex: 1; overflow-y: auto; padding: 26px 28px; display: flex; flex-direction: column; gap: 18px; }
-
-.message {
-  display: flex; gap: 12px; max-width: 82%;
-  animation: messageIn var(--dur-slow) var(--ease-sheet);
-}
-.message-user { align-self: flex-end; flex-direction: row-reverse; }
-@keyframes messageIn { from { opacity: 0; transform: translateY(14px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-
-.monogram-msg {
-  width: 34px; height: 34px; border-radius: 50%;
-  font-size: 11.5px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; color: #fff;
-  border: 1px solid rgba(255,255,255,0.12);
-}
-.message-avatar {
-  width: 34px; height: 34px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700; flex-shrink: 0;
-  background: var(--bg-solid-3);
-  border: 1px solid var(--border);
-}
-.message-bubble {
-  padding: 12px 16px;
-  border-radius: 20px;
-  font-size: 14px; line-height: 1.6;
-  word-wrap: break-word; overflow-wrap: break-word;
-}
-.message-user .message-bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 7px; }
-.message-agent .message-bubble { background: var(--bg-solid-2); border: 1px solid var(--border); border-bottom-left-radius: 7px; }
-.message-bubble pre { background: #0b0b0d; border-radius: var(--radius-sm); padding: 13px; margin: 8px 0; overflow-x: auto; border: 1px solid var(--border); }
-.message-bubble code { background: rgba(255,255,255,0.07); padding: 2px 6px; border-radius: 5px; font-size: 12px; font-family: var(--font-mono); }
-.message-bubble pre code { background: transparent; padding: 0; }
-.msg-sender { font-size: 11.5px; font-weight: 700; color: var(--text-secondary); margin-bottom: 4px; padding-left: 4px; }
-
-/* Composer */
-.composer {
-  padding: 14px 28px 22px;
-  border-top: 1px solid var(--border);
-  background: var(--glass);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-}
-.composer-input {
-  display: flex; align-items: center; gap: 12px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
-  padding: 7px 7px 7px 18px;
-  transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
-}
-.composer-input:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
-.composer-input input { flex: 1; border: none; background: transparent; font-size: 14px; outline: none; color: var(--text-primary); }
-.composer-input input::placeholder { color: var(--text-tertiary); }
-.composer-send {
-  width: 34px; height: 34px; border-radius: 50%;
-  background: var(--accent); color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: background var(--dur-fast), transform var(--dur-fast) var(--ease-spring);
-  border: none; box-shadow: 0 3px 10px rgba(10,132,255,0.35);
-}
-.composer-send:hover { background: var(--accent-hover); transform: scale(1.06); }
-.composer-send:active { transform: scale(0.92); }
-.composer-hint { text-align: center; font-size: 11px; color: var(--text-tertiary); margin-top: 9px; }
-.composer-hint kbd {
-  font-family: var(--font-mono); font-size: 10px;
-  background: rgba(255,255,255,0.08); border: 1px solid var(--border);
-  border-radius: 4px; padding: 1px 5px;
+  -webkit-appearance: none;
 }
 
-.composer-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 9px; }
-.chip {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 5px 12px;
-  border-radius: var(--radius-pill);
-  background: rgba(255,255,255,0.07);
-  border: 1px solid var(--border);
-  font-size: 12px; font-weight: 600;
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--ac);
   cursor: pointer;
-  transition: border-color var(--dur-fast), color var(--dur-fast), transform var(--dur-fast) var(--ease-spring);
-  color: var(--text-secondary);
 }
-.chip:hover { border-color: var(--accent); color: var(--accent-hover); transform: translateY(-1px); }
-.chip-add { border-style: dashed; color: var(--text-tertiary); }
+
+.slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--ac);
+  cursor: pointer;
+  border: none;
+}
+
+/* Mention dropdown */
+.mentionDropdown {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg2);
+  border: 1px solid var(--bd2);
+  border-radius: var(--r8);
+  max-height: 300px;
+  overflow-y: auto;
+  display: none;
+  z-index: 1000;
+  box-shadow: var(--shL);
+}
+
+.mentionDropdown.show {
+  display: block;
+}
+
+.mentionItem {
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-bottom: 1px solid var(--bd);
+}
+
+.mentionItem:last-child {
+  border-bottom: none;
+}
+
+.mentionItem:hover,
+.mentionItem.sel {
+  background: var(--bg3);
+}
+
+.mentionItem .miI {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r8);
+  background: var(--acS);
+  color: var(--ac);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.mentionItem .miN {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mentionItem .miD {
+  font-size: 11px;
+  color: var(--tx3);
+}
+
+/* Mention in messages */
+.mention {
+  background: var(--acS);
+  color: var(--ac);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* Code blocks */
+.codeBlock {
+  background: var(--bg3);
+  border: 1px solid var(--bd);
+  border-radius: var(--r8);
+  padding: 16px;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 12px 0;
+}
+
+.codeInline {
+  background: var(--bg3);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+/* Message bubbles */
+.msg {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 4px;
+  border-radius: var(--r8);
+  transition: background 0.15s ease;
+}
+
+.msg:hover {
+  background: var(--bg3);
+}
+
+.msgU {
+  background: var(--acS);
+}
+
+.msgA {
+  background: var(--bg3);
+}
+
+.msg .mA {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r8);
+  background: var(--bg4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.msgU .mA {
+  background: var(--ac);
+  color: #fff;
+}
+
+.msgA .mA {
+  background: var(--gr);
+  color: #fff;
+}
+
+.msg .mB {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.msg .mTime {
+  font-size: 11px;
+  color: var(--tx3);
+  margin-top: 4px;
+}
 
 /* Empty states */
 .empty {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  height: 100%; color: var(--text-tertiary); text-align: center; padding: 48px;
-  animation: viewIn var(--dur-slow) var(--ease-sheet);
-}
-.empty-icon {
-  width: 76px; height: 76px; border-radius: 24px;
-  background: linear-gradient(145deg, #2C2C2E, #1C1C1E);
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 20px; border: 1px solid var(--border);
-  color: var(--text-secondary);
-  box-shadow: var(--shadow-card);
-}
-.empty-icon svg { width: 32px; height: 32px; stroke-width: 1.5; }
-.empty-title { font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; letter-spacing: -0.02em; }
-.empty-desc { font-size: 13px; max-width: 340px; line-height: 1.55; }
-.empty .btn { margin-top: 18px; }
-
-/* ═══════════ Modals (Apple sheet style) ═══════════ */
-.modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.55);
-  backdrop-filter: blur(16px) saturate(150%);
-  -webkit-backdrop-filter: blur(16px) saturate(150%);
-  display: none; align-items: center; justify-content: center;
-  z-index: 200; animation: fadeIn var(--dur-base) ease;
-}
-.modal-overlay.show { display: flex; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.modal {
-  background: var(--glass-strong);
-  backdrop-filter: blur(60px) saturate(180%);
-  -webkit-backdrop-filter: blur(60px) saturate(180%);
-  border-radius: var(--radius-xl);
-  padding: 26px;
-  width: 480px; max-width: 92vw; max-height: 88vh;
-  overflow-y: auto;
-  box-shadow: var(--shadow-float);
-  border: 1px solid var(--border-strong);
-  animation: sheetIn var(--dur-slow) var(--ease-sheet);
-}
-@keyframes sheetIn { from { opacity: 0; transform: scale(0.94) translateY(24px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-.modal-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; letter-spacing: -0.02em; }
-.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }
-.modal-hint {
-  font-size: 12.5px; color: var(--text-secondary);
-  background: var(--accent-soft);
-  border: 1px solid rgba(10,132,255,0.25);
-  border-radius: var(--radius-sm);
-  padding: 11px 13px; margin-bottom: 18px; line-height: 1.55;
-}
-
-/* ═══════════ Toasts ═══════════ */
-.toast-container { position: fixed; top: 18px; left: 50%; transform: translateX(-50%); z-index: 300; display: flex; flex-direction: column; gap: 8px; align-items: center; }
-.toast {
-  background: var(--glass-strong);
-  backdrop-filter: blur(40px) saturate(180%);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-pill);
-  padding: 11px 20px;
-  box-shadow: var(--shadow-float);
-  display: flex; align-items: center; gap: 12px;
-  min-width: 240px; max-width: 90vw;
-  animation: toastIn var(--dur-slow) var(--ease-spring);
-}
-@keyframes toastIn { from { opacity: 0; transform: translateY(-24px) scale(0.92); } to { opacity: 1; transform: translateY(0) scale(1); } }
-.toast-success { border-color: rgba(48,209,88,0.4); }
-.toast-error { border-color: rgba(255,69,58,0.4); }
-.toast-warning { border-color: rgba(255,214,10,0.4); }
-.toast-info { border-color: rgba(10,132,255,0.4); }
-.toast-content { flex: 1; font-size: 13px; font-weight: 600; text-align: center; }
-.toast-close { cursor: pointer; color: var(--text-tertiary); padding: 4px; }
-.toast-close:hover { color: var(--text-primary); }
-
-/* ═══════════ Stats ═══════════ */
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-bottom: 26px; }
-.stat-card {
-  background: var(--bg-solid-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  box-shadow: var(--shadow-card);
-  transition: transform var(--dur-base) var(--ease-sheet), border-color var(--dur-base);
-  animation: cardIn var(--dur-slow) var(--ease-sheet) backwards;
-}
-.stat-card:hover { border-color: var(--border-strong); transform: translateY(-3px); }
-@keyframes cardIn { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
-.stat-value { font-size: 32px; font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
-.stat-label { font-size: 11px; color: var(--text-tertiary); margin-top: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; }
-
-/* ═══════════ Agents ═══════════ */
-.agent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(248px, 1fr)); gap: 14px; }
-.agent-card {
-  background: var(--bg-solid-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 18px;
-  display: flex; flex-direction: column; gap: 11px;
-  box-shadow: var(--shadow-card);
-  transition: transform var(--dur-base) var(--ease-sheet), border-color var(--dur-base), box-shadow var(--dur-base);
-  animation: cardIn var(--dur-slow) var(--ease-sheet) backwards;
-}
-.agent-card:hover { border-color: var(--border-strong); transform: translateY(-3px) scale(1.008); box-shadow: var(--shadow-float); }
-.agent-card-top { display: flex; align-items: center; gap: 12px; }
-.agent-name { font-size: 14.5px; font-weight: 700; letter-spacing: -0.015em; }
-.agent-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 5px; }
-.agent-desc {
-  font-size: 12.5px; color: var(--text-secondary); line-height: 1.55; flex: 1;
-  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-}
-.agent-actions { display: flex; gap: 6px; margin-top: 2px; }
-.agent-add {
-  border: 1.5px dashed var(--border-strong);
-  background: transparent;
-  border-radius: var(--radius-lg);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 9px; min-height: 168px; cursor: pointer;
-  color: var(--text-tertiary);
-  transition: border-color var(--dur-base), color var(--dur-base), background var(--dur-base), transform var(--dur-base) var(--ease-sheet);
-  font-size: 13px; font-weight: 600;
-  animation: cardIn var(--dur-slow) var(--ease-sheet) backwards;
-}
-.agent-add:hover { border-color: var(--accent); color: var(--accent-hover); background: var(--accent-soft); transform: translateY(-2px); }
-.agent-add svg { width: 24px; height: 24px; stroke-width: 2; }
-
-.monogram {
-  width: 44px; height: 44px; border-radius: var(--radius-md);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 700;
-  flex-shrink: 0; color: #fff;
-  border: 1px solid rgba(255,255,255,0.1);
-}
-.monogram-sm {
-  width: 32px; height: 32px; border-radius: 9px;
-  font-size: 11px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; color: #fff;
-}
-.face-badge { overflow: hidden; background: var(--bg-solid-3); }
-.face-badge svg { display: block; }
-
-/* iOS segmented control */
-.seg {
-  display: inline-flex; gap: 2px;
-  background: rgba(255,255,255,0.07);
-  padding: 3px;
-  border-radius: var(--radius-sm);
-  margin-bottom: 18px;
-}
-.seg-btn {
-  padding: 7px 18px; text-align: center;
-  border: none; border-radius: 8px; cursor: pointer;
-  font-size: 13px; font-weight: 600;
-  color: var(--text-secondary);
-  background: transparent;
-  transition: background var(--dur-base), color var(--dur-base), box-shadow var(--dur-base);
-}
-.seg-btn.active {
-  background: var(--bg-solid-3);
-  color: var(--text-primary);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
-}
-
-.category-head { display: flex; align-items: center; gap: 10px; margin: 26px 0 12px; }
-.category-head:first-child { margin-top: 0; }
-.category-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-tertiary); }
-.category-line { flex: 1; height: 1px; background: var(--border); }
-
-.section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-.section-title { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
-
-/* Mention autocomplete */
-.mention-menu {
-  position: absolute;
-  bottom: 100%;
-  left: 16px; right: 16px;
-  background: var(--glass-strong);
-  backdrop-filter: blur(50px) saturate(180%);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-float);
-  max-height: 224px; overflow-y: auto;
-  display: none; z-index: 50; margin-bottom: 8px;
-}
-.mention-menu.show { display: block; animation: sheetIn 200ms var(--ease-sheet); }
-.mention-item { display: flex; align-items: center; gap: 10px; padding: 9px 13px; cursor: pointer; transition: background var(--dur-fast); }
-.mention-item:hover, .mention-item.sel { background: var(--accent-soft); }
-.mention-name { font-size: 13px; font-weight: 600; }
-.mention-sub { font-size: 11px; color: var(--text-tertiary); }
-
-/* Room agents panel */
-.panel-section-label {
-  font-size: 10px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.08em;
-  color: var(--text-tertiary);
-  padding: 10px 10px 6px;
-}
-.room-agent-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: var(--radius-sm); transition: background var(--dur-fast); }
-.room-agent-row:hover { background: rgba(255,255,255,0.06); }
-.room-agent-name { flex: 1; min-width: 0; font-size: 12.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.room-agent-x { background: none; border: none; cursor: pointer; color: var(--text-tertiary); padding: 2px; display: flex; align-items: center; transition: color var(--dur-fast); }
-.room-agent-x:hover { color: var(--error); }
-.room-agent-x svg { width: 13px; height: 13px; }
-
-/* Task & doc rows */
-.task-row, .doc-row {
-  display: flex; align-items: center; gap: 14px;
-  background: var(--bg-solid-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 14px 16px; margin-bottom: 10px;
-  box-shadow: var(--shadow-card);
-  transition: border-color var(--dur-base), transform var(--dur-base) var(--ease-sheet);
-  animation: cardIn var(--dur-slow) var(--ease-sheet) backwards;
-}
-.task-row:hover, .doc-row:hover { border-color: var(--border-strong); transform: translateX(2px); }
-.task-status-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-.task-row .task-status-dot.running { animation: pulse 1.4s infinite ease-in-out; }
-.task-title { font-size: 14px; font-weight: 600; flex: 1; min-width: 0; }
-.task-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
-.doc-title { font-size: 13px; font-weight: 600; }
-.doc-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
-
-/* RAG answers */
-.rag-answer {
-  background: var(--bg-solid-2);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--accent);
-  border-radius: var(--radius-sm);
-  padding: 14px 16px;
-  font-size: 13px; line-height: 1.6;
-  color: var(--text-secondary);
-  margin-top: 12px;
-  white-space: pre-wrap;
-  animation: cardIn var(--dur-slow) var(--ease-sheet);
-}
-
-/* Processing */
-.processing { display: flex; align-items: center; gap: 12px; padding: 8px 28px; animation: fadeIn var(--dur-base) ease; }
-.processing-dots { display: flex; gap: 5px; }
-.processing-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 1.4s infinite ease-in-out; }
-.processing-dot:nth-child(1) { animation-delay: 0s; }
-.processing-dot:nth-child(2) { animation-delay: 0.18s; }
-.processing-dot:nth-child(3) { animation-delay: 0.36s; }
-@keyframes pulse { 0%, 80%, 100% { transform: scale(0.55); opacity: 0.35; } 40% { transform: scale(1); opacity: 1; } }
-.processing-text { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
-
-/* Hardware card */
-.hw-card { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.9; color: var(--text-secondary); }
-
-/* ═══════════ Progress rings ═══════════ */
-.ring-card {
-  display: flex; align-items: center; gap: 16px;
-  background: var(--bg-solid-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 18px 20px;
-  box-shadow: var(--shadow-card);
-  transition: transform var(--dur-base) var(--ease-sheet), border-color var(--dur-base);
-  animation: cardIn var(--dur-slow) var(--ease-sheet) backwards;
-  position: relative; overflow: hidden;
-}
-.ring-card:hover { border-color: var(--border-strong); transform: translateY(-3px); }
-.ring-svg { width: 64px; height: 64px; flex-shrink: 0; transform: rotate(-90deg); }
-.ring-bg { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 6; }
-.ring-val { fill: none; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 900ms var(--ease-sheet); }
-.ring-num {
-  position: absolute; inset: 0; width: 64px; height: 64px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums;
-  pointer-events: none;
-}
-.ring-label { font-size: 12px; font-weight: 700; letter-spacing: 0.02em; }
-.ring-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 3px; }
-
-/* ═══════════ Honeycomb activity (GitHub-style hex grid) ═══════════ */
-.honey-card { margin-bottom: 20px; }
-.honey-wrap { overflow-x: auto; padding-bottom: 6px; }
-.honey-wrap svg { display: block; }
-.honey-wrap polygon {
-  stroke: rgba(0,0,0,0.35); stroke-width: 1;
-  animation: hexIn 420ms var(--ease-sheet) backwards;
-  cursor: default;
-}
-@keyframes hexIn { from { opacity: 0; transform: scale(0.3); } to { opacity: 1; transform: scale(1); } }
-.honey-wrap polygon.lv0 { fill: rgba(255,255,255,0.055); }
-.honey-wrap polygon.lv1 { fill: rgba(10,132,255,0.3); }
-.honey-wrap polygon.lv2 { fill: rgba(10,132,255,0.5); }
-.honey-wrap polygon.lv3 { fill: rgba(10,132,255,0.75); }
-.honey-wrap polygon.lv4 { fill: #409CFF; }
-.honey-wrap polygon:hover { stroke: #fff; stroke-width: 1.4; }
-.honey-legend { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-tertiary); }
-.honey-legend .hx { width: 11px; height: 11px; clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); display: inline-block; }
-.hx.lv0 { background: rgba(255,255,255,0.055); }
-.hx.lv1 { background: rgba(10,132,255,0.3); }
-.hx.lv2 { background: rgba(10,132,255,0.5); }
-.hx.lv3 { background: rgba(10,132,255,0.75); }
-.hx.lv4 { background: #409CFF; }
-
-/* ═══════════ Task rows v2 ═══════════ */
-.task-row { flex-direction: column; align-items: stretch; gap: 8px; padding: 15px 18px; }
-.task-row-top { display: flex; align-items: center; gap: 12px; }
-.task-prog {
-  height: 5px; border-radius: 99px;
-  background: rgba(255,255,255,0.07);
-  overflow: hidden;
-}
-.task-prog > div {
-  height: 100%; border-radius: 99px;
-  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
-  background-size: 200% 100%;
-  animation: progSlide 1.6s linear infinite;
-  transition: width 800ms var(--ease-sheet);
-}
-@keyframes progSlide { from { background-position: 0% 0; } to { background-position: -200% 0; } }
-.task-result {
-  font-size: 12.5px; color: var(--text-secondary); line-height: 1.55;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
-  max-height: 120px; overflow-y: auto;
-  white-space: pre-wrap;
-  animation: fadeIn var(--dur-base) ease;
-}
-.task-status-dot.running { animation: pulse 1.2s infinite ease-in-out; }
-.prio-high { color: var(--error); }
-.prio-critical { color: var(--error); }
-
-/* Dashboard agents strip */
-.dash-agent-row {
-  display: flex; align-items: center; gap: 11px;
-  padding: 8px 10px;
-  border-radius: var(--radius-sm);
-  transition: background var(--dur-fast);
-  animation: cardIn var(--dur-slow) var(--ease-sheet) backwards;
-}
-.dash-agent-row:hover { background: rgba(255,255,255,0.06); }
-.dash-agent-name { font-size: 13px; font-weight: 600; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.dash-agent-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
-
-@media (max-width: 1100px) { .dash-cols { grid-template-columns: 1fr !important; } }
-
-/* ═══════════ Auth ═══════════ */
-.auth-screen {
-  position: fixed; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  z-index: 300;
-  background:
-    radial-gradient(1000px 500px at 70% 0%, rgba(10,132,255,0.1), transparent 55%),
-    radial-gradient(800px 500px at 20% 100%, rgba(245,158,11,0.07), transparent 55%),
-    var(--bg-primary);
-}
-.auth-card {
-  background: var(--glass-strong);
-  backdrop-filter: blur(60px) saturate(180%);
-  border-radius: var(--radius-xl);
-  padding: 44px;
-  width: 410px; max-width: 92vw;
-  box-shadow: var(--shadow-float);
-  border: 1px solid var(--border-strong);
-  animation: sheetIn var(--dur-slow) var(--ease-sheet);
-}
-.auth-logo { text-align: center; margin-bottom: 30px; }
-.auth-logo img {
-  width: 72px; height: 72px;
-  filter: drop-shadow(0 10px 30px rgba(245,158,11,0.35));
-  animation: floatY 5s ease-in-out infinite;
-}
-@keyframes floatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-.auth-headline { text-align: center; font-size: 24px; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 4px; }
-.auth-sub { text-align: center; font-size: 13px; color: var(--text-secondary); margin-bottom: 26px; }
-.auth-tabs {
-  display: flex; gap: 2px; margin-bottom: 24px;
-  background: rgba(255,255,255,0.07); padding: 3px;
-  border-radius: var(--radius-sm);
-}
-.auth-tab {
-  flex: 1; padding: 9px; text-align: center;
-  border-radius: 8px; cursor: pointer;
-  font-size: 13px; font-weight: 600;
-  transition: background var(--dur-base), color var(--dur-base), box-shadow var(--dur-base);
-  color: var(--text-secondary);
-}
-.auth-tab.active { background: var(--bg-solid-3); color: var(--text-primary); box-shadow: 0 2px 8px rgba(0,0,0,0.35); }
-
-/* ═══════════ Onboarding: welcome deck ═══════════ */
-.tour-overlay {
-  position: fixed; inset: 0; z-index: 400;
-  display: none;
-}
-.tour-overlay.show { display: block; animation: fadeIn var(--dur-base) ease; }
-
-.tour-spot {
-  position: absolute;
-  border-radius: var(--radius-md);
-  box-shadow: 0 0 0 2px rgba(10,132,255,0.9), 0 0 0 6000px rgba(0,0,0,0.72), 0 0 40px rgba(10,132,255,0.35);
-  transition: all 480ms var(--ease-sheet);
-  pointer-events: none;
-}
-.tour-spot.center {
-  box-shadow: 0 0 0 2px transparent, 0 0 0 6000px rgba(0,0,0,0), 0 0 0 transparent;
-}
-
-.tour-tip {
-  position: absolute;
-  width: 340px;
-  background: var(--glass-strong);
-  backdrop-filter: blur(60px) saturate(180%);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-lg);
-  padding: 22px;
-  box-shadow: var(--shadow-float);
-  transition: all 480ms var(--ease-sheet);
-  animation: cardIn 420ms var(--ease-sheet);
-}
-.tour-step-num { font-size: 11px; font-weight: 700; color: var(--accent-hover); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
-.tour-title { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
-.tour-body { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
-.tour-body kbd {
-  font-family: var(--font-mono); font-size: 11px;
-  background: rgba(255,255,255,0.1); border: 1px solid var(--border-strong);
-  border-radius: 5px; padding: 1px 6px; color: var(--text-primary);
-}
-.tour-mention-demo {
-  margin: 12px 0;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
-  padding: 9px 16px;
-  font-size: 13px; color: var(--text-secondary);
-}
-.tour-mention-demo b { color: var(--accent-hover); font-weight: 700; }
-.tour-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; }
-.tour-dots { display: flex; gap: 6px; }
-.tour-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.18); transition: all var(--dur-base) var(--ease-spring); }
-.tour-dot.on { background: var(--accent); width: 20px; border-radius: var(--radius-pill); }
-.tour-btns { display: flex; gap: 8px; }
-
-/* Welcome deck (pre-tour) */
-.welcome-deck {
-  position: fixed; inset: 0; z-index: 410;
-  display: none; align-items: center; justify-content: center;
-  background:
-    radial-gradient(1100px 550px at 75% 5%, rgba(10,132,255,0.12), transparent 55%),
-    radial-gradient(900px 550px at 15% 100%, rgba(245,158,11,0.09), transparent 55%),
-    rgba(0,0,0,0.82);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-.welcome-deck.show { display: flex; animation: fadeIn var(--dur-slow) ease; }
-.welcome-card {
-  width: 520px; max-width: 92vw;
   text-align: center;
-  animation: sheetIn var(--dur-slow) var(--ease-sheet);
+  padding: 60px 24px;
+  color: var(--tx3);
 }
-.welcome-logo { width: 84px; height: 84px; margin: 0 auto 22px; filter: drop-shadow(0 14px 40px rgba(245,158,11,0.4)); animation: floatY 5s ease-in-out infinite; }
-.welcome-headline { font-size: 34px; font-weight: 800; letter-spacing: -0.035em; margin-bottom: 10px; }
-.welcome-sub { font-size: 15px; color: var(--text-secondary); line-height: 1.6; max-width: 420px; margin: 0 auto 30px; }
-.welcome-slides { display: flex; gap: 12px; margin-bottom: 30px; }
-.welcome-slide {
-  flex: 1;
-  background: var(--glass);
-  backdrop-filter: blur(30px);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 20px 14px;
-  transition: transform var(--dur-base) var(--ease-sheet), border-color var(--dur-base);
-  animation: cardIn 500ms var(--ease-sheet) backwards;
-}
-.welcome-slide:nth-child(2) { animation-delay: 90ms; }
-.welcome-slide:nth-child(3) { animation-delay: 180ms; }
-.welcome-slide:hover { transform: translateY(-4px); border-color: var(--border-strong); }
-.welcome-slide-icon {
-  width: 44px; height: 44px; margin: 0 auto 12px;
-  border-radius: var(--radius-md);
-  display: flex; align-items: center; justify-content: center;
-  color: #fff;
-}
-.welcome-slide-title { font-size: 13.5px; font-weight: 700; margin-bottom: 5px; }
-.welcome-slide-desc { font-size: 11.5px; color: var(--text-tertiary); line-height: 1.5; }
-.welcome-actions { display: flex; gap: 10px; justify-content: center; }
 
-/* iOS switch */
-.switch { position: relative; display: inline-block; width: 44px; height: 26px; flex-shrink: 0; }
-.switch input { opacity: 0; width: 0; height: 0; }
-.switch .track {
-  position: absolute; inset: 0;
-  background: rgba(255,255,255,0.15);
-  border-radius: var(--radius-pill);
-  transition: background var(--dur-base);
+.empty .eT {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.empty .eD {
+  font-size: 14px;
+}
+
+/* Processing indicator */
+.processingIndicator {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--bg3);
+  border-radius: var(--r8);
+  font-size: 12px;
+  color: var(--tx2);
+}
+
+.processingIndicator .spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--bd);
+  border-top-color: var(--ac);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* File drop zone */
+.fileDropZone {
+  border: 2px dashed var(--bd2);
+  border-radius: var(--r12);
+  padding: 40px;
+  text-align: center;
+  transition: all 0.2s ease;
   cursor: pointer;
 }
-.switch .track::after {
-  content: '';
-  position: absolute; left: 2px; top: 2px;
-  width: 22px; height: 22px;
-  background: #fff;
-  border-radius: 50%;
-  transition: transform var(--dur-base) var(--ease-spring);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-}
-.switch input:checked + .track { background: var(--success); }
-.switch input:checked + .track::after { transform: translateX(18px); }
 
-.setting-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 13px 0;
-  border-bottom: 1px solid var(--border);
-}
-.setting-row:last-child { border-bottom: none; }
-.setting-name { font-size: 13.5px; font-weight: 600; }
-.setting-desc { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
-
-
-/* ═══════════ Motion upgrades ═══════════ */
-@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-.stat-value {
-  background: linear-gradient(110deg, var(--text-primary) 30%, #ffffff 46%, var(--accent-hover) 52%, var(--text-primary) 68%);
-  background-size: 200% 100%;
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 5.5s linear infinite;
-}
-.stat-card::after, .agent-card::after {
-  content: '';
-  position: absolute; inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(10,132,255,0.10), transparent 45%);
-  opacity: 0; transition: opacity 300ms ease;
-  pointer-events: none;
-}
-.stat-card:hover::after, .agent-card:hover::after { opacity: 1; }
-.stat-card, .agent-card { position: relative; overflow: hidden; }
-
-.agent-card:active { transform: scale(0.985); }
-.rail-btn.active::after {
-  content: '';
-  position: absolute; inset: -4px;
-  border-radius: inherit;
-  background: var(--accent);
-  filter: blur(14px); opacity: 0.5; z-index: -1;
-  animation: glowPulse 3.2s ease-in-out infinite;
-}
-@keyframes glowPulse { 0%, 100% { opacity: 0.32; } 50% { opacity: 0.62; } }
-
-
-.topbar-title { animation: titleIn 480ms var(--ease-sheet); }
-@keyframes titleIn { from { opacity: 0; transform: translateY(-8px); letter-spacing: 0.02em; } to { opacity: 1; transform: translateY(0); letter-spacing: -0.025em; } }
-
-.view.active { animation: viewIn2 520ms var(--ease-sheet); }
-@keyframes viewIn2 {
-  0% { opacity: 0; transform: translateY(18px) scale(0.992); filter: blur(6px); }
-  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+.fileDropZone:hover,
+.fileDropZone.dragover {
+  border-color: var(--ac);
+  background: var(--acS);
 }
 
-.btn-primary { background: linear-gradient(145deg, var(--accent), #0868d9); }
-.btn-primary::before {
-  content: '';
-  position: absolute; inset: 0; border-radius: inherit;
-  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.35) 50%, transparent 60%);
-  background-size: 250% 100%;
-  background-position: 200% 0;
-  transition: background-position 700ms ease;
-}
-.btn-primary { position: relative; overflow: hidden; }
-.btn-primary:hover::before { background-position: -50% 0; }
-
-.chip, .mention-item, .list-item { will-change: transform; }
-.message-bubble { box-shadow: 0 2px 12px rgba(0,0,0,0.25); }
-
-@keyframes typingDot { 0%, 60%, 100% { transform: translateY(0) scale(0.8); opacity: 0.4; } 30% { transform: translateY(-5px) scale(1.05); opacity: 1; } }
-.processing-dot { animation: typingDot 1.1s infinite ease-in-out; }
-
-/* ═══════════ Agent spawn & chat life ═══════════ */
-.avatar-wrap { position: relative; flex-shrink: 0; }
-.avatar-ring {
-  position: absolute; inset: -5px;
-  border-radius: 50%;
-  border: 2px solid var(--accent);
-  opacity: 0;
-  pointer-events: none;
-}
-.message-agent.spawn .avatar-wrap { animation: spawnPop 640ms var(--ease-spring); }
-.message-agent.spawn .avatar-ring { animation: ringBurst 700ms var(--ease-sheet); }
-@keyframes spawnPop {
-  0% { transform: scale(0) rotate(-160deg); opacity: 0; }
-  60% { transform: scale(1.25) rotate(8deg); opacity: 1; }
-  100% { transform: scale(1) rotate(0); }
-}
-@keyframes ringBurst {
-  0% { transform: scale(0.4); opacity: 0.9; }
-  100% { transform: scale(1.9); opacity: 0; }
-}
-.message-agent.spawn .msg-sender { animation: nameFlash 900ms ease; }
-@keyframes nameFlash { 0% { color: var(--accent-hover); text-shadow: 0 0 14px rgba(10,132,255,0.8); } 100% { color: var(--text-secondary); text-shadow: none; } }
-
-/* System join/leave lines */
-.sys-line {
-  align-self: center;
-  display: flex; align-items: center; gap: 8px;
-  font-size: 11.5px; font-weight: 600;
-  color: var(--text-tertiary);
-  padding: 4px 14px;
-  border-radius: var(--radius-pill);
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border);
-  animation: sysIn 480ms var(--ease-spring);
-}
-.sys-line .sys-face { width: 18px; height: 18px; border-radius: 5px; overflow: hidden; }
-.sys-line .sys-face svg { display: block; }
-@keyframes sysIn { from { opacity: 0; transform: translateY(8px) scale(0.85); } to { opacity: 1; transform: translateY(0) scale(1); } }
-
-/* Thinking indicator with agent face */
-.thinking {
-  display: flex; align-items: center; gap: 11px;
-  padding: 8px 28px;
-  animation: fadeIn 240ms ease;
-}
-.thinking-face {
-  width: 30px; height: 30px; border-radius: 50%;
-  overflow: hidden; flex-shrink: 0;
-  border: 1.5px solid var(--accent);
-  animation: thinkBob 1s ease-in-out infinite;
-}
-.thinking-face svg { display: block; }
-@keyframes thinkBob { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-4px) rotate(4deg); } }
-.thinking-name { font-size: 12.5px; font-weight: 700; color: var(--text-secondary); }
-.thinking-dots { display: flex; gap: 4px; margin-left: 2px; }
-.thinking-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: typingDot 1.1s infinite ease-in-out; }
-.thinking-dot:nth-child(2) { animation-delay: 0.15s; }
-.thinking-dot:nth-child(3) { animation-delay: 0.3s; }
-
-/* User message launch */
-.message-user .message-bubble { animation: launchUp 420ms var(--ease-spring); }
-@keyframes launchUp { 0% { transform: translateY(14px) scale(0.92); opacity: 0; } 70% { transform: translateY(-2px) scale(1.015); } 100% { transform: translateY(0) scale(1); opacity: 1; } }
-
-/* Composer reacts when mentioning */
-.composer-input.mention-live { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft), 0 10px 34px rgba(10,132,255,0.16); }
-.chat-messages { scroll-behavior: smooth; }
-
-.modal-title::after {
-  content: '';
-  display: block; width: 34px; height: 3px; border-radius: 99px;
-  background: linear-gradient(90deg, var(--accent), var(--brand));
-  margin-top: 10px;
+.fileDropZone svg {
+  color: var(--tx3);
+  margin-bottom: 12px;
 }
 
-.composer-input:focus-within { box-shadow: 0 0 0 4px var(--accent-soft), 0 8px 30px rgba(10,132,255,0.12); }
+.fileDropZone .dropTitle {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
 
-@media (max-width: 900px) {
-  .panel { display: none !important; }
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
-  .message { max-width: 94%; }
-  .welcome-slides { flex-direction: column; }
-  .welcome-slide { display: flex; align-items: center; text-align: left; gap: 14px; }
-  .welcome-slide-icon { margin: 0; }
+.fileDropZone .dropDesc {
+  font-size: 12px;
+  color: var(--tx3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    transform: translateX(-100%);
+    z-index: 100;
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .dashboardGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .settingsLayout {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
 </head>
 <body>
 
-<div class="toast-container" id="toastContainer"></div>
-
-<div class="app">
-  <!-- Icon rail -->
-  <div class="rail">
-    <div class="rail-logo" onclick="showView('chat')" title="Hive">
-      <img src="/static/logo.png" alt="Hive">
+<!-- Auth Screen -->
+<div class="authScreen" id="authScreen">
+  <div class="authCard">
+    <div class="authLogo">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="3" y="11" width="18" height="10" rx="2"/>
+        <circle cx="12" cy="5" r="2"/>
+        <path d="M12 2v3M8 8v3M16 8v3"/>
+      </svg>
     </div>
-    <button class="rail-btn active" data-view="chat" onclick="showView('chat')" title="Chat">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <span class="rail-tip">Chat</span>
-    </button>
-    <button class="rail-btn" data-view="agents" onclick="showView('agents')" title="Agents">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 7V4"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/></svg>
-      <span class="rail-tip">Agents</span>
-    </button>
-    <button class="rail-btn" data-view="tasks" onclick="showView('tasks')" title="Tasks">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-      <span class="rail-tip">Tasks</span>
-    </button>
-    <button class="rail-btn" data-view="knowledge" onclick="showView('knowledge')" title="Knowledge">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-      <span class="rail-tip">Knowledge</span>
-    </button>
-    <button class="rail-btn" data-view="dashboard" onclick="showView('dashboard')" title="Dashboard">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-      <span class="rail-tip">Dashboard</span>
-    </button>
-    <button class="rail-btn" data-view="settings" onclick="showView('settings')" title="Settings">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      <span class="rail-tip">Settings</span>
-    </button>
-    <div class="rail-spacer"></div>
-    <button class="rail-btn" onclick="startTour(true)" title="Guide">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      <span class="rail-tip">Take the tour</span>
-    </button>
-    <button class="rail-btn" onclick="logout()" title="Sign out">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      <span class="rail-tip">Sign out</span>
-    </button>
-    <div class="rail-avatar" id="userAvatar" onclick="showView('settings')" title="Profile"></div>
+    <div class="authTitle">Welcome to Hive</div>
+    <div class="authSubtitle">Sign in to your AI agent platform</div>
+    
+    <div class="field">
+      <label>Username</label>
+      <input class="inp" id="authUsername" placeholder="Enter username">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input class="inp" id="authPassword" type="password" placeholder="Enter password">
+    </div>
+    
+    <div style="display:flex;gap:8px;margin-top:24px">
+      <button class="btn btnP" onclick="login()" style="flex:1">Sign In</button>
+      <button class="btn btnS" onclick="register()" style="flex:1">Register</button>
+    </div>
   </div>
+</div>
 
-  <!-- Contextual panel (rooms for chat) -->
-  <div class="panel" id="panel-chat">
-    <div class="panel-header">
-      <div class="panel-title">Chats</div>
-      <div class="panel-sub">Your conversations</div>
+<!-- Main App -->
+<div class="app" id="app" style="display:none">
+  
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sbH">
+      <div class="logo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="11" width="18" height="10" rx="2"/>
+          <circle cx="12" cy="5" r="2"/>
+          <path d="M12 2v3M8 8v3M16 8v3"/>
+        </svg>
+      </div>
+      <div class="sbT">Hive</div>
+      <div class="sbKbd" onclick="openCommandPalette()" title="Command Palette (⌘K)">⌘K</div>
     </div>
-    <div class="panel-content" id="roomList"></div>
-    <div id="roomAgentsPanel" style="display:none; border-top:1px solid var(--border); padding: 6px 8px 10px; max-height: 40%; overflow-y: auto;">
-      <div class="panel-section-label">Agents in this chat</div>
-      <div id="roomAgentsList"></div>
-      <div class="room-agent-row">
-        <div class="chip chip-add" style="flex:1; justify-content:center" onclick="openAddAgentToRoom()">+ Add agent</div>
+    
+    <div class="sbC">
+      <!-- Navigation -->
+      <div class="sbS">
+        <div class="sbL">Navigation</div>
+        <div class="ni active" onclick="showView('chat')">
+          <div class="niI"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <div class="niT">Chat</div>
+        </div>
+        <div class="ni" onclick="showView('agents')">
+          <div class="niI"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 2v3M8 8v3M16 8v3"/></svg></div>
+          <div class="niT">Agents</div>
+        </div>
+        <div class="ni" onclick="showView('tasks')">
+          <div class="niI"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+          <div class="niT">Tasks</div>
+        </div>
+        <div class="ni" onclick="showView('files')">
+          <div class="niI"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg></div>
+          <div class="niT">Files</div>
+        </div>
+        <div class="ni" onclick="showView('dashboard')">
+          <div class="niI"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+          <div class="niT">Dashboard</div>
+        </div>
+        <div class="ni" onclick="showView('settings')">
+          <div class="niI"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+          <div class="niT">Settings</div>
+        </div>
+      </div>
+      
+      <!-- Rooms -->
+      <div class="sbS">
+        <div class="sbL">Rooms</div>
+        <div id="roomList"></div>
+        <button class="btn btnS btnSM" onclick="showModal('mRoom')" style="width:100%;margin-top:8px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Room
+        </button>
+      </div>
+    </div>
+    
+    <!-- User section -->
+    <div style="padding:12px;border-top:1px solid var(--bd)">
+      <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="showView('settings')">
+        <div id="userAvatar" style="width:32px;height:32px;border-radius:var(--r8);background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px">U</div>
+        <div style="flex:1;min-width:0">
+          <div id="userName" style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">User</div>
+          <div style="font-size:11px;color:var(--tx3)">Online</div>
+        </div>
+        <button class="btnI" onclick="event.stopPropagation();logout()" title="Sign Out">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
       </div>
     </div>
   </div>
-
-  <!-- Main area -->
+  
+  <!-- Main content -->
   <div class="main">
-    <!-- Chat -->
-    <div id="view-chat" class="view active">
-      <div class="topbar">
+    
+    <!-- Chat View -->
+    <div class="view active" id="view-chat">
+      <div class="tb">
         <div>
-          <div class="topbar-title" id="chatTitle">Chat</div>
-          <div class="topbar-subtitle" id="chatSub">Pick a conversation, then type @ to call an agent</div>
-        </div>
-        <div class="topbar-actions">
-          <button class="btn btn-ghost btn-sm" onclick="exportConversation()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export
-          </button>
-          <button class="btn btn-primary btn-sm" onclick="openModal('mRoom')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            New Chat
-          </button>
+          <div class="tbT" id="chatTitle">Select a conversation</div>
+          <div class="tbSt" id="chatSub">Choose a room from the sidebar</div>
         </div>
       </div>
-      <div class="chat-messages" id="chatMessages">
+      
+      <div style="flex:1;overflow-y:auto;padding:16px" id="chatMessages">
         <div class="empty">
-          <div class="empty-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          </div>
-          <div class="empty-title">Welcome to Hive</div>
-          <div class="empty-desc">Create a chat, add agents to it, and call them by typing <b>@</b> followed by their name. Everything runs on your machine with your own API keys.</div>
-          <button class="btn btn-primary" onclick="startTour()">Show me around</button>
+          <div class="eT">Select a conversation</div>
+          <div class="eD">Choose a room from the sidebar to start chatting</div>
         </div>
       </div>
-      <div id="processingIndicator" style="display:none" class="thinking">
-        <div class="thinking-face" id="thinkingFace"></div>
-        <div class="thinking-name" id="thinkingName">Agent</div>
-        <div class="thinking-dots">
-          <div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div>
-        </div>
+      
+      <div id="processingIndicator" class="processingIndicator" style="margin:0 16px">
+        <div class="spinner"></div>
+        <span>Agent is thinking...</span>
       </div>
-      <div class="composer" id="composer" style="display:none">
-        <div class="composer-chips" id="composerChips"></div>
+      
+      <div id="composer" style="padding:16px;border-top:1px solid var(--bd);display:none">
         <div style="position:relative">
-          <div class="mention-menu" id="mentionMenu"></div>
-          <div class="composer-input">
-            <input id="chatInput" placeholder="Message… type @ to call an agent" autocomplete="off">
-            <button class="composer-send" onclick="sendMessage()">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+          <div class="mentionDropdown" id="mentionDropdown"></div>
+          <div style="display:flex;gap:8px">
+            <input class="inp" id="chatInput" placeholder="Type a message... (use @ to mention agents)" oninput="handleMentionInput()" onkeydown="if(event.key==='Enter')sendMessage();if(event.key==='ArrowDown'){mentionIdx=Math.min(mentionIdx+1,mentionItems.length-1);renderMentionSel()}if(event.key==='ArrowUp'){mentionIdx=Math.max(mentionIdx-1,0);renderMentionSel()}">
+            <button class="btn btnP" onclick="sendMessage()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
             </button>
           </div>
         </div>
-        <div class="composer-hint">Type <kbd>@</kbd> to mention an agent · <kbd>Enter</kbd> to send</div>
       </div>
     </div>
-
-    <!-- Agents -->
-    <div id="view-agents" class="view">
-      <div class="topbar">
+    
+    <!-- Agents View -->
+    <div class="view" id="view-agents">
+      <div class="tb">
         <div>
-          <div class="topbar-title">Agents</div>
-          <div class="topbar-subtitle">Your AI workforce — pick a template, set your own config</div>
+          <div class="tbT">Agents</div>
+          <div class="tbSt"><span id="agentCount">0</span> agents available</div>
         </div>
-        <div class="topbar-actions">
-          <button class="btn btn-primary btn-sm" onclick="openCreateAgent()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Create Agent
+        <div class="tbA">
+          <input class="inp" id="agentSearch" placeholder="Search agents..." oninput="filterAgents()" style="width:200px">
+          <button class="btn btnP" onclick="showModal('mAgent')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Agent
           </button>
         </div>
       </div>
-      <div class="content" id="agentsContent"></div>
-    </div>
-
-    <!-- Tasks -->
-    <div id="view-tasks" class="view">
-      <div class="topbar">
-        <div>
-          <div class="topbar-title">Tasks</div>
-          <div class="topbar-subtitle">Background jobs your agents run and report on</div>
+      
+      <div class="agentsContainer">
+        <div class="agentsContent">
+          <div class="agentSection">
+            <div class="agentSectionHeader">
+              <div class="agentSectionTitle">My Agents <span class="agentSectionCount" id="agentCount">0</span></div>
+            </div>
+            <div class="agGrid" id="myAgents"></div>
+          </div>
+          
+          <div class="sectionDivider"></div>
+          
+          <div class="agentSection">
+            <div class="agentSectionHeader">
+              <div class="agentSectionTitle">Templates <span class="agentSectionCount" id="templateCount">0</span></div>
+            </div>
+            <div class="agTabs" id="agentTabs"></div>
+            <div class="agGrid" id="templateGrid"></div>
+          </div>
         </div>
-        <div class="topbar-actions">
-          <button class="btn btn-primary btn-sm" onclick="openModal('mTask')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+    </div>
+    
+    <!-- Tasks View -->
+    <div class="view" id="view-tasks">
+      <div class="tb">
+        <div>
+          <div class="tbT">Tasks</div>
+          <div class="tbSt">Monitor and manage agent tasks</div>
+        </div>
+        <div class="tbA">
+          <button class="btn btnP" onclick="showModal('mTask')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             New Task
           </button>
         </div>
       </div>
-      <div class="content">
-        <div class="stats-grid" id="taskStats"></div>
-        <div class="card honey-card">
-          <div class="section-head" style="margin-bottom:10px">
-            <div>
-              <div class="section-title" style="font-size:15px">Activity</div>
-              <div style="font-size:12px;color:var(--text-tertiary)">Task runs over the last 12 weeks</div>
-            </div>
-            <div class="honey-legend">
-              <span>Less</span>
-              <i class="hx lv0"></i><i class="hx lv1"></i><i class="hx lv2"></i><i class="hx lv3"></i><i class="hx lv4"></i>
-              <span>More</span>
-            </div>
-          </div>
-          <div id="taskHoney" class="honey-wrap"></div>
+      
+      <div class="tasksContainer">
+        <div class="tasksHeader">
+          <div class="sg" id="taskStats"></div>
         </div>
-        <div class="section-head"><div class="section-title">All tasks</div></div>
-        <div id="tasksList"></div>
+        
+        <div class="tasksContent">
+          <div class="taskSection">
+            <div class="taskSectionHeader">
+              <div class="taskSectionTitle">Active Tasks <span class="taskSectionCount" id="taskActiveCount">0</span></div>
+            </div>
+            <div class="taskList" id="taskQueue"></div>
+          </div>
+          
+          <div class="taskSection">
+            <div class="taskSectionHeader">
+              <div class="taskSectionTitle">History <span class="taskSectionCount" id="taskHistoryCount">0</span></div>
+            </div>
+            <div class="taskList" id="taskHistory"></div>
+          </div>
+        </div>
       </div>
     </div>
-
-    <!-- Knowledge (RAG) -->
-    <div id="view-knowledge" class="view">
-      <div class="topbar">
+    
+    <!-- Files View -->
+    <div class="view" id="view-files">
+      <div class="tb">
         <div>
-          <div class="topbar-title">Knowledge</div>
-          <div class="topbar-subtitle">Documents your agents can search with semantic retrieval</div>
+          <div class="tbT">Files</div>
+          <div class="tbSt"><span id="fileCount">0</span> files · <span id="fileSize">0 MB</span></div>
         </div>
-        <div class="topbar-actions">
-          <button class="btn btn-primary btn-sm" onclick="openModal('mDoc')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add Text
+        <div class="tbA">
+          <button class="btn btnP" onclick="uploadFile()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload
           </button>
         </div>
       </div>
-      <div class="content">
-        <div class="card" style="margin-bottom:22px">
-          <div style="font-weight:700;margin-bottom:12px;font-size:15px;letter-spacing:-0.01em">Ask your knowledge base</div>
-          <div style="display:flex;gap:8px">
-            <input id="ragQuery" class="input" placeholder="Ask a question across all documents…" onkeydown="if(event.key==='Enter')runRagQuery()">
-            <button class="btn btn-primary" onclick="runRagQuery()">Search</button>
+      
+      <div class="filesContainer">
+        <div class="filesContent">
+          <div class="fileDropZone" id="fileDropZone" onclick="uploadFile()">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <div class="dropTitle">Drop files here or click to upload</div>
+            <div class="dropDesc">Support for documents, images, and more</div>
           </div>
-          <div id="ragResults"></div>
+          
+          <div style="margin-top:24px">
+            <div class="fileGrid" id="fileGrid"></div>
+          </div>
         </div>
-        <div class="section-head">
-          <div class="section-title">Documents</div>
-          <div style="font-size:12px;color:var(--text-tertiary)" id="docCount"></div>
-        </div>
-        <div id="docsList"></div>
       </div>
     </div>
-
-    <!-- Dashboard -->
-    <div id="view-dashboard" class="view">
-      <div class="topbar">
+    
+    <!-- Dashboard View -->
+    <div class="view" id="view-dashboard">
+      <div class="tb">
         <div>
-          <div class="topbar-title">Dashboard</div>
-          <div class="topbar-subtitle">Everything happening in your hive</div>
+          <div class="tbT">Dashboard</div>
+          <div class="tbSt">System overview and analytics</div>
         </div>
       </div>
-      <div class="content">
-        <div class="stats-grid" id="dashStats"></div>
-        <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:20px" class="dash-cols">
-          <div class="card honey-card">
-            <div class="section-head" style="margin-bottom:10px">
-              <div>
-                <div class="section-title" style="font-size:15px">Activity</div>
-                <div style="font-size:12px;color:var(--text-tertiary)">Tasks and messages over the last 12 weeks</div>
+      
+      <div class="dashboardContainer">
+        <div class="dashboardContent">
+          <div class="dashboardGrid">
+            <div class="dashCard">
+              <div class="dashCardHeader">
+                <div class="dashCardTitle">Statistics</div>
               </div>
-              <div class="honey-legend">
-                <span>Less</span>
-                <i class="hx lv0"></i><i class="hx lv1"></i><i class="hx lv2"></i><i class="hx lv3"></i><i class="hx lv4"></i>
-                <span>More</span>
+              <div class="dashCardBody">
+                <div class="sg" id="dashStats"></div>
               </div>
             </div>
-            <div id="dashHoney" class="honey-wrap"></div>
-          </div>
-          <div class="card" style="display:flex;flex-direction:column">
-            <div class="section-title" style="font-size:15px;margin-bottom:12px">Your agents</div>
-            <div id="dashAgents" style="display:flex;flex-direction:column;gap:8px;flex:1;overflow-y:auto"></div>
-          </div>
-        </div>
-        <div class="section-head"><div class="section-title">Hardware</div></div>
-        <div class="card hw-card" id="hwCard"></div>
-      </div>
-    </div>
-
-    <!-- Settings -->
-    <div id="view-settings" class="view">
-      <div class="topbar">
-        <div>
-          <div class="topbar-title">Settings</div>
-          <div class="topbar-subtitle">Account, provider keys, and interface</div>
-        </div>
-      </div>
-      <div class="content">
-        <div class="card" style="margin-bottom:18px">
-          <div style="font-weight:700;margin-bottom:16px;font-size:15px;letter-spacing:-0.01em">Profile</div>
-          <div style="display:flex;gap:16px;align-items:center">
-            <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(145deg,#3A3A3C,#2C2C2E);display:flex;align-items:center;justify-content:center;color:var(--text-primary);font-size:24px;font-weight:700;border:2px solid var(--border-strong)" id="profileAvatar"></div>
-            <div>
-              <div style="font-weight:700;font-size:16px;margin-bottom:3px;letter-spacing:-0.015em" id="profileName"></div>
-              <div style="font-size:13px;color:var(--text-tertiary)" id="profileUsername"></div>
+            
+            <div class="dashCard">
+              <div class="dashCardHeader">
+                <div class="dashCardTitle">Active Agents</div>
+              </div>
+              <div class="dashCardBody">
+                <div id="dashAgents"></div>
+              </div>
+            </div>
+            
+            <div class="dashCard">
+              <div class="dashCardHeader">
+                <div class="dashCardTitle">Recent Conversations</div>
+              </div>
+              <div class="dashCardBody">
+                <div id="dashRecent"></div>
+              </div>
+            </div>
+            
+            <div class="dashCard dashCardWide">
+              <div class="dashCardHeader">
+                <div class="dashCardTitle">Activity Heatmap</div>
+              </div>
+              <div class="dashCardBody">
+                <div id="dashHeatmap"></div>
+              </div>
             </div>
           </div>
         </div>
-
-        <div class="card" style="margin-bottom:18px">
-          <div style="font-weight:700;margin-bottom:6px;font-size:15px;letter-spacing:-0.01em">API Keys</div>
-          <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:10px">Connect a provider so your agents can run. Keys stay on your machine.</div>
-          <div id="keysList"></div>
-          <div style="display:flex;gap:8px;margin-top:16px">
-            <select id="keyProvider" class="input" style="width:170px"></select>
-            <input id="keyValue" class="input" placeholder="sk-…" style="flex:1">
-            <button class="btn btn-primary btn-sm" onclick="saveKey()">Save</button>
-          </div>
+      </div>
+    </div>
+    
+    <!-- Settings View -->
+    <div class="view" id="view-settings">
+      <div class="tb">
+        <div>
+          <div class="tbT">Settings</div>
+          <div class="tbSt">Manage your account and preferences</div>
         </div>
-
-        <div class="card" style="margin-bottom:18px">
-          <div style="font-weight:700;margin-bottom:4px;font-size:15px;letter-spacing:-0.01em">Custom Providers</div>
-          <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:10px">Connect any OpenAI-compatible endpoint — vLLM, LiteLLM, llama.cpp, private gateways. Stored locally in custom_providers.json.</div>
-          <div id="customProvidersList"></div>
-          <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:12px">
-            <input id="cpName" class="input" placeholder="Name (e.g. vllm-local)">
-            <input id="cpUrl" class="input" placeholder="Base URL (e.g. http://localhost:8000/v1)">
-          </div>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <input id="cpKey" class="input" placeholder="API key (optional, e.g. none for local)" style="flex:1">
-            <button class="btn btn-primary btn-sm" onclick="addCustomProvider()">Add</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <div style="font-weight:700;margin-bottom:4px;font-size:15px;letter-spacing:-0.01em">Interface</div>
-          <div class="setting-row">
-            <div>
-              <div class="setting-name">Reduce motion</div>
-              <div class="setting-desc">Minimize animations throughout the app</div>
+      </div>
+      
+      <div class="settingsContainer">
+        <div class="settingsContent">
+          <div class="settingsLayout">
+            <div class="settingsSidebar">
+              <div class="settingsNav">
+                <div class="settingsNavItem active" data-panel="settingsProfile" onclick="showSettingsPanel('settingsProfile')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  Profile
+                </div>
+                <div class="settingsNavItem" data-panel="settingsKeys" onclick="showSettingsPanel('settingsKeys')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                  API Keys
+                </div>
+                <div class="settingsNavItem" data-panel="settingsAppearance" onclick="showSettingsPanel('settingsAppearance')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                  Appearance
+                </div>
+                <div class="settingsNavItem" data-panel="settingsNotifications" onclick="showSettingsPanel('settingsNotifications')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                  Notifications
+                </div>
+                <div class="settingsNavItem" data-panel="settingsData" onclick="showSettingsPanel('settingsData')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                  Data & Storage
+                </div>
+              </div>
             </div>
-            <label class="switch">
-              <input type="checkbox" id="reduceMotionToggle" onchange="toggleReduceMotion(this.checked)">
-              <span class="track"></span>
-            </label>
-          </div>
-          <div class="setting-row">
-            <div>
-              <div class="setting-name">Take the tour again</div>
-              <div class="setting-desc">Replay the guided walkthrough of Hive</div>
+            
+            <div class="settingsMain">
+              <!-- Profile Panel -->
+              <div class="settingsPanel active" id="settingsProfile">
+                <div class="settingsPanelHeader">
+                  <div class="settingsPanelTitle">Profile</div>
+                  <div class="settingsPanelDesc">Manage your account information</div>
+                </div>
+                
+                <div class="settingsCard">
+                  <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+                    <div id="profileAvatar" style="width:64px;height:64px;border-radius:var(--r16);background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700">U</div>
+                    <div>
+                      <div id="profileName" style="font-size:18px;font-weight:700;margin-bottom:4px">User</div>
+                      <div id="profileUsername" style="font-size:13px;color:var(--tx3)">@user</div>
+                    </div>
+                  </div>
+                  
+                  <div class="settingsInfoGrid" id="settingsInfoGrid"></div>
+                </div>
+              </div>
+              
+              <!-- API Keys Panel -->
+              <div class="settingsPanel" id="settingsKeys">
+                <div class="settingsPanelHeader">
+                  <div class="settingsPanelTitle">API Keys</div>
+                  <div class="settingsPanelDesc">Manage your provider API keys</div>
+                </div>
+                
+                <div class="settingsCard">
+                  <div class="settingsCardTitle">Add New Key</div>
+                  <div class="settingsField">
+                    <label>Provider</label>
+                    <select class="inp" id="keyProvider"></select>
+                  </div>
+                  <div class="settingsField">
+                    <label>API Key</label>
+                    <input class="inp" id="keyValue" type="password" placeholder="Enter API key">
+                  </div>
+                  <button class="btn btnP" onclick="saveKey()">Save Key</button>
+                </div>
+                
+                <div class="settingsCard">
+                  <div class="settingsCardTitle">Saved Keys</div>
+                  <div id="keysList"></div>
+                </div>
+              </div>
+              
+              <!-- Appearance Panel -->
+              <div class="settingsPanel" id="settingsAppearance">
+                <div class="settingsPanelHeader">
+                  <div class="settingsPanelTitle">Appearance</div>
+                  <div class="settingsPanelDesc">Customize the look and feel</div>
+                </div>
+                
+                <div class="settingsCard">
+                  <div class="settingsCardTitle">Accent Color</div>
+                  <div style="display:flex;gap:12px;flex-wrap:wrap">
+                    <div class="colorSwatch" data-color="#0A84FF" style="background:#0A84FF" onclick="setAccentColor('#0A84FF')"></div>
+                    <div class="colorSwatch" data-color="#30D158" style="background:#30D158" onclick="setAccentColor('#30D158')"></div>
+                    <div class="colorSwatch" data-color="#FFD60A" style="background:#FFD60A" onclick="setAccentColor('#FFD60A')"></div>
+                    <div class="colorSwatch" data-color="#FF453A" style="background:#FF453A" onclick="setAccentColor('#FF453A')"></div>
+                    <div class="colorSwatch" data-color="#BF5AF2" style="background:#BF5AF2" onclick="setAccentColor('#BF5AF2')"></div>
+                    <div class="colorSwatch" data-color="#FF9F0A" style="background:#FF9F0A" onclick="setAccentColor('#FF9F0A')"></div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Notifications Panel -->
+              <div class="settingsPanel" id="settingsNotifications">
+                <div class="settingsPanelHeader">
+                  <div class="settingsPanelTitle">Notifications</div>
+                  <div class="settingsPanelDesc">Control how you receive notifications</div>
+                </div>
+                
+                <div class="settingsCard">
+                  <div class="settingsToggleRow">
+                    <div>
+                      <div style="font-size:13px;font-weight:600">Desktop Notifications</div>
+                      <div style="font-size:11px;color:var(--tx3);margin-top:2px">Show browser notifications</div>
+                    </div>
+                    <div class="toggleSwitch" id="desktopToggle" onclick="toggleNotification('desktop')"></div>
+                  </div>
+                  <div class="settingsToggleRow">
+                    <div>
+                      <div style="font-size:13px;font-weight:600">Sound</div>
+                      <div style="font-size:11px;color:var(--tx3);margin-top:2px">Play sound for new messages</div>
+                    </div>
+                    <div class="toggleSwitch" id="soundToggle" onclick="toggleNotification('sound')"></div>
+                  </div>
+                  <div class="settingsToggleRow">
+                    <div>
+                      <div style="font-size:13px;font-weight:600">Badge Count</div>
+                      <div style="font-size:11px;color:var(--tx3);margin-top:2px">Show unread count in browser tab</div>
+                    </div>
+                    <div class="toggleSwitch" id="badgeToggle" onclick="toggleNotification('badge')"></div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Data Panel -->
+              <div class="settingsPanel" id="settingsData">
+                <div class="settingsPanelHeader">
+                  <div class="settingsPanelTitle">Data & Storage</div>
+                  <div class="settingsPanelDesc">Manage your data and storage</div>
+                </div>
+                
+                <div class="settingsCard">
+                  <div class="settingsCardTitle">Export Data</div>
+                  <div style="font-size:13px;color:var(--tx2);margin-bottom:12px">Download all your data including agents, conversations, and settings</div>
+                  <button class="btn btnS" onclick="exportData()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Export Data
+                  </button>
+                </div>
+                
+                <div class="settingsCard danger">
+                  <div class="settingsCardTitle" style="color:var(--rd)">Danger Zone</div>
+                  <div style="font-size:13px;color:var(--tx2);margin-bottom:12px">Permanently delete all your data. This action cannot be undone.</div>
+                  <button class="btn btnD" onclick="clearData()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    Clear All Data
+                  </button>
+                </div>
+              </div>
             </div>
-            <button class="btn btn-secondary btn-sm" onclick="startTour(true)">Start</button>
           </div>
         </div>
       </div>
     </div>
+    
   </div>
 </div>
 
-<!-- New Room modal -->
-<div class="modal-overlay" id="mRoom">
-  <div class="modal">
-    <div class="modal-title">New Chat</div>
-    <div style="margin-bottom:16px">
-      <label class="lbl">Name</label>
-      <input id="nrN" class="input" placeholder="e.g. Q3 Campaign">
-    </div>
-    <div style="margin-bottom:16px">
-      <label class="lbl">Type</label>
-      <select id="nrT" class="input"><option value="group">Group</option><option value="dm">Direct Message</option></select>
-    </div>
-    <div style="margin-bottom:20px">
-      <label class="lbl">Add agents to this chat (optional)</label>
-      <div id="nrAgents" style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;background:rgba(255,255,255,0.04)"></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="hideModal('mRoom')">Cancel</button>
-      <button class="btn btn-primary" onclick="createRoom()">Create</button>
-    </div>
-  </div>
-</div>
+<!-- Taskbar -->
+<div class="taskbar" id="taskbar"></div>
 
-<!-- Create/Edit Agent modal -->
-<div class="modal-overlay" id="mAgent">
-  <div class="modal">
-    <div class="modal-title" id="mAgentTitle">Create Agent</div>
-    <div class="modal-hint" id="naHint" style="display:none"></div>
-    <div style="margin-bottom:16px">
-      <label class="lbl">Name</label>
-      <input id="naN" class="input" placeholder="Agent name">
+<!-- Toast Container -->
+<div class="tc" id="toastContainer"></div>
+
+<!-- Modals -->
+<div id="mRoom" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--r16);padding:24px;width:90%;max-width:420px">
+    <div style="font-size:18px;font-weight:700;margin-bottom:16px">New Room</div>
+    <div class="field">
+      <label>Room Name</label>
+      <input class="inp" id="nrN" placeholder="Enter room name">
     </div>
-    <div style="margin-bottom:16px">
-      <label class="lbl">Description</label>
-      <input id="naD" class="input" placeholder="What does this agent do?">
+    <div class="field">
+      <label>Type</label>
+      <select class="inp" id="nrT">
+        <option value="group">Group Chat</option>
+        <option value="dm">Direct Message</option>
+      </select>
     </div>
-    <div style="margin-bottom:16px">
-      <label class="lbl">System Prompt</label>
-      <textarea id="naP" class="input" rows="5" placeholder="Define the agent's behavior…">You are a helpful assistant.</textarea>
-    </div>
-    <div style="display:flex;gap:12px;margin-bottom:16px">
-      <div style="flex:1">
-        <label class="lbl">Provider</label>
-        <select id="naPr" class="input" onchange="scanModels()"></select>
-      </div>
-      <div style="flex:1">
-        <label class="lbl">Model</label>
-        <select id="naM" class="input"><option value="">Default</option></select>
-      </div>
-    </div>
-    <div style="margin-bottom:16px">
-      <label class="lbl">Tools (comma-separated)</label>
-      <input id="naTools" class="input" placeholder="e.g. web_search, calculator">
-    </div>
-    <div style="margin-bottom:20px">
-      <label class="lbl">Temperature: <span id="naTv">0.7</span></label>
-      <input id="naT" type="range" min="0" max="2" step="0.1" value="0.7" style="width:100%;accent-color:var(--accent)" oninput="document.getElementById('naTv').textContent=this.value">
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="hideModal('mAgent')">Cancel</button>
-      <button class="btn btn-primary" id="naSave" onclick="saveAgent()">Create</button>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
+      <button class="btn btnG" onclick="hideModal('mRoom')">Cancel</button>
+      <button class="btn btnP" onclick="createRoom()">Create</button>
     </div>
   </div>
 </div>
 
-<!-- New Task modal -->
-<div class="modal-overlay" id="mTask">
-  <div class="modal">
-    <div class="modal-title">New Task</div>
-    <div style="margin-bottom:16px">
-      <label class="lbl">Title</label>
-      <input id="tkT" class="input" placeholder="What should be done?">
+<div id="mAgent" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--r16);padding:24px;width:90%;max-width:480px">
+    <div style="font-size:18px;font-weight:700;margin-bottom:16px">New Agent</div>
+    <div class="field">
+      <label>Name</label>
+      <input class="inp" id="naN" placeholder="Agent name">
     </div>
-    <div style="margin-bottom:16px">
-      <label class="lbl">Description</label>
-      <textarea id="tkD" class="input" rows="3" placeholder="Details for the agent…"></textarea>
+    <div class="field">
+      <label>Provider</label>
+      <select class="inp" id="naPr"></select>
     </div>
-    <div style="display:flex;gap:12px;margin-bottom:20px">
-      <div style="flex:1">
-        <label class="lbl">Agent</label>
-        <select id="tkA" class="input"></select>
-      </div>
-      <div style="flex:1">
-        <label class="lbl">Priority</label>
-        <select id="tkP" class="input"><option>medium</option><option>high</option><option>low</option></select>
-      </div>
+    <div class="field">
+      <label>Model</label>
+      <input class="inp" id="naM" placeholder="e.g. gpt-4, claude-3-opus">
     </div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="hideModal('mTask')">Cancel</button>
-      <button class="btn btn-primary" onclick="createTask()">Create</button>
+    <div class="field">
+      <label>System Prompt</label>
+      <textarea class="inp" id="naP" rows="4" placeholder="Define the agent's personality and behavior"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
+      <button class="btn btnG" onclick="hideModal('mAgent')">Cancel</button>
+      <button class="btn btnP" onclick="createAgent()">Create</button>
     </div>
   </div>
 </div>
 
-<!-- Add Text Doc modal -->
-<div class="modal-overlay" id="mDoc">
-  <div class="modal">
-    <div class="modal-title">Add Text to Knowledge</div>
-    <div style="margin-bottom:16px">
-      <label class="lbl">Title / filename</label>
-      <input id="dcN" class="input" placeholder="e.g. product-notes">
+<div id="mTask" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--r16);padding:24px;width:90%;max-width:480px">
+    <div style="font-size:18px;font-weight:700;margin-bottom:16px">New Task</div>
+    <div class="field">
+      <label>Title</label>
+      <input class="inp" id="ntT" placeholder="Task title">
     </div>
-    <div style="margin-bottom:20px">
-      <label class="lbl">Content</label>
-      <textarea id="dcT" class="input" rows="7" placeholder="Paste any text — it will be chunked and indexed for semantic search…"></textarea>
+    <div class="field">
+      <label>Description</label>
+      <textarea class="inp" id="ntD" rows="3" placeholder="Describe the task"></textarea>
     </div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="hideModal('mDoc')">Cancel</button>
-      <button class="btn btn-primary" onclick="addDoc()">Add</button>
+    <div class="field">
+      <label>Agent</label>
+      <select class="inp" id="ntA"></select>
     </div>
-  </div>
-</div>
-
-<!-- Auth -->
-<div class="auth-screen" id="authScreen">
-  <div class="auth-card">
-    <div class="auth-logo">
-      <img src="/static/logo.png" alt="Hive">
-    </div>
-    <div class="auth-headline">Hive</div>
-    <div class="auth-sub">Your AI workforce. Self-hosted, your keys, your data.</div>
-    <div class="auth-tabs">
-      <div id="authTabLogin" class="auth-tab active" onclick="authTab(0)">Sign in</div>
-      <div id="authTabRegister" class="auth-tab" onclick="authTab(1)">Register</div>
-    </div>
-    <div id="authLogin">
-      <div style="margin-bottom:14px">
-        <input id="lU" class="input" placeholder="Username" autocomplete="username">
-      </div>
-      <div style="margin-bottom:20px">
-        <input id="lP" type="password" class="input" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
-      </div>
-      <button class="btn btn-primary" style="width:100%;padding:12px" onclick="doLogin()">Sign in</button>
-      <div id="lErr" style="color:var(--error);font-size:12px;margin-top:12px;display:none;text-align:center"></div>
-    </div>
-    <div id="authRegister" style="display:none">
-      <div style="margin-bottom:14px">
-        <input id="rU" class="input" placeholder="Username" autocomplete="username">
-      </div>
-      <div style="margin-bottom:14px">
-        <input id="rN" class="input" placeholder="Display name (optional)">
-      </div>
-      <div style="margin-bottom:20px">
-        <input id="rP" type="password" class="input" placeholder="Password (min 8 chars)" autocomplete="new-password" onkeydown="if(event.key==='Enter')doRegister()">
-      </div>
-      <button class="btn btn-primary" style="width:100%;padding:12px" onclick="doRegister()">Create account</button>
-      <div id="rErr" style="color:var(--error);font-size:12px;margin-top:12px;display:none;text-align:center"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
+      <button class="btn btnG" onclick="hideModal('mTask')">Cancel</button>
+      <button class="btn btnP" onclick="createTask()">Create</button>
     </div>
   </div>
 </div>
 
-<!-- Welcome deck (first run) -->
-<div class="welcome-deck" id="welcomeDeck">
-  <div class="welcome-card">
-    <img class="welcome-logo" src="/static/logo.png" alt="Hive">
-    <div class="welcome-headline">Welcome to Hive</div>
-    <div class="welcome-sub">Build a team of AI agents, call them into your chats, and let them work — all self-hosted with your own API keys.</div>
-    <div class="welcome-slides">
-      <div class="welcome-slide">
-        <div class="welcome-slide-icon" style="background:linear-gradient(145deg,#0A84FF,#409CFF)">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 7V4"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/></svg>
-        </div>
-        <div>
-          <div class="welcome-slide-title">Agents</div>
-          <div class="welcome-slide-desc">35 professional templates, configured your way</div>
-        </div>
-      </div>
-      <div class="welcome-slide">
-        <div class="welcome-slide-icon" style="background:linear-gradient(145deg,#AF52DE,#C77DFF)">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        </div>
-        <div>
-          <div class="welcome-slide-title">Call with @</div>
-          <div class="welcome-slide-desc">Mention agents by name and they reply in chat</div>
-        </div>
-      </div>
-      <div class="welcome-slide">
-        <div class="welcome-slide-icon" style="background:linear-gradient(145deg,#F59E0B,#FBBF24)">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </div>
-        <div>
-          <div class="welcome-slide-title">Your data</div>
-          <div class="welcome-slide-desc">Self-hosted. Keys never leave your machine</div>
-        </div>
-      </div>
+<!-- Command Palette -->
+<div id="commandPalette" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:1000;align-items:flex-start;justify-content:center;padding-top:100px">
+  <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--r12);width:90%;max-width:500px;overflow:hidden">
+    <div style="padding:16px;border-bottom:1px solid var(--bd)">
+      <input class="inp" placeholder="Type a command..." oninput="filterCommands(this.value)">
     </div>
-    <div class="welcome-actions">
-      <button class="btn btn-secondary" onclick="finishWelcome(false)">Skip</button>
-      <button class="btn btn-primary" style="padding:11px 26px" onclick="finishWelcome(true)">Take the tour</button>
+    <div id="commandList" style="max-height:400px;overflow-y:auto;padding:8px">
+      <div class="commandItem" onclick="executeCommand('chat')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>Go to Chat</span>
+      </div>
+      <div class="commandItem" onclick="executeCommand('agents')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 2v3M8 8v3M16 8v3"/></svg>
+        <span>Go to Agents</span>
+      </div>
+      <div class="commandItem" onclick="executeCommand('tasks')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>Go to Tasks</span>
+      </div>
+      <div class="commandItem" onclick="executeCommand('files')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+        <span>Go to Files</span>
+      </div>
+      <div class="commandItem" onclick="executeCommand('new-room')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>New Room</span>
+      </div>
+      <div class="commandItem" onclick="executeCommand('new-agent')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>New Agent</span>
+      </div>
+      <div class="commandItem" onclick="executeCommand('logout')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>Sign Out</span>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Guided tour -->
-<div class="tour-overlay" id="tourOverlay">
-  <div class="tour-spot" id="tourSpot"></div>
-  <div class="tour-tip" id="tourTip"></div>
-</div>
+<style>
+.commandItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-radius: var(--r6);
+}
+
+.commandItem:hover {
+  background: var(--bg3);
+}
+
+.commandItem svg {
+  color: var(--tx3);
+  flex-shrink: 0;
+}
+
+.commandItem span {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.btnI {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r6);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tx3);
+  transition: all 0.15s ease;
+}
+
+.btnI:hover {
+  background: var(--bg3);
+  color: var(--tx);
+}
+</style>
+
+<!-- Hive UI Scripts -->
+<script src="/static/ui-utils.js"></script>
+<script src="/static/ui.js"></script>
+<script src="/static/ui-windows.js"></script>
+<script src="/static/ui-agents.js"></script>
+<script src="/static/ui-tasks.js"></script>
+<script src="/static/ui-files.js"></script>
+<script src="/static/ui-dashboard.js"></script>
+<script src="/static/ui-settings.js"></script>
 
 <script>
-let T = null, U = null, N = null, currentRoom = null, ws = null, wsRetry = 0, unread = {};
-let currentMessages = [];
-let editingAgentId = null;
-let AGENTS = [];            // cache of user agents
-let roomAgentIds = [];      // agents in the open room
-let mentionState = { open: false, items: [], sel: 0, start: -1 };
-let AGENT_TAB = 'mine';
-
-const $ = id => document.getElementById(id);
-const api = (u, o = {}) => {
-  o.headers = o.headers || {};
-  o.headers['Content-Type'] = 'application/json';
-  if (T) o.headers['Authorization'] = 'Bearer ' + T;
-  return fetch(u, o).then(r => r.json());
-};
-const escHtml = s => s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;').replace(/"/g,'&quot;') : '';
-
-marked.setOptions({ breaks: true, gfm: true });
-function renderMarkdown(s) {
-  if (!s) return '';
-  try { return marked.parse(s); } catch (e) { return escHtml(s).replace(/\n/g, '<br>'); }
-}
-
-function toast(message, type = 'info') {
-  const el = document.createElement('div');
-  el.className = `toast toast-${type}`;
-  el.innerHTML = `<div class="toast-content">${message}</div><div class="toast-close" onclick="this.parentElement.remove()">✕</div>`;
-  $('toastContainer').appendChild(el);
-  setTimeout(() => {
-    el.style.transition = 'opacity 260ms ease, transform 260ms ease';
-    el.style.opacity = '0'; el.style.transform = 'translateY(-16px) scale(0.95)';
-    setTimeout(() => el.remove(), 300);
-  }, 3600);
-}
-
-/* Animated count-up for stat values */
-function countUp(el, target) {
-  const dur = 700, start = performance.now();
-  const step = now => {
-    const p = Math.min((now - start) / dur, 1);
-    const eased = 1 - Math.pow(1 - p, 3);
-    el.textContent = Math.round(target * eased);
-    if (p < 1) requestAnimationFrame(step);
-  };
-  requestAnimationFrame(step);
-}
-
-/* ═══════════ Auth ═══════════ */
-function authTab(i) {
-  $('authTabLogin').classList.toggle('active', i === 0);
-  $('authTabRegister').classList.toggle('active', i === 1);
-  $('authLogin').style.display = i ? 'none' : 'block';
-  $('authRegister').style.display = i ? 'block' : 'none';
-}
-
-function doLogin() {
-  const u = $('lU').value, p = $('lP').value;
-  if (!u || !p) { $('lErr').textContent = 'Fill all fields'; $('lErr').style.display = 'block'; return; }
-  api('/api/auth/login', { method: 'POST', body: JSON.stringify({ username: u, password: p }) })
-    .then(r => {
-      if (r.token) { T = r.token; U = r.id; N = r.username; enterApp(); toast('Welcome back', 'success'); }
-      else { $('lErr').textContent = r.detail || 'Invalid credentials'; $('lErr').style.display = 'block'; }
-    });
-}
-
-function doRegister() {
-  const u = $('rU').value, p = $('rP').value, n = $('rN').value;
-  if (!u || !p) { $('rErr').textContent = 'Fill all fields'; $('rErr').style.display = 'block'; return; }
-  if (p.length < 8) { $('rErr').textContent = 'Password must be at least 8 characters'; $('rErr').style.display = 'block'; return; }
-  api('/api/auth/register', { method: 'POST', body: JSON.stringify({ username: u, password: p, display_name: n }) })
-    .then(r => {
-      if (r.token) { T = r.token; U = r.id; N = r.username; enterApp(); toast('Account created', 'success'); }
-      else { $('rErr').textContent = r.detail || 'Error'; $('rErr').style.display = 'block'; }
-    });
-}
-
-function logout() { T = null; U = null; N = null; if (ws) ws.close(); localStorage.clear(); location.reload(); }
-
-function enterApp() {
-  localStorage.setItem('ht', T);
-  localStorage.setItem('hu', U);
-  localStorage.setItem('hn', N);
-  $('authScreen').style.display = 'none';
-  $('userAvatar').textContent = N.charAt(0).toUpperCase();
-  $('userAvatar').title = N;
-  $('profileAvatar').textContent = N.charAt(0).toUpperCase();
-  $('profileName').textContent = N;
-  $('profileUsername').textContent = '@' + U;
-  if (localStorage.getItem('hiveReduceMotion') === '1') {
-    document.body.classList.add('reduce-motion');
-    $('reduceMotionToggle').checked = true;
-  }
-  loadRooms();
-  loadProviders();
-  refreshAgentCache();
-  if (!localStorage.getItem('hiveWelcomeDone')) {
-    setTimeout(() => $('welcomeDeck').classList.add('show'), 500);
-  }
-}
-
-function finishWelcome(takeTour) {
-  localStorage.setItem('hiveWelcomeDone', '1');
-  $('welcomeDeck').classList.remove('show');
-  if (takeTour) setTimeout(() => startTour(), 350);
-  else toast('Tip: the ? button in the rail restarts the tour anytime', 'info');
-}
-
-function refreshAgentCache() {
-  api('/api/agents').then(agents => {
-    AGENTS = agents;
-    renderNrAgents();
-    renderRoomAgents();
+// Command palette filtering
+function filterCommands(query) {
+  const items = document.querySelectorAll('.commandItem');
+  const q = query.toLowerCase();
+  items.forEach(item => {
+    const text = item.textContent.toLowerCase();
+    item.style.display = text.includes(q) ? 'flex' : 'none';
   });
 }
 
-if (localStorage.getItem('ht')) { T = localStorage.getItem('ht'); U = localStorage.getItem('hu'); N = localStorage.getItem('hn'); enterApp(); }
-
-/* ═══════════ Navigation ═══════════ */
-function showView(view) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.rail-btn').forEach(b => b.classList.toggle('active', b.dataset.view === view));
-  const el = $('view-' + view);
-  if (el) el.classList.add('active');
-  $('panel-chat').classList.toggle('show', view === 'chat');
-  if (view === 'agents') loadAgents();
-  if (view === 'tasks') loadTasks();
-  if (view === 'knowledge') loadDocs();
-  if (view === 'dashboard') loadDashboard();
-  if (view === 'settings') loadKeys();
-}
-
-/* ═══════════ Chat / rooms ═══════════ */
-function loadRooms() {
-  api('/api/rooms?user_id=' + U).then(rooms => {
-    $('roomList').innerHTML = rooms.map(r => {
-      const badge = unread[r.id] ? `<div class="li-badge">${unread[r.id]}</div>` : '';
-      return `<div class="list-item${currentRoom === r.id ? ' active' : ''}" onclick="openRoom('${r.id}','${escHtml(r.name || r.id)}')">
-        <div class="li-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
-        <div class="li-content">
-          <div class="li-title">${escHtml(r.name || r.id)}</div>
-          <div class="li-meta">${escHtml(r.type)}</div>
-        </div>
-        ${badge}
-      </div>`;
-    }).join('') || '<div style="padding:22px;text-align:center;color:var(--text-tertiary);font-size:13px;line-height:1.6">No chats yet.<br>Create one to start.</div>';
-  });
-}
-
-function openRoom(id, name) {
-  currentRoom = id;
-  unread[id] = 0;
-  $('chatTitle').textContent = name;
-  $('chatSub').textContent = 'Type @ to call an agent';
-  loadRooms();
-  $('composer').style.display = 'block';
-  connectWS(id);
-  api('/api/rooms/' + id + '/members').then(members => {
-    roomAgentIds = members.filter(m => m.member_type === 'agent').map(m => m.member_id);
-    renderRoomAgents();
-  });
-  api('/api/rooms/' + id + '/messages').then(msgs => {
-    currentMessages = msgs;
-    $('chatMessages').innerHTML = msgs.map(renderMessage).join('') || '<div class="empty"><div class="empty-title">No messages yet</div><div class="empty-desc">Type <b>@</b> in the composer below to call one of the agents in this chat.</div></div>';
-    $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
-  });
-}
-
-/* Agents attached to the current room */
-function renderRoomAgents() {
-  const panel = $('roomAgentsPanel'), list = $('roomAgentsList'), chips = $('composerChips');
-  if (!panel || !currentRoom) return;
-  panel.style.display = currentRoom ? 'block' : 'none';
-  list.innerHTML = roomAgentIds.map(id => `
-    <div class="room-agent-row">
-      ${faceBadge(id, agentName(id), 'monogram-sm')}
-      <div class="room-agent-name">${escHtml(agentName(id))}</div>
-      <button class="room-agent-x" onclick="removeAgentFromRoom('${id}')" title="Remove from chat">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>`).join('') || '<div style="padding:4px 8px 8px;font-size:12px;color:var(--text-tertiary);line-height:1.5">No agents yet — add one, then call it with @</div>';
-  chips.innerHTML = roomAgentIds.map(id =>
-    `<div class="chip" onclick="insertMention('${escHtml(agentName(id))}')">@${escHtml(agentName(id))}</div>`).join('');
-}
-
-function openAddAgentToRoom() {
-  const available = AGENTS.filter(a => !roomAgentIds.includes(a.id));
-  if (!available.length) { toast('All your agents are already in this chat', 'info'); return; }
-  const html = available.map(a =>
-    `<div class="list-item" onclick="addAgentToRoom('${a.id}')">
-      ${faceBadge(a.id, a.name, 'monogram-sm')}
-      <div class="li-content"><div class="li-title">${escHtml(a.name)}</div></div>
-    </div>`).join('');
-  $('roomAgentsList').innerHTML = '<div style="padding:4px 8px 8px;font-size:11px;color:var(--text-tertiary)">Select an agent to add</div>' + html +
-    '<div class="room-agent-row"><div class="chip chip-add" style="flex:1;justify-content:center" onclick="renderRoomAgents()">Cancel</div></div>';
-}
-
-function addAgentToRoom(agentId) {
-  api('/api/rooms/' + currentRoom + '/members', { method: 'POST', body: JSON.stringify({ member_type: 'agent', member_id: agentId }) })
-    .then(() => {
-      roomAgentIds.push(agentId);
-      renderRoomAgents();
-      appendSysLine(agentId, 'joined the chat');
-      markForSpawn(agentId);
-      toast(agentName(agentId) + ' added — call it with @' + agentName(agentId), 'success');
-    });
-}
-
-function removeAgentFromRoom(agentId) {
-  fetch('/api/rooms/' + currentRoom + '/members/agent/' + agentId, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + T } })
-    .then(() => {
-      appendSysLine(agentId, 'left the chat');
-      roomAgentIds = roomAgentIds.filter(i => i !== agentId);
-      renderRoomAgents();
-      toast('Agent removed from chat', 'success');
-    });
-}
-
-/* Animated system line ("Garry joined the chat") */
-function appendSysLine(agentId, text) {
-  const box = $('chatMessages');
-  const el = document.createElement('div');
-  el.className = 'sys-line';
-  el.innerHTML = `<span class="sys-face">${faceSVG(agentId, agentName(agentId))}</span>${escHtml(agentName(agentId))} ${escHtml(text)}`;
-  box.appendChild(el);
-  box.scrollTop = box.scrollHeight;
-}
-
-/* Thinking indicator with the called agent's face */
-let thinkingAgentId = null;
-function showThinking(agentId) {
-  thinkingAgentId = agentId || null;
-  const name = agentId ? agentName(agentId) : 'Agent';
-  $('thinkingFace').innerHTML = faceSVG(agentId || 'generic', name);
-  $('thinkingName').textContent = name + ' is thinking';
-  $('processingIndicator').style.display = 'flex';
-}
-function hideThinking() {
-  thinkingAgentId = null;
-  $('processingIndicator').style.display = 'none';
-}
-
-/* @mention autocomplete */
-function insertMention(name) {
-  const inp = $('chatInput');
-  if (mentionState.open && mentionState.start >= 0) {
-    inp.value = inp.value.slice(0, mentionState.start) + '@' + name + ' ' + inp.value.slice(inp.selectionStart);
-  } else {
-    inp.value += (inp.value && !inp.value.endsWith(' ') ? ' ' : '') + '@' + name + ' ';
-  }
-  closeMentionMenu();
-  inp.focus();
-}
-
-function closeMentionMenu() {
-  mentionState.open = false;
-  $('mentionMenu').classList.remove('show');
-  document.querySelector('.composer-input').classList.remove('mention-live');
-}
-
-function updateMentionMenu() {
-  const inp = $('chatInput');
-  const pos = inp.selectionStart;
-  const before = inp.value.slice(0, pos);
-  const at = before.lastIndexOf('@');
-  if (at === -1 || /[\s]/.test(before.slice(at + 1))) { closeMentionMenu(); return; }
-  const query = before.slice(at + 1).toLowerCase();
-  const items = AGENTS.filter(a => roomAgentIds.includes(a.id) &&
-    a.name.toLowerCase().includes(query)).slice(0, 6);
-  if (!items.length) { closeMentionMenu(); return; }
-  mentionState = { open: true, items, sel: 0, start: at };
-  $('mentionMenu').innerHTML = items.map((a, i) => `
-    <div class="mention-item${i === 0 ? ' sel' : ''}" data-i="${i}" onclick="insertMention('${escHtml(a.name)}')" onmouseenter="this.parentElement.querySelectorAll('.mention-item').forEach(e=>e.classList.remove('sel'));this.classList.add('sel')">
-      ${faceBadge(a.id, a.name, 'monogram-sm')}
-      <div><div class="mention-name">${escHtml(a.name)}</div><div class="mention-sub">${escHtml(a.provider || 'default')}</div></div>
-    </div>`).join('');
-  $('mentionMenu').classList.add('show');
-  document.querySelector('.composer-input').classList.add('mention-live');
-}
-
-function mentionKeydown(e) {
-  if (!mentionState.open) return false;
-  const items = $('mentionMenu').querySelectorAll('.mention-item');
-  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-    e.preventDefault();
-    mentionState.sel = (mentionState.sel + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
-    items.forEach((el, i) => el.classList.toggle('sel', i === mentionState.sel));
-    return true;
-  }
-  if (e.key === 'Enter' || e.key === 'Tab') {
-    e.preventDefault();
-    insertMention(mentionState.items[mentionState.sel].name);
-    return true;
-  }
-  if (e.key === 'Escape') {
-    closeMentionMenu();
-    return true;
-  }
-  return false;
-}
-
-function renderMessage(x) {
-  const isUser = x.sender_id === U;
-  const cls = isUser ? 'message-user' : 'message-agent';
-  const name = isUser ? (N || 'You') : agentName(x.sender_id);
-  const spawn = !isUser && recentSpawns.has(x.sender_id) ? ' spawn' : '';
-  if (!isUser && recentSpawns.has(x.sender_id)) recentSpawns.delete(x.sender_id);
-  const avatar = isUser
-    ? `<div class="message-avatar">${N ? N.charAt(0).toUpperCase() : 'U'}</div>`
-    : `<div class="avatar-wrap"><div class="avatar-ring"></div>${faceBadge(x.sender_id, name, 'monogram-msg')}</div>`;
-  const label = isUser ? '' : `<div class="msg-sender">${escHtml(name)}</div>`;
-  const content = isUser ? escHtml(x.content).replace(/\n/g, '<br>') : renderMarkdown(x.content);
-  return `<div class="message ${cls}${spawn}">${avatar}<div>${label}<div class="message-bubble">${content}</div></div></div>`;
-}
-
-function createRoom() {
-  const n = $('nrN').value, t = $('nrT').value;
-  if (!n) return;
-  const selected = [...document.querySelectorAll('#nrAgents input:checked')].map(c => c.value);
-  api('/api/rooms?user_id=' + U, { method: 'POST', body: JSON.stringify({ name: n, type: t }) })
-    .then(r => {
-      const roomId = r.id;
-      return Promise.all(selected.map(aid =>
-        api('/api/rooms/' + roomId + '/members', { method: 'POST', body: JSON.stringify({ member_type: 'agent', member_id: aid }) })
-      )).then(() => roomId);
-    })
-    .then(roomId => {
-      hideModal('mRoom'); $('nrN').value = '';
-      loadRooms();
-      openRoom(roomId, n);
-      toast('Chat created' + (selected.length ? ' with ' + selected.length + ' agent(s)' : ''), 'success');
-    });
-}
-
-function renderNrAgents() {
-  $('nrAgents').innerHTML = AGENTS.map(a => `
-    <label style="display:flex;align-items:center;gap:9px;padding:5px 4px;cursor:pointer">
-      <input type="checkbox" value="${a.id}" style="accent-color:var(--accent);width:15px;height:15px">
-      ${faceBadge(a.id, a.name, 'monogram-sm')}
-      <span style="font-size:13px;font-weight:500">${escHtml(a.name)}</span>
-    </label>`).join('') || '<div style="font-size:12px;color:var(--text-tertiary);padding:4px;line-height:1.5">No agents yet — create some in the Agents section first</div>';
-}
-
-function connectWS(id) {
-  if (ws) ws.close();
-  const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-  ws = new WebSocket(protocol + '//' + location.host + '/ws/' + id + '?token=' + T);
-  ws.onopen = () => { wsRetry = 0; };
-  ws.onclose = () => { if (T && currentRoom) setTimeout(() => { if (currentRoom) connectWS(currentRoom); }, Math.min(1000 * Math.pow(2, wsRetry++), 30000)); };
-  ws.onmessage = e => {
-    const d = JSON.parse(e.data);
-    if (d.type === 'new_message') {
-      currentMessages.push(d.message);
-      appendChatMessage(d.message);
-      if (d.message.sender_type === 'agent' || d.message.sender_id !== U) hideThinking();
-      if (d.message.sender_id !== U && currentRoom !== id) { unread[id] = (unread[id] || 0) + 1; loadRooms(); }
-    } else if (d.type === 'typing') {
-      if (!thinkingAgentId) showThinking(null);
-      clearTimeout(window._tt);
-      window._tt = setTimeout(hideThinking, 3000);
-    } else if (d.type === 'agent_joined') {
-      refreshRoomMembers();
-      if (!roomAgentIds.includes(d.agent_id)) roomAgentIds.push(d.agent_id);
-      appendSysLine(d.agent_id, 'joined the chat');
-      refreshAgentCache();
-    } else if (d.type === 'agent_left') {
-      appendSysLine(d.agent_id, 'left the chat');
-      roomAgentIds = roomAgentIds.filter(i => i !== d.agent_id);
-      renderRoomAgents();
-    }
-  };
-}
-
-/* Track recently-joined agents so their first reply gets the spawn burst */
-let recentSpawns = new Set();
-function markForSpawn(agentId) {
-  recentSpawns.add(agentId);
-  setTimeout(() => recentSpawns.delete(agentId), 15000);
-}
-
-function appendChatMessage(x) {
-  const box = $('chatMessages');
-  const emptyEl = box.querySelector('.empty');
-  if (emptyEl) emptyEl.remove();
-  box.insertAdjacentHTML('beforeend', renderMessage(x));
-  box.scrollTop = box.scrollHeight;
-}
-
-function refreshRoomMembers() {
-  if (!currentRoom) return;
-  api('/api/rooms/' + currentRoom + '/members').then(members => {
-    roomAgentIds = members.filter(m => m.member_type === 'agent').map(m => m.member_id);
-    renderRoomAgents();
-  });
-}
-
-/* Find the first @mentioned room agent in a text ("@Garry do x" -> Garry) */
-function detectMention(text) {
-  const t = text.toLowerCase();
-  for (const a of AGENTS) {
-    if (!roomAgentIds.includes(a.id)) continue;
-    const n = a.name.toLowerCase();
-    if (t.includes('@' + n) || t.includes('@' + n.replace(/[^a-z0-9]/g, ''))) return a;
-  }
-  return null;
-}
-
-function sendMessage() {
-  const v = $('chatInput').value.trim();
-  if (!v || !currentRoom) return;
-  $('chatInput').value = '';
-  $('composer').querySelector('.composer-input').classList.remove('mention-live');
-  const called = detectMention(v);
-  if (called) markForSpawn(called.id);
-  showThinking(called ? called.id : null);
-  api('/api/rooms/' + currentRoom + '/messages?user_id=' + U, { method: 'POST', body: JSON.stringify({ content: v }) });
-}
-
-function exportConversation() {
-  if (!currentRoom || !currentMessages.length) { toast('No messages to export', 'warning'); return; }
-  const content = currentMessages.map(m => {
-    const sender = m.sender_id === U ? 'You' : agentName(m.sender_id);
-    const time = new Date(m.created_at * 1000).toLocaleString();
-    return `## ${sender} (${time})\n\n${m.content}\n\n---\n`;
-  }).join('\n');
-  const blob = new Blob([content], { type: 'text/markdown' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `conversation-${Date.now()}.md`;
-  a.click();
-  URL.revokeObjectURL(url);
-  toast('Conversation exported', 'success');
-}
-
-/* ═══════════ Agents ═══════════ */
-/* Generative agent faces — deterministic blob & pixel robots from seed */
-const FACE_PALETTES = [
-  ['#0A84FF', '#409CFF'], ['#AF52DE', '#C77DFF'], ['#30D158', '#6EE7A0'],
-  ['#FF9F0A', '#FFD60A'], ['#FF453A', '#FF6961'], ['#5E5CE6', '#7D7AFF'],
-  ['#64D2FF', '#9BE7FF'], ['#FF375F', '#FF6482'], ['#66D4CF', '#9FF0EA'],
-];
-
-function faceHash(s) {
-  let h = 2166136261;
-  for (const c of String(s || 'x')) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
-  return h;
-}
-
-function blobFace(h, c1, c2, eye, mouth) {
-  const n = 8, pts = [];
-  for (let i = 0; i < n; i++) {
-    const wob = 0.86 + (((h >> (i * 2)) & 7) / 7) * 0.28;
-    const ang = (i / n) * Math.PI * 2 - Math.PI / 2;
-    pts.push([20 + Math.cos(ang) * 15 * wob, 20 + Math.sin(ang) * 15 * wob]);
-  }
-  const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
-  const f = v => v.toFixed(1);
-  let m = mid(pts[n - 1], pts[0]);
-  let d = `M ${f(m[0])} ${f(m[1])}`;
-  for (let i = 0; i < n; i++) {
-    const p = pts[i], q = mid(p, pts[(i + 1) % n]);
-    d += ` Q ${f(p[0])} ${f(p[1])} ${f(q[0])} ${f(q[1])}`;
-  }
-  let eyes = '';
-  if (eye === 0) eyes = '<circle cx="14.4" cy="17.4" r="2.7" fill="#fff"/><circle cx="25.6" cy="17.4" r="2.7" fill="#fff"/>';
-  else if (eye === 1) eyes = '<path d="M11.6 18.4 Q14.4 14.6 17.2 18.4" stroke="#fff" stroke-width="2.2" stroke-linecap="round" fill="none"/><path d="M22.8 18.4 Q25.6 14.6 28.4 18.4" stroke="#fff" stroke-width="2.2" stroke-linecap="round" fill="none"/>';
-  else eyes = '<rect x="10.6" y="15.4" width="18.8" height="4.6" rx="2.3" fill="#fff" opacity="0.92"/>';
-  let mouthSvg = '';
-  if (mouth === 0) mouthSvg = '<path d="M15.4 24.2 Q20 28.2 24.6 24.2" stroke="#fff" stroke-width="2.2" stroke-linecap="round" fill="none"/>';
-  else if (mouth === 1) mouthSvg = '<line x1="16" y1="25.4" x2="24" y2="25.4" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>';
-  else mouthSvg = '<circle cx="20" cy="25.4" r="2.2" fill="#fff"/>';
-  return `<svg viewBox="0 0 40 40" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-    <defs><linearGradient id="fg${h}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs>
-    <path d="${d} Z" fill="url(#fg${h})"/>${eyes}${mouthSvg}
-  </svg>`;
-}
-
-function pixelFace(h, c1, c2, eye, mouth) {
-  const g = `url(#fg${h})`;
-  const antCol = 3 + ((h >> 7) % 4);
-  let eyes = '';
-  if (eye === 0) eyes = '<rect x="2.9" y="3.6" width="1.5" height="1.6" fill="#0b0b0d" opacity="0.82"/><rect x="5.6" y="3.6" width="1.5" height="1.6" fill="#0b0b0d" opacity="0.82"/>';
-  else if (eye === 1) eyes = '<rect x="2.9" y="4.4" width="1.5" height="1.5" fill="#0b0b0d" opacity="0.82"/><rect x="5.6" y="4.4" width="1.5" height="1.5" fill="#0b0b0d" opacity="0.82"/>';
-  else eyes = '<rect x="2.4" y="3.8" width="5.2" height="1.4" fill="#0b0b0d" opacity="0.78"/>';
-  let m = '';
-  if (mouth === 0) m = '<rect x="3" y="6.1" width="1.1" height="1" fill="#0b0b0d" opacity="0.82"/><rect x="5.9" y="6.1" width="1.1" height="1" fill="#0b0b0d" opacity="0.82"/><rect x="4.1" y="6.7" width="1.8" height="0.9" fill="#0b0b0d" opacity="0.82"/>';
-  else if (mouth === 1) m = '<rect x="3.5" y="6.3" width="3" height="0.9" fill="#0b0b0d" opacity="0.82"/>';
-  else m = '<rect x="4.3" y="5.9" width="1.4" height="1.4" fill="#0b0b0d" opacity="0.82"/>';
-  const cheeks = ((h >> 9) & 1) ? '<rect x="1.9" y="5.2" width="0.8" height="0.8" fill="#fff" opacity="0.45"/><rect x="7.3" y="5.2" width="0.8" height="0.8" fill="#fff" opacity="0.45"/>' : '';
-  return `<svg viewBox="0 0 10 10" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-    <defs><linearGradient id="fg${h}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs>
-    <rect x="${antCol}" y="0.4" width="0.9" height="1.4" fill="${g}"/>
-    <circle cx="${antCol + 0.45}" cy="0.35" r="0.5" fill="${c2}"/>
-    <rect x="1.4" y="1.8" width="7.2" height="6.9" rx="0.4" fill="${g}"/>
-    <rect x="2.1" y="8.2" width="1.5" height="0.8" fill="${g}" opacity="0.85"/>
-    <rect x="6.4" y="8.2" width="1.5" height="0.8" fill="${g}" opacity="0.85"/>${eyes}${m}${cheeks}
-  </svg>`;
-}
-
-function faceSVG(seed, name) {
-  const h = faceHash(String(seed) + '|' + String(name));
-  const pal = FACE_PALETTES[h % FACE_PALETTES.length];
-  const eye = (h >> 3) % 3, mouth = (h >> 5) % 3, style = (h >> 11) & 1;
-  return style ? pixelFace(h, pal[0], pal[1], eye, mouth) : blobFace(h, pal[0], pal[1], eye, mouth);
-}
-function faceBadge(seed, name, cls) {
-  return `<div class="${cls || 'monogram'} face-badge">${faceSVG(seed, name)}</div>`;
-}
-function agentById(id) { return AGENTS.find(a => a.id === id); }
-function agentName(id) { const a = agentById(id); return a ? a.name : 'Agent'; }
-
-const CATEGORY_ICONS = {
-  'General': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l2 2"/></svg>',
-  'Growth & Sales': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg>',
-  'Client Delivery': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
-  'Client Success': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>',
-  'Operations': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
-  'Analytics': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="20" x2="6" y2="12"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="14"/></svg>',
-  'Creative': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="19" cy="13" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="10" cy="19" r="2.5"/><line x1="12" y1="8.5" x2="17.5" y2="11.5"/><line x1="7.5" y1="13.5" x2="11.5" y2="17.5"/><line x1="8" y1="11" x2="11" y2="8"/><line x1="16.5" y1="14.5" x2="13" y2="17.5"/></svg>',
-};
-function categoryIcon(cat) {
-  return `<span style="width:15px;height:15px;display:inline-flex;color:var(--text-tertiary)">${CATEGORY_ICONS[cat] || CATEGORY_ICONS['General']}</span>`;
-}
-
-function showAgentTab(tab) {
-  AGENT_TAB = tab;
-  document.querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  const mine = $('agentsMine'), lib = $('agentsLib');
-  if (mine) mine.style.display = tab === 'mine' ? 'block' : 'none';
-  if (lib) lib.style.display = tab === 'lib' ? 'block' : 'none';
-}
-
-function loadAgents() {
-  Promise.all([api('/api/agents'), api('/api/templates')]).then(([agents, templates]) => {
-    AGENTS = agents;
-    const mine = agents.map((x, i) => `
-      <div class="agent-card" style="animation-delay:${Math.min(i * 40, 320)}ms">
-        <div class="agent-card-top">
-          ${faceBadge(x.id, x.name)}
-          <div style="min-width:0">
-            <div class="agent-name">${escHtml(x.name)}</div>
-            <div class="agent-pills">
-              <span class="pill pill-accent">${escHtml(x.provider || 'default')}</span>
-              ${x.model ? `<span class="pill pill-neutral">${escHtml(x.model)}</span>` : ''}
-              <span class="pill pill-neutral">t ${(x.temperature ?? 0.7).toFixed(1)}</span>
-            </div>
-          </div>
-        </div>
-        <div class="agent-desc">${escHtml(x.description || x.system_prompt || '')}</div>
-        <div class="agent-actions">
-          <button class="btn btn-secondary btn-sm" style="flex:1" onclick="openEditAgent('${x.id}')">Configure</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteAgent('${x.id}')">Delete</button>
-        </div>
-      </div>`).join('');
-
-    const emptyMine = `
-      <div class="empty" style="grid-column:1/-1">
-        <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 7V4"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/></svg></div>
-        <div class="empty-title">No agents yet</div>
-        <div class="empty-desc">Create one from scratch, or open the Library tab and pick one of the 35 ready-made professional templates.</div>
-        <button class="btn btn-primary" onclick="showAgentTab('lib')">Browse the library</button>
-      </div>`;
-
-    const cats = {};
-    templates.forEach(t => { (cats[t.category || 'General'] = cats[t.category || 'General'] || []).push(t); });
-    const catOrder = ['General', 'Growth & Sales', 'Client Delivery', 'Client Success', 'Operations', 'Analytics', 'Creative'];
-    let libIdx = 0;
-    const lib = catOrder.filter(c => cats[c]).map(c => `
-      <div class="category-head">${categoryIcon(c)}<div class="category-title">${escHtml(c)}</div><div class="category-line"></div></div>
-      <div class="agent-grid">
-        ${cats[c].map(t => {
-          const d = Math.min(libIdx++ * 40, 480);
-          return `
-          <div class="agent-card" style="animation-delay:${d}ms">
-            <div class="agent-card-top">
-              ${faceBadge(t.id, t.name)}
-              <div style="min-width:0">
-                <div class="agent-name">${escHtml(t.name)}</div>
-                <div class="agent-pills"><span class="pill pill-neutral">template</span></div>
-              </div>
-            </div>
-            <div class="agent-desc">${escHtml(t.description)}</div>
-            <div class="agent-actions">
-              <button class="btn btn-primary btn-sm" style="flex:1" onclick="openFromTemplate('${t.id}')">Configure & add</button>
-            </div>
-          </div>`;
-        }).join('')}
-      </div>`).join('');
-
-    $('agentsContent').innerHTML = `
-      <div class="seg">
-        <button class="seg-btn${AGENT_TAB === 'mine' ? ' active' : ''}" data-tab="mine" onclick="showAgentTab('mine')">My Agents</button>
-        <button class="seg-btn${AGENT_TAB === 'lib' ? ' active' : ''}" data-tab="lib" onclick="showAgentTab('lib')">Library</button>
-      </div>
-      <div id="agentsMine" style="display:${AGENT_TAB === 'mine' ? 'block' : 'none'}">
-        <div class="agent-grid">${mine || emptyMine}
-          <div class="agent-add" onclick="openCreateAgent()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add agent
-          </div>
-        </div>
-      </div>
-      <div id="agentsLib" style="display:${AGENT_TAB === 'lib' ? 'block' : 'none'}">${lib}</div>`;
-    renderRoomAgents();
-  });
-}
-
-function openCreateAgent() {
-  editingAgentId = null;
-  $('mAgentTitle').textContent = 'Create Agent';
-  $('naSave').textContent = 'Create';
-  $('naHint').style.display = 'none';
-  $('naN').value = ''; $('naD').value = '';
-  $('naP').value = 'You are a helpful assistant.';
-  $('naTools').value = '';
-  $('naT').value = 0.7; $('naTv').textContent = '0.7';
-  openModal('mAgent');
-}
-
-function openFromTemplate(templateId) {
-  api('/api/templates/' + templateId).then(t => {
-    editingAgentId = null;
-    $('mAgentTitle').textContent = 'Add Agent from Template';
-    $('naSave').textContent = 'Create';
-    $('naHint').style.display = 'block';
-    $('naHint').innerHTML = `<strong>${escHtml(t.name)}</strong> pre-filled the prompt, tools and temperature. Pick your provider, model and settings — the agent is created with your configuration.`;
-    $('naN').value = t.name;
-    $('naD').value = t.description || '';
-    $('naP').value = t.system_prompt || '';
-    $('naTools').value = (t.tools || []).join(', ');
-    $('naT').value = t.temperature ?? 0.7;
-    $('naTv').textContent = Number(t.temperature ?? 0.7).toFixed(1);
-    openModal('mAgent');
-  });
-}
-
-function openEditAgent(id) {
-  api('/api/agents/' + id).then(a => {
-    editingAgentId = id;
-    $('mAgentTitle').textContent = 'Configure Agent';
-    $('naSave').textContent = 'Save';
-    $('naHint').style.display = 'none';
-    $('naN').value = a.name || '';
-    $('naD').value = a.description || '';
-    $('naP').value = a.system_prompt || '';
-    let tools = a.tools || [];
-    if (typeof tools === 'string') { try { tools = JSON.parse(tools); } catch (e) { tools = []; } }
-    $('naTools').value = tools.join(', ');
-    $('naT').value = a.temperature ?? 0.7;
-    $('naTv').textContent = Number(a.temperature ?? 0.7).toFixed(1);
-    openModal('mAgent');
-  });
-}
-
-function saveAgent() {
-  const body = {
-    name: $('naN').value.trim(),
-    description: $('naD').value.trim(),
-    system_prompt: $('naP').value,
-    provider: $('naPr').value,
-    model: $('naM').value,
-    temperature: parseFloat($('naT').value),
-    tools: $('naTools').value.split(',').map(s => s.trim()).filter(Boolean)
-  };
-  if (!body.name) { toast('Name is required', 'warning'); return; }
-  const req = editingAgentId
-    ? api('/api/agents/' + editingAgentId, { method: 'PUT', body: JSON.stringify(body) })
-    : api('/api/agents', { method: 'POST', body: JSON.stringify(body) });
-  req.then(() => {
-    hideModal('mAgent');
-    loadAgents();
-    refreshAgentCache();
-    toast(editingAgentId ? 'Agent updated' : 'Agent created', 'success');
-  });
-}
-
-function deleteAgent(id) {
-  if (!confirm('Delete this agent?')) return;
-  fetch('/api/agents/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + T, 'Content-Type': 'application/json' } })
-    .then(r => { if (!r.ok) throw new Error('Delete failed'); return r.json(); })
-    .then(() => { loadAgents(); refreshAgentCache(); toast('Agent deleted', 'success'); })
-    .catch(() => toast('Failed to delete agent', 'error'));
-}
-
-function createFromTemplate(templateId, name) {
-  api('/api/templates/create', { method: 'POST', body: JSON.stringify({ template_id: templateId }) })
-    .then(() => { loadAgents(); refreshAgentCache(); toast(`Agent "${name}" added`, 'success'); });
-}
-
-/* ═══════════ Providers / models ═══════════ */
-function loadProviders() {
-  api('/api/providers/all?user_id=' + U).then(p => {
-    let h = '';
-    for (let k in p) h += `<option value="${k}">${p[k].name}</option>`;
-    $('naPr').innerHTML = h;
-    scanModels();
-  });
-}
-
-function scanModels() {
-  const p = $('naPr').value;
-  if (!p) return;
-  api('/api/providers/' + p + '/models?user_id=' + U).then(r => {
-    const models = r.models || [];
-    $('naM').innerHTML = '<option value="">Default</option>' + models.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
-  });
-}
-
-/* ═══════════ Tasks ═══════════ */
-const TASK_STATUS = {
-  pending:   { c: 'var(--warning)', pill: 'pill-warning' },
-  running:   { c: 'var(--accent)',  pill: 'pill-accent' },
-  completed: { c: 'var(--success)', pill: 'pill-success' },
-  failed:    { c: 'var(--error)',   pill: 'pill-error' },
-  cancelled: { c: 'var(--text-tertiary)', pill: 'pill-neutral' }
-};
-
-/* ── Animated progress ring ── */
-function ringCard(value, label, sub, color, delay) {
-  const R = 26, C = 2 * Math.PI * R;
-  const max = Math.max(value, 5);
-  const frac = Math.max(0, Math.min(1, value / Math.max(max, 1)));
-  const gid = 'rg' + label.replace(/\W/g, '');
-  return `<div class="ring-card" style="animation-delay:${delay}ms">
-    <div style="position:relative;width:64px;height:64px;flex-shrink:0">
-      <svg class="ring-svg" viewBox="0 0 64 64">
-        <circle class="ring-bg" cx="32" cy="32" r="${R}"/>
-        <circle class="ring-val" cx="32" cy="32" r="${R}" stroke="${color}"
-          stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${C.toFixed(1)}"
-          data-target="${(C * (1 - frac)).toFixed(1)}"/>
-      </svg>
-      <div class="ring-num" data-count="${value}">0</div>
-    </div>
-    <div>
-      <div class="ring-label">${escHtml(label)}</div>
-      <div class="ring-sub">${escHtml(sub)}</div>
-    </div>
-  </div>`;
-}
-function animateRings(scope) {
-  document.querySelectorAll(scope + ' .ring-val').forEach(el => {
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      el.style.strokeDashoffset = el.dataset.target;
-    }));
-  });
-  document.querySelectorAll(scope + ' .ring-num').forEach(el => countUp(el, +el.dataset.count));
-}
-
-/* ── GitHub-style honeycomb activity grid ──
-   Counts events per day; renders 12 weeks of pointy-top hexagons. */
-function honeycomb(events, mount) {
-  const weeks = 12, days = 7;
-  // bucket events (unix seconds) per YYYY-MM-DD
-  const counts = {};
-  for (const ts of events) {
-    if (!ts) continue;
-    const d = new Date(ts * 1000);
-    const key = d.toISOString().slice(0, 10);
-    counts[key] = (counts[key] || 0) + 1;
-  }
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const start = new Date(today);
-  start.setDate(start.getDate() - (weeks * 7 - 1));
-  // align to Sunday
-  start.setDate(start.getDate() - start.getDay());
-
-  const r = 9;                        // hex radius
-  const hw = Math.sqrt(3) * r;        // hex width
-  const vh = 1.5 * r;                 // vertical step
-  const pad = 4;
-  const W = pad * 2 + weeks * hw;
-  const H = pad * 2 + (days - 1) * vh + 2 * r;
-
-  let hexes = '', idx = 0;
-  const maxC = Math.max(1, ...Object.values(counts));
-  for (let w = 0; w < weeks; w++) {
-    for (let d = 0; d < days; d++) {
-      const date = new Date(start);
-      date.setDate(start.getDate() + w * 7 + d);
-      if (date > today) continue;
-      const key = date.toISOString().slice(0, 10);
-      const c = counts[key] || 0;
-      const lv = c === 0 ? 0 : c <= maxC * 0.25 ? 1 : c <= maxC * 0.5 ? 2 : c <= maxC * 0.75 ? 3 : 4;
-      const cx = pad + w * hw + hw / 2 + (d % 2 ? hw / 2 : 0);
-      const cy = pad + r + d * vh;
-      const pts = [[0, -r], [hw / 2, -r / 2], [hw / 2, r / 2], [0, r], [-hw / 2, r / 2], [-hw / 2, -r / 2]]
-        .map(p => `${(cx + p[0]).toFixed(1)},${(cy + p[1]).toFixed(1)}`).join(' ');
-      hexes += `<polygon class="lv${lv}" points="${pts}" style="animation-delay:${Math.min(idx * 6, 500)}ms"><title>${key} — ${c} event${c === 1 ? '' : 's'}</title></polygon>`;
-      idx++;
-    }
-  }
-  mount.innerHTML = `<svg width="${W.toFixed(0)}" height="${H.toFixed(0)}" viewBox="0 0 ${W.toFixed(0)} ${H.toFixed(0)}">${hexes}</svg>`;
-}
-
-function loadTasks() {
-  Promise.all([api('/api/tasks'), api('/api/tasks/stats'), api('/api/agents')]).then(([tasks, stats, agents]) => {
-    AGENTS = agents;
-    const done = stats.completed || 0, failed = stats.failed || 0;
-    const successRate = (done + failed) ? Math.round(done / (done + failed) * 100) : 100;
-    $('taskStats').innerHTML = [
-      ringCard(stats.total || 0, 'Total', 'all tasks ever', 'var(--text-primary)', 0),
-      ringCard(stats.running || 0, 'Running', 'executing now', 'var(--accent)', 60),
-      ringCard(done, 'Completed', 'successfully finished', 'var(--success)', 120),
-      ringCard(failed, 'Failed', 'needs attention', 'var(--error)', 180),
-      ringCard(successRate, 'Success %', 'completion rate', 'var(--brand)', 240),
-    ].join('');
-    animateRings('#taskStats');
-
-    honeycomb(tasks.map(t => t.created_at), $('taskHoney'));
-
-    $('tkA').innerHTML = agents.map(a => `<option value="${a.id}">${escHtml(a.name)}</option>`).join('')
-      || '<option value="">No agents</option>';
-
-    $('tasksList').innerHTML = tasks.map((t, i) => {
-      const st = TASK_STATUS[t.status] || TASK_STATUS.pending;
-      const time = t.created_at ? new Date(t.created_at * 1000).toLocaleString() : '';
-      const prio = t.priority || 'medium';
-      const runningBar = t.status === 'running'
-        ? `<div class="task-prog"><div style="width:65%"></div></div>` : '';
-      const pendingBar = t.status === 'pending'
-        ? `<div class="task-prog"><div style="width:12%;animation:none;background:var(--warning);opacity:.7"></div></div>` : '';
-      const result = (t.status === 'completed' && t.result)
-        ? `<div class="task-result">${escHtml(String(t.result).substring(0, 600))}</div>` : '';
-      return `<div class="task-row" style="animation-delay:${Math.min(i * 35, 350)}ms">
-        <div class="task-row-top">
-          <div class="task-status-dot ${t.status}" style="background:${st.c}"></div>
-          <div style="flex:1;min-width:0">
-            <div class="task-title">${escHtml(t.title || t.id)}</div>
-            <div class="task-meta">${escHtml(agentName(t.agent_id))} · ${time} · <span class="prio-${escHtml(prio)}">${escHtml(prio)}</span></div>
-          </div>
-          <span class="pill ${st.pill}">${escHtml(t.status)}</span>
-          ${t.status === 'pending' ? `<button class="btn btn-ghost btn-sm" onclick="cancelTask('${t.id}')">Cancel</button>` : ''}
-          ${t.status !== 'pending' && t.status !== 'running' ? `<button class="btn btn-ghost btn-sm" onclick="deleteTask('${t.id}')">Delete</button>` : ''}
-        </div>
-        ${runningBar}${pendingBar}${result}
-      </div>`;
-    }).join('') || '<div class="empty"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="empty-title">No tasks yet</div><div class="empty-desc">A task is a background job for an agent — it runs the full agent loop and stores the result. Create one and watch it light up the honeycomb.</div></div>';
-  });
-}
-
-function createTask() {
-  const body = { title: $('tkT').value.trim(), description: $('tkD').value, agent_id: $('tkA').value, priority: $('tkP').value };
-  if (!body.title) { toast('Title is required', 'warning'); return; }
-  api('/api/tasks', { method: 'POST', body: JSON.stringify(body) }).then(() => {
-    hideModal('mTask'); $('tkT').value = ''; $('tkD').value = '';
-    loadTasks(); toast('Task created', 'success');
-  });
-}
-
-function cancelTask(id) {
-  api('/api/tasks/' + id + '/cancel', { method: 'POST' }).then(() => { loadTasks(); toast('Task cancelled', 'success'); });
-}
-function deleteTask(id) {
-  fetch('/api/tasks/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + T } })
-    .then(() => { loadTasks(); toast('Task deleted', 'success'); });
-}
-
-/* ═══════════ Knowledge (RAG) ═══════════ */
-function loadDocs() {
-  api('/api/rag/documents').then(r => {
-    const docs = r.documents || [];
-    $('docCount').textContent = `${docs.length} docs · ${r.total_chunks || 0} chunks`;
-    $('docsList').innerHTML = docs.map((d, i) => `<div class="doc-row" style="animation-delay:${Math.min(i * 35, 300)}ms">
-      <div class="li-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-      <div style="flex:1;min-width:0">
-        <div class="doc-title">${escHtml(d.filename || d.doc_id)}</div>
-        <div class="doc-meta">${d.chunks || 0} chunks</div>
-      </div>
-      <button class="btn btn-danger btn-sm" onclick="deleteDoc('${d.doc_id}')">Remove</button>
-    </div>`).join('') || '<div class="empty"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div><div class="empty-title">No documents yet</div><div class="empty-desc">Add any text and Hive chunks and embeds it, so your agents can search it semantically in chat.</div></div>';
-  });
-}
-
-function addDoc() {
-  const n = $('dcN').value.trim() || 'note-' + Date.now(), t = $('dcT').value;
-  if (!t) { toast('Content is required', 'warning'); return; }
-  api('/api/rag/ingest/text', { method: 'POST', body: JSON.stringify({ text: t, filename: n }) }).then(r => {
-    hideModal('mDoc'); $('dcN').value = ''; $('dcT').value = '';
-    loadDocs(); toast(`Indexed ${r.chunks || '?'} chunks`, 'success');
-  });
-}
-
-function deleteDoc(id) {
-  if (!confirm('Remove this document?')) return;
-  fetch('/api/rag/documents/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + T } })
-    .then(() => { loadDocs(); toast('Document removed', 'success'); });
-}
-
-function runRagQuery() {
-  const q = $('ragQuery').value.trim();
-  if (!q) return;
-  $('ragResults').innerHTML = '<div class="processing" style="padding:12px 0"><div class="processing-dots"><div class="processing-dot"></div><div class="processing-dot"></div><div class="processing-dot"></div></div><div class="processing-text">Searching…</div></div>';
-  api('/api/rag/query', { method: 'POST', body: JSON.stringify({ question: q, top_k: 4 }) }).then(r => {
-    const res = r.results || [];
-    $('ragResults').innerHTML = res.length
-      ? res.map(x => `<div class="rag-answer"><strong>${escHtml(x.filename || x.doc_id || 'doc')} · chunk ${x.chunk_index ?? 0} · relevance ${(x.relevance_score ?? 0).toFixed(2)}</strong>\n${escHtml((x.content || '').substring(0, 500))}</div>`).join('')
-      : '<div class="rag-answer">No matching content found in your knowledge base.</div>';
-  });
-}
-
-/* ═══════════ Dashboard ═══════════ */
-function loadDashboard() {
-  // Each call fails independently — one broken endpoint never blanks the page
-  Promise.all([
-    api('/api/tasks/stats').catch(() => null),
-    api('/api/agents').catch(() => null),
-    api('/api/files').catch(() => null),
-    api('/api/rooms?user_id=' + U).catch(() => null),
-    api('/api/hardware').catch(() => null),
-    api('/api/rag/documents').catch(() => null),
-    api('/api/tasks').catch(() => null),
-  ]).then(([tasks, agents, files, rooms, hw, rag, allTasks]) => {
-    agents = agents || []; rooms = rooms || []; tasks = tasks || {}; allTasks = allTasks || [];
-    AGENTS = agents;
-
-    // Rings row: hive size + throughput
-    const done = tasks.completed || 0;
-    $('dashStats').innerHTML = [
-      ringCard(agents.length, 'Agents', 'your AI workforce', 'var(--accent-hover)', 0),
-      ringCard(rooms.length, 'Chats', 'conversations', 'var(--success)', 60),
-      ringCard(done, 'Tasks Done', `${tasks.running || 0} running now`, 'var(--brand)', 120),
-      ringCard((files || []).length, 'Files', 'shared in chats', 'var(--text-primary)', 180),
-      ringCard(((rag || {}).documents || []).length, 'Knowledge', 'indexed documents', '#AF52DE', 240),
-    ].join('');
-    animateRings('#dashStats');
-
-    // Honeycomb: tasks + message events per day
-    const events = allTasks.map(t => t.created_at);
-    Promise.all(rooms.map(rm => api('/api/rooms/' + rm.id + '/messages?limit=50').catch(() => [])))
-      .then(msgBatches => {
-        msgBatches.forEach(batch => events.push(...(batch || []).map(m => m.created_at)));
-        honeycomb(events, $('dashHoney'));
-      });
-
-    // Agents strip with faces
-    $('dashAgents').innerHTML = agents.slice(0, 8).map((a, i) => `
-      <div class="dash-agent-row" style="animation-delay:${i * 50}ms" onclick="showView('agents')" title="Configure in Agents">
-        ${faceBadge(a.id, a.name, 'monogram-sm')}
-        <div style="min-width:0">
-          <div class="dash-agent-name">${escHtml(a.name)}</div>
-          <div class="dash-agent-sub">${escHtml(a.provider || 'default')}${a.model ? ' · ' + escHtml(a.model) : ''}</div>
-        </div>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>`).join('') || '<div style="color:var(--text-tertiary);font-size:13px;padding:10px 0;line-height:1.6">No agents yet.<br>Create one from the Agents library.</div>';
-
-    const h = (hw || {}).hardware || {};
-    const usage = (hw || {}).usage || {};
-    const gpu = h.gpu && h.gpu !== 'unknown' ? `${h.gpu}${h.gpu_vram_gb ? ` (${h.gpu_vram_gb} GB VRAM)` : ''}` : 'none detected';
-    const line = (k, v) => v !== undefined && v !== '' ? `<div><span style="color:var(--text-tertiary)">${k}:</span> ${escHtml(String(v))}</div>` : '';
-    const bar = (label, pct, detail) => {
-      if (pct === undefined || pct === null) return '';
-      const p = Math.max(0, Math.min(100, pct));
-      const col = p > 80 ? 'var(--error)' : p > 55 ? 'var(--warning)' : 'var(--success)';
-      return `<div style="margin:8px 0">
-        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
-          <span style="color:var(--text-tertiary)">${label}</span><span>${detail || Math.round(p) + '%'}</span>
-        </div>
-        <div style="height:6px;border-radius:99px;background:rgba(255,255,255,0.08);overflow:hidden">
-          <div style="height:100%;width:${p}%;border-radius:99px;background:${col};transition:width 700ms var(--ease-sheet)"></div>
-        </div>
-      </div>`;
-    };
-    $('hwCard').innerHTML = !hw ? 'Hardware info unavailable.' : [
-      bar('CPU usage', usage.cpu_percent),
-      bar('Memory', usage.mem_percent, usage.ram_used_gb !== undefined ? `${usage.ram_used_gb} / ${h.ram_gb || '?'} GB` : ''),
-      line('OS', `${h.os || '?'} ${h.arch || ''}`.trim()),
-      line('CPU cores', h.cpu_cores),
-      line('RAM', h.ram_gb ? `${h.ram_gb} GB` : ''),
-      line('GPU', gpu),
-      line('Local model fit', (hw || {}).recommendation || '')
-    ].join('');
-  });
-}
-
-/* ═══════════ Settings / keys ═══════════ */
-function loadKeys() {
-  Promise.all([api('/api/users/keys?user_id=' + U), api('/api/providers/custom')]).then(([keys, custom]) => {
-    // Dynamic provider selector: built-ins from /api/providers/all + custom
-    api('/api/providers/all?user_id=' + U).then(provs => {
-      const names = Object.keys(provs);
-      const cur = $('keyProvider').value;
-      $('keyProvider').innerHTML = names.map(n =>
-        `<option value="${escHtml(n)}"${provs[n].type === 'custom' ? ' disabled' : ''}>${escHtml(n)}${provs[n].type === 'custom' ? ' (custom — below)' : ''}</option>`).join('');
-      if (cur && names.includes(cur)) $('keyProvider').value = cur;
-    });
-
-    $('keysList').innerHTML = keys.map(k => `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
-      <div>
-        <div style="font-weight:600;font-size:13px">${escHtml(k.provider)}</div>
-        ${k.model ? `<div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">${escHtml(k.model)}</div>` : ''}
-      </div>
-      <button class="btn btn-danger btn-sm" onclick="deleteKey('${escHtml(k.provider)}')">Remove</button>
-    </div>`).join('') || '<div style="color:var(--text-tertiary);font-size:13px;padding:8px 0">No keys configured — add one above so your agents can run.</div>';
-
-    const clist = (custom && (custom.providers || custom)) || {};
-    const items = Array.isArray(clist) ? clist : Object.values(clist);
-    $('customProvidersList').innerHTML = items.map(c => `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
-      <div style="min-width:0">
-        <div style="font-weight:600;font-size:13px">${escHtml(c.name || '')} <span class="pill pill-neutral" style="margin-left:6px">custom</span></div>
-        <div style="font-size:11px;color:var(--text-tertiary);margin-top:2px;font-family:var(--font-mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(c.base_url || '')}</div>
-      </div>
-      <button class="btn btn-danger btn-sm" onclick="deleteCustomProvider('${escHtml(c.name || '')}')">Remove</button>
-    </div>`).join('') || '<div style="color:var(--text-tertiary);font-size:13px;padding:8px 0">No custom providers yet.</div>';
-  });
-}
-
-function addCustomProvider() {
-  const name = $('cpName').value.trim(), url = $('cpUrl').value.trim(), key = $('cpKey').value.trim();
-  if (!name || !url) { toast('Name and base URL are required', 'warning'); return; }
-  api('/api/providers/custom', { method: 'POST', body: JSON.stringify({ name, base_url: url, api_key: key }) })
-    .then(r => {
-      if (r.status === 'added' || r.name) {
-        $('cpName').value = ''; $('cpUrl').value = ''; $('cpKey').value = '';
-        loadKeys(); loadProviders();
-        toast(`Custom provider "${name}" added`, 'success');
-      } else toast(r.detail || 'Failed to add provider', 'error');
-    });
-}
-
-function deleteCustomProvider(name) {
-  if (!confirm(`Remove custom provider "${name}"?`)) return;
-  fetch('/api/providers/custom/' + encodeURIComponent(name), { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + T } })
-    .then(() => { loadKeys(); loadProviders(); toast('Custom provider removed', 'success'); });
-}
-
-function saveKey() {
-  const p = $('keyProvider').value, k = $('keyValue').value;
-  if (!k) return;
-  api('/api/users/keys?user_id=' + U, { method: 'POST', body: JSON.stringify({ provider: p, api_key: k }) })
-    .then(() => { $('keyValue').value = ''; loadKeys(); toast('API key saved', 'success'); });
-}
-
-function deleteKey(p) {
-  fetch('/api/users/keys/' + p + '?user_id=' + U, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + T } })
-    .then(() => { loadKeys(); toast('API key removed', 'success'); });
-}
-
-function toggleReduceMotion(on) {
-  localStorage.setItem('hiveReduceMotion', on ? '1' : '0');
-  document.body.classList.toggle('reduce-motion', on);
-}
-
-/* ═══════════ Modals ═══════════ */
-function openModal(id) { $(id).classList.add('show'); }
-function hideModal(id) { $(id).classList.remove('show'); }
-
-document.querySelectorAll('.modal-overlay').forEach(m => {
-  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });
+// Initialize on load
+window.addEventListener('DOMContentLoaded', () => {
+  loadAccentColor();
+  loadNotificationSettings();
+  initFileDrop();
 });
-
-/* Chat input: @mention autocomplete + Enter to send */
-const chatInputEl = document.getElementById('chatInput');
-chatInputEl.addEventListener('input', updateMentionMenu);
-chatInputEl.addEventListener('keydown', e => {
-  if (mentionKeydown(e)) return;
-  if (e.key === 'Enter') sendMessage();
-});
-chatInputEl.addEventListener('blur', () => setTimeout(closeMentionMenu, 150));
-
-/* ═══════════ Guided tour ═══════════ */
-const TOUR = [
-  {
-    target: null, title: 'Welcome to Hive',
-    body: 'A 60-second tour of your self-hosted AI workforce. Everything runs on your machine, with your own API keys.',
-  },
-  {
-    target: '[data-view="chat"]', title: 'Chat',
-    body: 'Your conversations live here. Create a chat, add agents to it, and talk to them like teammates.',
-  },
-  {
-    target: '[data-view="agents"]', title: 'Agents',
-    body: 'Your AI workforce. Start from 35 professional templates — a Proposal Generator, SEO Strategist, Meeting Notes taker and more — then pick the provider, model, temperature and tools yourself.',
-  },
-  {
-    target: '[data-view="tasks"]', title: 'Tasks',
-    body: 'Hand an agent a background job. It runs the full agent loop and you can watch pending, running and completed work here.',
-  },
-  {
-    target: '[data-view="knowledge"]', title: 'Knowledge',
-    body: 'Paste any text and Hive indexes it for semantic search. Your agents use this as a knowledge base when answering.',
-  },
-  {
-    target: '[data-view="settings"]', title: 'Connect a provider',
-    body: 'Add an API key (OpenAI, Anthropic, Groq, and others) in Settings — this is what makes your agents actually run. Keys never leave your machine.',
-  },
-  {
-    target: null, title: 'Call agents with @',
-    body: 'The part you will use most:',
-    mentionDemo: true,
-  },
-  {
-    target: null, title: 'You are ready',
-    body: 'Create your first agent, drop it into a chat, and mention it with @. You can restart this tour anytime with the ? button in the rail.',
-    cta: 'Open Agents',
-  },
-];
-let tourStep = 0;
-
-function startTour(manual) {
-  if (!T) { toast('Sign in first', 'warning'); return; }
-  tourStep = 0;
-  $('tourOverlay').classList.add('show');
-  renderTourStep();
-}
-
-function endTour() {
-  $('tourOverlay').classList.remove('show');
-  localStorage.setItem('hiveWelcomeDone', '1');
-}
-
-function tourNext() {
-  if (tourStep < TOUR.length - 1) { tourStep++; renderTourStep(); }
-  else {
-    const cta = TOUR[tourStep].cta;
-    endTour();
-    if (cta === 'Open Agents') showView('agents');
-  }
-}
-
-function tourPrev() {
-  if (tourStep > 0) { tourStep--; renderTourStep(); }
-}
-
-function renderTourStep() {
-  const step = TOUR[tourStep];
-  const spot = $('tourSpot'), tip = $('tourTip');
-
-  const target = step.target ? document.querySelector(step.target) : null;
-  if (target) {
-    target.scrollIntoView({ block: 'nearest' });
-    const r = target.getBoundingClientRect();
-    spot.classList.remove('center');
-    spot.style.left = (r.left - 6) + 'px';
-    spot.style.top = (r.top - 6) + 'px';
-    spot.style.width = (r.width + 12) + 'px';
-    spot.style.height = (r.height + 12) + 'px';
-  } else {
-    spot.classList.add('center');
-    spot.style.left = '50%';
-    spot.style.top = '50%';
-    spot.style.width = '2px';
-    spot.style.height = '2px';
-    spot.style.transform = 'translate(-50%, -50%)';
-  }
-  if (target) spot.style.transform = 'none';
-
-  const demo = step.mentionDemo ? `
-    <div class="tour-mention-demo"><b>@Proposal Generator</b> draft a proposal for the Q3 retainer…</div>
-    <div class="tour-body" style="margin-top:8px">Add agents to a chat from the left panel, then type <kbd>@</kbd> in the message box — an autocomplete appears, and the mentioned agent replies in the conversation.</div>` : '';
-
-  tip.innerHTML = `
-    <div class="tour-step-num">Step ${tourStep + 1} of ${TOUR.length}</div>
-    <div class="tour-title">${escHtml(step.title)}</div>
-    <div class="tour-body">${step.body}</div>
-    ${demo}
-    <div class="tour-footer">
-      <div class="tour-dots">${TOUR.map((_, i) => `<div class="tour-dot${i === tourStep ? ' on' : ''}"></div>`).join('')}</div>
-      <div class="tour-btns">
-        ${tourStep > 0 ? '<button class="btn btn-ghost btn-sm" onclick="tourPrev()">Back</button>' : ''}
-        ${tourStep === 0 ? '<button class="btn btn-ghost btn-sm" onclick="endTour()">Skip</button>' : ''}
-        <button class="btn btn-primary btn-sm" onclick="tourNext()">${tourStep === TOUR.length - 1 ? (step.cta || 'Done') : 'Next'}</button>
-      </div>
-    </div>`;
-
-  // Position the tip below (or above) the spotlight, clamped to the viewport
-  const sr = spot.getBoundingClientRect();
-  const tw = Math.min(340, window.innerWidth - 32), th = tip.offsetHeight || 240;
-  let left = Math.max(16, Math.min(sr.left + sr.width / 2 - tw / 2, window.innerWidth - tw - 16));
-  let top = sr.bottom + 68 + 14;
-  if (step.target) {
-    // rail buttons are on the far left — place the tip to their right
-    top = Math.max(16, Math.min(sr.top, window.innerHeight - th - 16));
-    left = sr.right + 18;
-    if (left + tw > window.innerWidth - 16) {
-      left = Math.max(16, window.innerWidth - tw - 16);
-      top = sr.bottom + 14;
-    }
-  } else {
-    top = window.innerHeight / 2 - th / 2 + 90;
-    if (top + th > window.innerHeight - 16) top = window.innerHeight - th - 16;
-  }
-  tip.style.left = left + 'px';
-  tip.style.top = top + 'px';
-  tip.style.width = tw + 'px';
-}
-
-document.addEventListener('keydown', e => {
-  if (!$('tourOverlay').classList.contains('show')) return;
-  if (e.key === 'Escape') endTour();
-  if (e.key === 'ArrowRight' || e.key === 'Enter') tourNext();
-  if (e.key === 'ArrowLeft') tourPrev();
-});
-window.addEventListener('resize', () => {
-  if ($('tourOverlay').classList.contains('show')) renderTourStep();
-});
-
-/* Cursor-tracking glow on cards (CSS var driven) */
-document.addEventListener('pointermove', e => {
-  for (const c of document.elementsFromPoint(e.clientX, e.clientY)) {
-    if (c.classList && (c.classList.contains('stat-card') || c.classList.contains('agent-card'))) {
-      const r = c.getBoundingClientRect();
-      c.style.setProperty('--mx', (e.clientX - r.left) + 'px');
-      c.style.setProperty('--my', (e.clientY - r.top) + 'px');
-    }
-  }
-}, { passive: true });
 </script>
+
 </body>
 </html>
