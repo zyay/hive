@@ -346,31 +346,6 @@ async def list_agents():
     return await get_all_agents()
 
 
-@app.get("/api/agents/{agent_id}")
-async def get_agent_endpoint(agent_id: str):
-    agent = await get_agent(agent_id)
-    if not agent:
-        raise HTTPException(404, "Agent not found")
-    return agent
-
-
-@app.put("/api/agents/{agent_id}")
-async def update_agent_endpoint(agent_id: str, body: AgentUpdate):
-    updates = {k: v for k, v in body.model_dump().items() if v is not None}
-    result = await update_agent(agent_id, updates)
-    if not result:
-        raise HTTPException(404, "Agent not found")
-    return result
-
-
-@app.delete("/api/agents/{agent_id}")
-async def delete_agent_endpoint(agent_id: str):
-    ok = await delete_agent(agent_id)
-    if not ok:
-        raise HTTPException(404, "Agent not found")
-    return {"deleted": True}
-
-
 @app.get("/api/agents/stats")
 async def agent_stats():
     """Get agent statistics."""
@@ -395,6 +370,31 @@ async def agent_stats():
         "active": len([a for a in agents if a.get("active", True)]),
         "with_tools": len([a for a in agents if a.get("tools")]),
     }
+
+
+@app.get("/api/agents/{agent_id}")
+async def get_agent_endpoint(agent_id: str):
+    agent = await get_agent(agent_id)
+    if not agent:
+        raise HTTPException(404, "Agent not found")
+    return agent
+
+
+@app.put("/api/agents/{agent_id}")
+async def update_agent_endpoint(agent_id: str, body: AgentUpdate):
+    updates = {k: v for k, v in body.model_dump().items() if v is not None}
+    result = await update_agent(agent_id, updates)
+    if not result:
+        raise HTTPException(404, "Agent not found")
+    return result
+
+
+@app.delete("/api/agents/{agent_id}")
+async def delete_agent_endpoint(agent_id: str):
+    ok = await delete_agent(agent_id)
+    if not ok:
+        raise HTTPException(404, "Agent not found")
+    return {"deleted": True}
 
 
 # ---------------------------------------------------------------------------
