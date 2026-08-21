@@ -46,7 +46,456 @@
   --dur-fast: 140ms;
   --dur-base: 260ms;
   --dur-slow: 420ms;
+  --ease-apple: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --blur-heavy: 40px;
+  --blur-medium: 20px;
 }
+
+/* ═══════════ Apple-Style Sophistication ═══════════ */
+
+/* Refined Typography */
+body {
+  font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Sophisticated Glassmorphism */
+.glass-premium {
+  background: linear-gradient(135deg, rgba(28,28,30,0.7) 0%, rgba(28,28,30,0.5) 100%);
+  backdrop-filter: blur(var(--blur-heavy)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--blur-heavy)) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 
+    0 8px 32px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+/* Depth Layers - Apple HIG Style */
+.depth-1 { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
+.depth-2 { box-shadow: 0 3px 6px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.12); }
+.depth-3 { box-shadow: 0 10px 20px rgba(0,0,0,0.15), 0 3px 6px rgba(0,0,0,0.10); }
+.depth-4 { box-shadow: 0 15px 25px rgba(0,0,0,0.15), 0 5px 10px rgba(0,0,0,0.05); }
+.depth-5 { box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+
+/* Premium Card Hover */
+.premium-hover {
+  transition: all 0.4s var(--ease-apple);
+}
+
+.premium-hover:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 
+    0 20px 40px rgba(0,0,0,0.3),
+    0 0 0 1px rgba(255,255,255,0.1),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+/* Sophisticated Gradient Borders */
+.gradient-border {
+  position: relative;
+  background: var(--bg-solid-2);
+  border-radius: var(--radius-lg);
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, 
+    rgba(255,255,255,0.1) 0%, 
+    rgba(255,255,255,0.05) 50%, 
+    rgba(255,255,255,0.1) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Apple-Style Segmented Control */
+.apple-segmented {
+  display: inline-flex;
+  background: rgba(120,120,128,0.16);
+  border-radius: 9px;
+  padding: 2px;
+  gap: 0;
+  position: relative;
+}
+
+.apple-segmented-btn {
+  padding: 7px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 7px;
+  transition: all 0.3s var(--ease-apple);
+  position: relative;
+  z-index: 1;
+}
+
+.apple-segmented-btn.active {
+  background: var(--bg-solid-2);
+  color: var(--text-primary);
+  box-shadow: 
+    0 3px 8px rgba(0,0,0,0.15),
+    0 1px 1px rgba(0,0,0,0.1);
+}
+
+/* Refined Input Fields */
+.apple-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(120,120,128,0.12);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 15px;
+  transition: all 0.3s var(--ease-apple);
+  outline: none;
+}
+
+.apple-input:focus {
+  background: rgba(120,120,128,0.16);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(10,132,255,0.15);
+}
+
+.apple-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* Premium Buttons */
+.btn-apple {
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-apple);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-apple-primary {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 2px 8px rgba(10,132,255,0.3);
+}
+
+.btn-apple-primary:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 4px 12px rgba(10,132,255,0.4);
+  transform: translateY(-1px);
+}
+
+.btn-apple-primary:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 4px rgba(10,132,255,0.3);
+}
+
+/* Sophisticated Loading */
+.apple-loader {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.1);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: appleSpin 0.8s linear infinite;
+}
+
+@keyframes appleSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Premium Toast Notifications */
+.toast-apple {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: rgba(28,28,30,0.95);
+  backdrop-filter: blur(var(--blur-heavy));
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 16px 24px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  z-index: 10000;
+  animation: toastSlideUp 0.4s var(--ease-spring) forwards;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 300px;
+}
+
+@keyframes toastSlideUp {
+  to { transform: translateX(-50%) translateY(0); }
+}
+
+/* Refined Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* Sophisticated Cards */
+.card-apple {
+  background: var(--bg-solid-2);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 20px;
+  transition: all 0.4s var(--ease-apple);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-apple::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, 
+    rgba(255,255,255,0.03) 0%, 
+    transparent 50%, 
+    rgba(255,255,255,0.03) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+
+.card-apple:hover::before {
+  opacity: 1;
+}
+
+/* Premium Status Indicators */
+.status-apple {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-apple-active {
+  background: rgba(48,209,88,0.15);
+  color: var(--success);
+}
+
+.status-apple-active::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* Niche: Intelligent Search */
+.search-intelligent {
+  position: relative;
+}
+
+.search-intelligent input {
+  width: 100%;
+  padding: 12px 16px 12px 40px;
+  background: rgba(120,120,128,0.12);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-size: 15px;
+  transition: all 0.3s var(--ease-apple);
+}
+
+.search-intelligent input:focus {
+  background: rgba(120,120,128,0.16);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(10,132,255,0.15);
+}
+
+.search-intelligent::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(235,235,245,0.32)' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat center;
+  pointer-events: none;
+}
+
+/* Niche: Floating Action Button */
+.fab-apple {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 56px;
+  height: 56px;
+  border-radius: 28px;
+  background: var(--accent);
+  border: none;
+  cursor: pointer;
+  box-shadow: 
+    0 8px 24px rgba(10,132,255,0.4),
+    0 4px 8px rgba(0,0,0,0.2);
+  transition: all 0.3s var(--ease-spring);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fab-apple:hover {
+  transform: scale(1.05);
+  box-shadow: 
+    0 12px 32px rgba(10,132,255,0.5),
+    0 6px 12px rgba(0,0,0,0.3);
+}
+
+.fab-apple:active {
+  transform: scale(0.95);
+}
+
+.fab-apple svg {
+  width: 24px;
+  height: 24px;
+  stroke: white;
+  stroke-width: 2;
+  fill: none;
+}
+
+/* Niche: Smooth Page Transitions */
+.page-transition-enter {
+  animation: pageEnter 0.5s var(--ease-apple);
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition-exit {
+  animation: pageExit 0.3s var(--ease-apple);
+}
+
+@keyframes pageExit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* Niche: Intelligent Hover States */
+.hover-intelligent {
+  transition: all 0.3s var(--ease-apple);
+  position: relative;
+}
+
+.hover-intelligent::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, 
+    rgba(255,255,255,0.05) 0%, 
+    transparent 50%
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.hover-intelligent:hover::after {
+  opacity: 1;
+}
+
+/* Niche: Premium Typography Scale */
+.display-large {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.display-medium {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+}
+
+.title-large {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+
+.title-medium {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.4;
+}
+
+.body-large {
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.body-medium {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.caption {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
 
 html, body {
   height: 100vh;
@@ -3349,22 +3798,28 @@ function loadAgents() {
   Promise.all([api('/api/agents'), api('/api/templates')]).then(([agents, templates]) => {
     AGENTS = agents;
     const mine = agents.map((x, i) => `
-      <div class="agent-card" style="animation-delay:${Math.min(i * 40, 320)}ms; cursor: pointer;" onclick="openAgentWindow(AGENTS.find(a => a.id === '${x.id}'))">
+      <div class="agent-card card-apple premium-hover hover-intelligent" style="animation-delay:${Math.min(i * 40, 320)}ms; cursor: pointer;" onclick="openAgentWindow(AGENTS.find(a => a.id === '${x.id}'))">
         <div class="agent-card-top">
           ${faceBadge(x.id, x.name)}
-          <div style="min-width:0">
-            <div class="agent-name">${escHtml(x.name)}</div>
-            <div class="agent-pills">
+          <div style="min-width:0; flex: 1;">
+            <div class="agent-name title-medium">${escHtml(x.name)}</div>
+            <div class="agent-pills" style="margin-top: 6px;">
               <span class="pill pill-accent">${escHtml(x.provider || 'default')}</span>
               ${x.model ? `<span class="pill pill-neutral">${escHtml(x.model)}</span>` : ''}
               <span class="pill pill-neutral">t ${(x.temperature ?? 0.7).toFixed(1)}</span>
             </div>
           </div>
+          ${x.status === 'active' ? '<span class="status-apple status-apple-active">Active</span>' : ''}
         </div>
-        <div class="agent-desc">${escHtml(x.description || x.system_prompt || '')}</div>
+        <div class="agent-desc body-medium">${escHtml(x.description || x.system_prompt || '')}</div>
         <div class="agent-actions">
-          <button class="btn btn-secondary btn-sm" style="flex:1" onclick="openEditAgent('${x.id}')">Configure</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteAgent('${x.id}')">Delete</button>
+          <button class="btn-apple btn-apple-primary" style="flex:1; font-size: 13px; padding: 8px 16px;" onclick="event.stopPropagation(); openEditAgent('${x.id}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            Configure
+          </button>
+          <button class="btn-apple" style="font-size: 13px; padding: 8px 16px; background: rgba(255,69,58,0.1); color: var(--error);" onclick="event.stopPropagation(); deleteAgent('${x.id}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
         </div>
       </div>`).join('');
 
@@ -3381,31 +3836,34 @@ function loadAgents() {
     const catOrder = ['General', 'Growth & Sales', 'Client Delivery', 'Client Success', 'Operations', 'Analytics', 'Creative'];
     let libIdx = 0;
     const lib = catOrder.filter(c => cats[c]).map(c => `
-      <div class="category-head">${categoryIcon(c)}<div class="category-title">${escHtml(c)}</div><div class="category-line"></div></div>
+      <div class="category-head">${categoryIcon(c)}<div class="category-title title-medium">${escHtml(c)}</div><div class="category-line"></div></div>
       <div class="agent-grid">
         ${cats[c].map(t => {
           const d = Math.min(libIdx++ * 40, 480);
           return `
-          <div class="agent-card" style="animation-delay:${d}ms">
+          <div class="agent-card card-apple premium-hover hover-intelligent" style="animation-delay:${d}ms">
             <div class="agent-card-top">
               ${faceBadge(t.id, t.name)}
-              <div style="min-width:0">
-                <div class="agent-name">${escHtml(t.name)}</div>
-                <div class="agent-pills"><span class="pill pill-neutral">template</span></div>
+              <div style="min-width:0; flex: 1;">
+                <div class="agent-name title-medium">${escHtml(t.name)}</div>
+                <div class="agent-pills" style="margin-top: 6px;"><span class="pill pill-neutral">template</span></div>
               </div>
             </div>
-            <div class="agent-desc">${escHtml(t.description)}</div>
+            <div class="agent-desc body-medium">${escHtml(t.description)}</div>
             <div class="agent-actions">
-              <button class="btn btn-primary btn-sm" style="flex:1" onclick="openFromTemplate('${t.id}')">Configure & add</button>
+              <button class="btn-apple btn-apple-primary" style="flex:1; font-size: 13px; padding: 10px 16px;" onclick="openFromTemplate('${t.id}')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Configure & add
+              </button>
             </div>
           </div>`;
         }).join('')}
       </div>`).join('');
 
     $('agentsContent').innerHTML = `
-      <div class="seg">
-        <button class="seg-btn${AGENT_TAB === 'mine' ? ' active' : ''}" data-tab="mine" onclick="showAgentTab('mine')">My Agents</button>
-        <button class="seg-btn${AGENT_TAB === 'lib' ? ' active' : ''}" data-tab="lib" onclick="showAgentTab('lib')">Library</button>
+      <div class="apple-segmented">
+        <button class="apple-segmented-btn${AGENT_TAB === 'mine' ? ' active' : ''}" data-tab="mine" onclick="showAgentTab('mine')">My Agents</button>
+        <button class="apple-segmented-btn${AGENT_TAB === 'lib' ? ' active' : ''}" data-tab="lib" onclick="showAgentTab('lib')">Library</button>
       </div>
       <div id="agentsMine" style="display:${AGENT_TAB === 'mine' ? 'block' : 'none'}">
         <div class="agent-grid">${mine || emptyMine}
@@ -4574,6 +5032,458 @@ window.showLoading = showLoading;
 window.showSkeleton = showSkeleton;
 window.createProgressBar = createProgressBar;
 window.smoothScrollTo = smoothScrollTo;
+
+/* ═══════════ Apple-Style Premium Features ═══════════ */
+
+// Premium Toast System
+class ToastManager {
+  constructor() {
+    this.container = null;
+    this.init();
+  }
+
+  init() {
+    this.container = document.createElement('div');
+    this.container.style.cssText = `
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10000;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 8px;
+      pointer-events: none;
+    `;
+    document.body.appendChild(this.container);
+  }
+
+  show(message, type = 'info', duration = 3000) {
+    const icons = {
+      success: '✓',
+      error: '✕',
+      warning: '⚠',
+      info: 'ℹ'
+    };
+
+    const colors = {
+      success: 'var(--success)',
+      error: 'var(--error)',
+      warning: 'var(--warning)',
+      info: 'var(--accent)'
+    };
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-apple';
+    toast.style.pointerEvents = 'auto';
+    toast.innerHTML = `
+      <div style="
+        width: 24px;
+        height: 24px;
+        border-radius: 12px;
+        background: ${colors[type]};
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 600;
+        color: white;
+        flex-shrink: 0;
+      ">${icons[type]}</div>
+      <div style="flex: 1; font-size: 14px; font-weight: 500;">${message}</div>
+    `;
+
+    this.container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.animation = 'toastSlideDown 0.3s var(--ease-apple) forwards';
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
+  }
+}
+
+const toastManager = new ToastManager();
+window.showToastPremium = (message, type = 'info', duration = 3000) => {
+  toastManager.show(message, type, duration);
+};
+
+// Smooth Page Transitions
+class PageTransitionManager {
+  constructor() {
+    this.currentView = null;
+  }
+
+  transition(fromElement, toElement) {
+    if (fromElement) {
+      fromElement.classList.add('page-transition-exit');
+      setTimeout(() => {
+        fromElement.style.display = 'none';
+        fromElement.classList.remove('page-transition-exit');
+        
+        toElement.style.display = 'block';
+        toElement.classList.add('page-transition-enter');
+        setTimeout(() => {
+          toElement.classList.remove('page-transition-enter');
+        }, 500);
+      }, 300);
+    } else {
+      toElement.style.display = 'block';
+      toElement.classList.add('page-transition-enter');
+      setTimeout(() => {
+        toElement.classList.remove('page-transition-enter');
+      }, 500);
+    }
+    this.currentView = toElement;
+  }
+}
+
+const pageTransitionManager = new PageTransitionManager();
+
+// Intelligent Search with Fuzzy Matching
+class IntelligentSearch {
+  constructor() {
+    this.searchIndex = new Map();
+    this.results = [];
+  }
+
+  addItem(id, text, data) {
+    this.searchIndex.set(id, { text: text.toLowerCase(), data });
+  }
+
+  search(query) {
+    if (!query) return [];
+    
+    const q = query.toLowerCase();
+    const results = [];
+
+    for (const [id, item] of this.searchIndex) {
+      const score = this.calculateScore(q, item.text);
+      if (score > 0) {
+        results.push({ id, score, ...item.data });
+      }
+    }
+
+    return results.sort((a, b) => b.score - a.score);
+  }
+
+  calculateScore(query, text) {
+    // Exact match
+    if (text === query) return 100;
+    
+    // Starts with
+    if (text.startsWith(query)) return 80;
+    
+    // Contains
+    if (text.includes(query)) return 60;
+    
+    // Fuzzy match
+    let score = 0;
+    let queryIndex = 0;
+    
+    for (let i = 0; i < text.length && queryIndex < query.length; i++) {
+      if (text[i] === query[queryIndex]) {
+        score += 10;
+        queryIndex++;
+      }
+    }
+    
+    return queryIndex === query.length ? score : 0;
+  }
+
+  clear() {
+    this.searchIndex.clear();
+  }
+}
+
+const intelligentSearch = new IntelligentSearch();
+window.intelligentSearch = intelligentSearch;
+
+// Floating Action Button Manager
+class FloatingActionButton {
+  constructor() {
+    this.fab = null;
+    this.isExpanded = false;
+    this.actions = [];
+  }
+
+  create(actions) {
+    this.actions = actions;
+    
+    this.fab = document.createElement('button');
+    this.fab.className = 'fab-apple';
+    this.fab.innerHTML = `
+      <svg viewBox="0 0 24 24">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+    `;
+    
+    this.fab.addEventListener('click', () => this.toggle());
+    document.body.appendChild(this.fab);
+  }
+
+  toggle() {
+    this.isExpanded = !this.isExpanded;
+    
+    if (this.isExpanded) {
+      this.expand();
+    } else {
+      this.collapse();
+    }
+  }
+
+  expand() {
+    // Rotate icon
+    this.fab.querySelector('svg').style.transform = 'rotate(45deg)';
+    this.fab.querySelector('svg').style.transition = 'transform 0.3s var(--ease-spring)';
+    
+    // Show actions
+    this.actions.forEach((action, index) => {
+      const actionBtn = document.createElement('button');
+      actionBtn.className = 'fab-apple';
+      actionBtn.style.cssText = `
+        bottom: ${32 + (index + 1) * 72}px;
+        width: 48px;
+        height: 48px;
+        border-radius: 24px;
+        animation: fabActionIn 0.3s var(--ease-spring) ${index * 0.05}s both;
+      `;
+      actionBtn.innerHTML = action.icon;
+      actionBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        action.onClick();
+        this.collapse();
+      });
+      document.body.appendChild(actionBtn);
+    });
+
+    // Add animation keyframes if not exists
+    if (!document.getElementById('fab-animations')) {
+      const style = document.createElement('style');
+      style.id = 'fab-animations';
+      style.textContent = `
+        @keyframes fabActionIn {
+          from {
+            opacity: 0;
+            transform: scale(0.5) translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+        @keyframes fabActionOut {
+          from {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+          to {
+            opacity: 0;
+            transform: scale(0.5) translateY(20px);
+          }
+        }
+        @keyframes toastSlideDown {
+          from {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+          }
+          to {
+            opacity: 0;
+            transform: translateX(-50%) translateY(100px);
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }
+
+  collapse() {
+    // Rotate icon back
+    this.fab.querySelector('svg').style.transform = 'rotate(0deg)';
+    
+    // Hide actions
+    const actionBtns = document.querySelectorAll('.fab-apple:not(:first-of-type)');
+    actionBtns.forEach((btn, index) => {
+      btn.style.animation = `fabActionOut 0.2s var(--ease-apple) ${index * 0.03}s forwards`;
+      setTimeout(() => btn.remove(), 200 + index * 30);
+    });
+    
+    this.isExpanded = false;
+  }
+
+  remove() {
+    if (this.fab) {
+      this.fab.remove();
+      this.fab = null;
+    }
+    this.collapse();
+  }
+}
+
+const fabManager = new FloatingActionButton();
+window.fabManager = fabManager;
+
+// Premium Loading States
+class PremiumLoader {
+  constructor() {
+    this.loaders = new Map();
+  }
+
+  show(container, text = 'Loading...') {
+    const loader = document.createElement('div');
+    loader.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      gap: 16px;
+    `;
+    
+    loader.innerHTML = `
+      <div class="apple-loader"></div>
+      <div style="font-size: 14px; color: var(--text-secondary);">${text}</div>
+    `;
+    
+    container.appendChild(loader);
+    this.loaders.set(container, loader);
+  }
+
+  hide(container) {
+    const loader = this.loaders.get(container);
+    if (loader) {
+      loader.style.animation = 'fadeOut 0.3s var(--ease-apple) forwards';
+      setTimeout(() => {
+        loader.remove();
+        this.loaders.delete(container);
+      }, 300);
+    }
+  }
+}
+
+const premiumLoader = new PremiumLoader();
+window.premiumLoader = premiumLoader;
+
+// Add fadeOut animation
+if (!document.getElementById('premium-animations')) {
+  const style = document.createElement('style');
+  style.id = 'premium-animations';
+  style.textContent = `
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+// Initialize FAB with default actions
+setTimeout(() => {
+  if (typeof showView === 'function') {
+    fabManager.create([
+      {
+        icon: '<svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
+        onClick: () => {
+          showToastPremium('Creating new agent...', 'info');
+          if (typeof showCreateAgent === 'function') showCreateAgent();
+        }
+      },
+      {
+        icon: '<svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>',
+        onClick: () => {
+          showToastPremium('Opening new chat...', 'info');
+          showView('chat');
+        }
+      },
+      {
+        icon: '<svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>',
+        onClick: () => {
+          showToastPremium('Uploading file...', 'info');
+          if (typeof uploadFile === 'function') uploadFile();
+        }
+      }
+    ]);
+  }
+}, 1000);
+
+// Enhance existing showView with transitions
+const originalShowView = window.showView;
+window.showView = function(viewName) {
+  const currentView = document.querySelector('.view.active');
+  const newView = document.querySelector(`[data-view="${viewName}"]`);
+  
+  if (newView) {
+    pageTransitionManager.transition(currentView, newView);
+    if (currentView) currentView.classList.remove('active');
+    newView.classList.add('active');
+  }
+  
+  if (originalShowView) originalShowView(viewName);
+};
+
+// Enhance button clicks with haptic feedback simulation
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.btn-apple, .fab-apple, .apple-segmented-btn');
+  if (btn && navigator.vibrate) {
+    navigator.vibrate(10);
+  }
+});
+
+// Add premium hover effects to all cards
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.card-apple, .agent-card').forEach(card => {
+    card.classList.add('premium-hover', 'hover-intelligent');
+  });
+});
+
+// Intelligent scroll behavior
+let lastScrollY = 0;
+let ticking = false;
+
+window.addEventListener('scroll', () => {
+  if (!ticking) {
+    window.requestAnimationFrame(() => {
+      const currentScrollY = window.scrollY;
+      
+      // Hide FAB when scrolling down
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        document.querySelectorAll('.fab-apple').forEach(fab => {
+          fab.style.transform = 'translateY(100px)';
+          fab.style.opacity = '0';
+        });
+      } else {
+        document.querySelectorAll('.fab-apple').forEach(fab => {
+          fab.style.transform = 'translateY(0)';
+          fab.style.opacity = '1';
+        });
+      }
+      
+      lastScrollY = currentScrollY;
+      ticking = false;
+    });
+    
+    ticking = true;
+  }
+});
+
+// Premium focus management for inputs
+document.addEventListener('focusin', (e) => {
+  if (e.target.matches('.apple-input, input, textarea, select')) {
+    e.target.parentElement.classList.add('focused');
+  }
+});
+
+document.addEventListener('focusout', (e) => {
+  if (e.target.matches('.apple-input, input, textarea, select')) {
+    e.target.parentElement.classList.remove('focused');
+  }
+});
+
+// Export premium features
+window.pageTransitionManager = pageTransitionManager;
+window.premiumLoader = premiumLoader;
+window.fabManager = fabManager;
+
 
 /* ═══════════ Interactive Particle Background ═══════════ */
 class ParticleSystem {
