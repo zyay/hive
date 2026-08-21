@@ -52,6 +52,274 @@
   --blur-medium: 20px;
 }
 
+/* ═══════════ Playful Animations ═══════════ */
+
+/* Bounce animation - subtle and playful */
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes bounce-in {
+  0% { transform: scale(0.9); opacity: 0; }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Wiggle animation - gentle movement */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-2deg); }
+  75% { transform: rotate(2deg); }
+}
+
+/* Pop animation - quick scale up/down */
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* Slide in from bottom */
+@keyframes slide-up {
+  0% { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* Fade and scale */
+@keyframes fade-scale {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Pulse glow */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(10, 132, 255, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(10, 132, 255, 0); }
+}
+
+/* Playful easing functions */
+:root {
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-bounce-soft: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-playful: cubic-bezier(0.5, 1.5, 0.5, 1);
+}
+
+/* Interactive button styles */
+.btn {
+  transition: all var(--dur-fast) var(--ease-bounce-soft);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.98);
+  transition-duration: 80ms;
+}
+
+/* Ripple effect on click */
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Card hover with playful lift */
+.card {
+  transition: all var(--dur-base) var(--ease-bounce-soft);
+}
+
+.card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+}
+
+/* Agent card special hover */
+.agent-card {
+  transition: all var(--dur-base) var(--ease-bounce-soft);
+}
+
+.agent-card:hover {
+  transform: translateY(-4px) scale(1.015);
+  box-shadow: 0 8px 20px rgba(10,132,255,0.15);
+}
+
+.agent-card:hover .agent-avatar {
+  animation: wiggle 0.4s var(--ease-bounce);
+}
+
+/* Input focus animation */
+.input:focus,
+textarea:focus,
+select:focus {
+  transform: scale(1.01);
+  transition: all var(--dur-fast) var(--ease-bounce-soft);
+}
+
+/* Icon bounce on hover */
+.btn svg,
+.icon-btn svg {
+  transition: transform var(--dur-fast) var(--ease-bounce);
+}
+
+.btn:hover svg,
+.icon-btn:hover svg {
+  transform: scale(1.15);
+}
+
+/* Badge pop animation */
+.badge,
+.pill {
+  transition: all var(--dur-fast) var(--ease-bounce-soft);
+}
+
+.badge:hover,
+.pill:hover {
+  transform: scale(1.08);
+}
+
+/* Stagger animation for lists */
+.list-item {
+  animation: slide-up 0.4s var(--ease-bounce-soft) backwards;
+}
+
+.list-item:nth-child(1) { animation-delay: 0ms; }
+.list-item:nth-child(2) { animation-delay: 50ms; }
+.list-item:nth-child(3) { animation-delay: 100ms; }
+.list-item:nth-child(4) { animation-delay: 150ms; }
+.list-item:nth-child(5) { animation-delay: 200ms; }
+
+/* Page transition */
+.page-enter {
+  animation: fade-scale 0.3s var(--ease-bounce-soft);
+}
+
+/* Toast notifications with bounce */
+.toast {
+  animation: slide-up 0.4s var(--ease-bounce);
+}
+
+/* Modal entrance */
+.modal-content {
+  animation: bounce-in 0.4s var(--ease-bounce-soft);
+}
+
+/* Tab switch animation */
+.tab-btn {
+  transition: all var(--dur-fast) var(--ease-bounce-soft);
+}
+
+.tab-btn.active {
+  transform: scale(1.05);
+}
+
+/* Floating action button */
+.fab {
+  transition: all var(--dur-fast) var(--ease-bounce);
+}
+
+.fab:hover {
+  transform: scale(1.1) rotate(90deg);
+}
+
+.fab:active {
+  transform: scale(0.95) rotate(90deg);
+}
+
+/* Loading spinner with bounce */
+@keyframes bounce-spinner {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.1); }
+}
+
+.spinner {
+  animation: bounce-spinner 1s var(--ease-bounce) infinite;
+}
+
+/* Checkbox/radio bounce */
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+  animation: pop 0.3s var(--ease-bounce);
+}
+
+/* Tooltip entrance */
+.tooltip {
+  animation: fade-scale 0.2s var(--ease-bounce-soft);
+}
+
+/* Progress bar with pulse */
+.progress-fill {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Skeleton loading with playful shimmer */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Success checkmark animation */
+@keyframes check-bounce {
+  0% { transform: scale(0) rotate(-45deg); }
+  50% { transform: scale(1.2) rotate(-45deg); }
+  100% { transform: scale(1) rotate(-45deg); }
+}
+
+.success-icon {
+  animation: check-bounce 0.5s var(--ease-bounce);
+}
+
+/* Playful border radius for cards */
+.card,
+.agent-card,
+.modal-content {
+  border-radius: var(--radius-lg);
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection animation */
+::selection {
+  background: var(--accent-soft);
+  animation: pop 0.2s var(--ease-bounce);
+}
+
 /* ═══════════ Apple-Style Sophistication ═══════════ */
 
 /* Refined Typography */
@@ -5572,6 +5840,225 @@ document.addEventListener('keydown', (e) => {
     if (e.key === '4') { e.preventDefault(); showView('dashboard'); }
   }
 });
+
+/* ═══════════ Playful Interactive Animations ═══════════ */
+
+// Intersection Observer for scroll animations
+const observerOptions = {
+  threshold: 0.1,
+  rootMargin: '0px 0px -50px 0px'
+};
+
+const animationObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('page-enter');
+      animationObserver.unobserve(entry.target);
+    }
+  });
+}, observerOptions);
+
+// Observe cards and sections for scroll animations
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.card, .agent-card, .stat-card').forEach(el => {
+    animationObserver.observe(el);
+  });
+});
+
+// Enhanced ripple effect for all buttons
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.btn');
+  if (!btn) return;
+  
+  const ripple = document.createElement('span');
+  const rect = btn.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  const x = e.clientX - rect.left - size / 2;
+  const y = e.clientY - rect.top - size / 2;
+  
+  ripple.style.width = ripple.style.height = size + 'px';
+  ripple.style.left = x + 'px';
+  ripple.style.top = y + 'px';
+  ripple.style.position = 'absolute';
+  ripple.style.borderRadius = '50%';
+  ripple.style.background = 'rgba(255, 255, 255, 0.3)';
+  ripple.style.transform = 'scale(0)';
+  ripple.style.animation = 'ripple 0.6s ease-out';
+  ripple.style.pointerEvents = 'none';
+  
+  btn.style.position = 'relative';
+  btn.style.overflow = 'hidden';
+  btn.appendChild(ripple);
+  
+  setTimeout(() => ripple.remove(), 600);
+});
+
+// Add ripple keyframes dynamically
+if (!document.getElementById('ripple-keyframes')) {
+  const style = document.createElement('style');
+  style.id = 'ripple-keyframes';
+  style.textContent = `
+    @keyframes ripple {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+// Stagger animation for dynamically loaded lists
+function staggerAnimate(container, selector = '.list-item, .agent-card, .card') {
+  const items = container.querySelectorAll(selector);
+  items.forEach((item, index) => {
+    item.style.animationDelay = `${index * 50}ms`;
+    item.classList.add('list-item');
+  });
+}
+
+// Apply stagger to agent grid when loaded
+const originalLoadAgents = window.loadAgents;
+if (originalLoadAgents) {
+  window.loadAgents = function(...args) {
+    const result = originalLoadAgents.apply(this, args);
+    setTimeout(() => {
+      const grid = document.querySelector('.agent-grid');
+      if (grid) staggerAnimate(grid, '.agent-card');
+    }, 100);
+    return result;
+  };
+}
+
+// Playful hover sound effect (subtle)
+let audioContext = null;
+function playHoverSound() {
+  if (!audioContext) {
+    try {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (e) {
+      return;
+    }
+  }
+  
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  
+  oscillator.frequency.value = 800;
+  oscillator.type = 'sine';
+  
+  gainNode.gain.setValueAtTime(0.01, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+  
+  oscillator.start(audioContext.currentTime);
+  oscillator.stop(audioContext.currentTime + 0.1);
+}
+
+// Optional: Add hover sound to agent cards (disabled by default for subtlety)
+// document.addEventListener('mouseover', (e) => {
+//   if (e.target.closest('.agent-card')) {
+//     playHoverSound();
+//   }
+// });
+
+// Smooth page transitions
+const originalShowView = window.showView;
+if (originalShowView) {
+  window.showView = function(viewName) {
+    const view = document.getElementById(`view-${viewName}`);
+    if (view) {
+      view.classList.add('page-enter');
+      setTimeout(() => view.classList.remove('page-enter'), 300);
+    }
+    return originalShowView.apply(this, arguments);
+  };
+}
+
+// Success animation for toast notifications
+const originalToast = window.toast;
+if (originalToast) {
+  window.toast = function(message, type = 'info') {
+    const result = originalToast.apply(this, arguments);
+    // Add bounce animation to toast
+    setTimeout(() => {
+      const toasts = document.querySelectorAll('.toast');
+      toasts.forEach(toast => {
+        toast.classList.add('toast');
+      });
+    }, 50);
+    return result;
+  };
+}
+
+// Magnetic effect for primary buttons (subtle)
+document.addEventListener('mousemove', (e) => {
+  const btn = e.target.closest('.btn-primary');
+  if (!btn) return;
+  
+  const rect = btn.getBoundingClientRect();
+  const x = e.clientX - rect.left - rect.width / 2;
+  const y = e.clientY - rect.top - rect.height / 2;
+  
+  // Only apply magnetic effect when close to button
+  const distance = Math.sqrt(x * x + y * y);
+  if (distance < 50) {
+    btn.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
+  }
+});
+
+document.addEventListener('mouseleave', (e) => {
+  if (e.target.classList && e.target.classList.contains('btn-primary')) {
+    e.target.style.transform = 'translate(0, 0)';
+  }
+}, true);
+
+// Add playful bounce to checkboxes and radios
+document.addEventListener('change', (e) => {
+  if (e.target.type === 'checkbox' || e.target.type === 'radio') {
+    e.target.style.animation = 'none';
+    setTimeout(() => {
+      e.target.style.animation = 'pop 0.3s var(--ease-bounce)';
+    }, 10);
+  }
+});
+
+// Smooth scroll to top on logo click
+document.addEventListener('click', (e) => {
+  if (e.target.closest('.logo')) {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+});
+
+// Add subtle parallax to cards on mouse move
+document.addEventListener('mousemove', (e) => {
+  const cards = document.querySelectorAll('.card:hover, .agent-card:hover');
+  cards.forEach(card => {
+    const rect = card.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    
+    card.style.transform = `
+      translateY(-6px) 
+      scale(1.01)
+      perspective(1000px)
+      rotateY(${x * 5}deg)
+      rotateX(${-y * 5}deg)
+    `;
+  });
+});
+
+// Reset card transform on mouse leave
+document.addEventListener('mouseleave', (e) => {
+  if (e.target.classList && (e.target.classList.contains('card') || e.target.classList.contains('agent-card'))) {
+    e.target.style.transform = '';
+  }
+}, true);
+
+console.log('✨ Playful animations loaded!');
 
 </script>
 </body>
