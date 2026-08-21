@@ -1623,436 +1623,108 @@ label.lbl { font-size: 12px; font-weight: 600; color: var(--text-secondary); dis
 .stat-value { font-size: 32px; font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
 .stat-label { font-size: 11px; color: var(--text-tertiary); margin-top: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; }
 
-/* ═══════════ Interactive Particle Background ═══════════ */
-#particleCanvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.4;
+/* ═══════════ Clean Page Styles ═══════════ */
+.page-header {
+  margin-bottom: 32px;
 }
 
-/* ═══════════ Holographic Cards ═══════════ */
-.holographic {
-  position: relative;
-  overflow: hidden;
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+  color: var(--text-primary);
 }
 
-.holographic::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    45deg,
-    transparent 30%,
-    rgba(255, 0, 255, 0.08) 40%,
-    rgba(0, 255, 255, 0.08) 50%,
-    rgba(255, 255, 0, 0.08) 60%,
-    transparent 70%
-  );
-  animation: holographicShift 3s ease-in-out infinite;
-  pointer-events: none;
+.page-subtitle {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.5;
 }
 
-@keyframes holographicShift {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  25% { transform: translate(10%, 10%) rotate(90deg); }
-  50% { transform: translate(0, 20%) rotate(180deg); }
-  75% { transform: translate(-10%, 10%) rotate(270deg); }
+.stats-grid-clean {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
 }
 
-/* ═══════════ Neon Glow Effects ═══════════ */
-.neon-text {
-  text-shadow: 
-    0 0 5px currentColor,
-    0 0 10px currentColor,
-    0 0 20px currentColor,
-    0 0 40px currentColor;
-  animation: neonPulse 2s ease-in-out infinite;
-}
-
-@keyframes neonPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.8; }
-}
-
-.neon-border {
-  box-shadow: 
-    0 0 5px var(--accent),
-    0 0 10px var(--accent),
-    inset 0 0 5px var(--accent),
-    inset 0 0 10px var(--accent);
-  animation: neonBorderPulse 2s ease-in-out infinite;
-}
-
-@keyframes neonBorderPulse {
-  0%, 100% { 
-    box-shadow: 
-      0 0 5px var(--accent),
-      0 0 10px var(--accent),
-      inset 0 0 5px var(--accent),
-      inset 0 0 10px var(--accent);
-  }
-  50% { 
-    box-shadow: 
-      0 0 10px var(--accent),
-      0 0 20px var(--accent),
-      0 0 30px var(--accent),
-      inset 0 0 10px var(--accent),
-      inset 0 0 20px var(--accent);
-  }
-}
-
-/* ═══════════ Particle Explosion ═══════════ */
-.particle {
-  position: fixed;
-  pointer-events: none;
-  z-index: 9999;
-}
-
-.particle-circle {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 10px var(--accent);
-}
-
-.particle-star {
-  width: 0;
-  height: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-bottom: 8px solid var(--accent);
-  filter: drop-shadow(0 0 5px var(--accent));
-}
-
-@keyframes particleExplode {
-  0% {
-    transform: translate(0, 0) scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(var(--tx), var(--ty)) scale(0);
-    opacity: 0;
-  }
-}
-
-/* ═══════════ Command Palette ═══════════ */
-.command-palette {
-  position: fixed;
-  top: 20%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 600px;
-  max-width: 90vw;
-  background: rgba(20, 20, 25, 0.95);
-  backdrop-filter: blur(20px) saturate(180%);
+.stat-card-clean {
+  background: var(--bg-solid-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1);
-  z-index: 10000;
-  display: none;
-  animation: commandPaletteIn 0.2s ease-out;
+  padding: 24px;
+  transition: all var(--dur-base) var(--ease-spring);
 }
 
-.command-palette.active {
-  display: block;
+.stat-card-clean:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
 }
 
-@keyframes commandPaletteIn {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0) scale(1);
-  }
-}
-
-.command-palette-input {
-  width: 100%;
-  padding: 20px 24px;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--border);
-  color: var(--text-primary);
-  font-size: 16px;
-  outline: none;
-}
-
-.command-palette-input::placeholder {
+.stat-label-clean {
+  font-size: 13px;
+  font-weight: 500;
   color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
 }
 
-.command-palette-results {
-  max-height: 400px;
-  overflow-y: auto;
-  padding: 8px;
-}
-
-.command-item {
-  padding: 12px 16px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.stat-value-clean {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   color: var(--text-primary);
 }
 
-.command-item:hover,
-.command-item.selected {
-  background: var(--accent-soft);
-  color: var(--accent);
+.section-clean {
+  margin-bottom: 32px;
 }
 
-.command-item-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-sm);
-  background: var(--bg-solid-3);
+.section-header-clean {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  margin-bottom: 16px;
 }
 
-.command-item-content {
-  flex: 1;
-}
-
-.command-item-title {
+.section-title-clean {
+  font-size: 18px;
   font-weight: 600;
-  margin-bottom: 2px;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
 }
 
-.command-item-desc {
-  font-size: 12px;
-  color: var(--text-tertiary);
+.card-clean {
+  background: var(--bg-solid-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 16px;
 }
 
-.command-item-shortcut {
-  font-size: 11px;
-  color: var(--text-tertiary);
-  background: var(--bg-solid-3);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-family: var(--font-mono);
+.card-clean-title {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 16px;
+  color: var(--text-primary);
 }
 
-/* ═══════════ Audio Wave Visualization ═══════════ */
-.audio-wave {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  height: 24px;
-}
-
-.audio-wave-bar {
-  width: 3px;
-  background: var(--accent);
-  border-radius: 2px;
-  animation: audioWave 1s ease-in-out infinite;
-}
-
-.audio-wave-bar:nth-child(1) { animation-delay: 0s; height: 40%; }
-.audio-wave-bar:nth-child(2) { animation-delay: 0.1s; height: 60%; }
-.audio-wave-bar:nth-child(3) { animation-delay: 0.2s; height: 80%; }
-.audio-wave-bar:nth-child(4) { animation-delay: 0.3s; height: 100%; }
-.audio-wave-bar:nth-child(5) { animation-delay: 0.4s; height: 80%; }
-.audio-wave-bar:nth-child(6) { animation-delay: 0.5s; height: 60%; }
-.audio-wave-bar:nth-child(7) { animation-delay: 0.6s; height: 40%; }
-
-@keyframes audioWave {
-  0%, 100% { transform: scaleY(0.3); }
-  50% { transform: scaleY(1); }
-}
-
-/* ═══════════ Context Menu ═══════════ */
-.context-menu {
-  position: fixed;
-  background: rgba(20, 20, 25, 0.95);
-  backdrop-filter: blur(20px) saturate(180%);
+.list-item-clean {
+  padding: 16px;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1);
-  padding: 6px;
-  z-index: 10000;
-  min-width: 180px;
-  animation: contextMenuIn 0.15s ease-out;
-}
-
-@keyframes contextMenuIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.context-menu-item {
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--text-primary);
-  font-size: 13px;
-}
-
-.context-menu-item:hover {
-  background: var(--accent-soft);
-  color: var(--accent);
-}
-
-.context-menu-divider {
-  height: 1px;
-  background: var(--border);
-  margin: 6px 0;
-}
-
-/* ═══════════ Custom Scrollbar ═══════════ */
-::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
-}
-
-::-webkit-scrollbar-track {
+  margin-bottom: 8px;
   background: var(--bg-solid-2);
-  border-radius: 6px;
+  transition: all var(--dur-fast) var(--ease-spring);
 }
 
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, var(--accent), var(--success));
-  border-radius: 6px;
-  border: 2px solid var(--bg-solid-2);
-  transition: all 0.3s ease;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, var(--accent-hover), var(--success));
-  box-shadow: 0 0 10px var(--accent);
-}
-
-::-webkit-scrollbar-corner {
-  background: var(--bg-solid-2);
-}
-
-/* ═══════════ Morphing Transitions ═══════════ */
-.view-morph-enter {
-  animation: morphEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes morphEnter {
-  0% {
-    opacity: 0;
-    transform: scale(0.95) translateY(10px);
-    filter: blur(10px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    filter: blur(0);
-  }
-}
-
-.view-morph-exit {
-  animation: morphExit 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes morphExit {
-  0% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    filter: blur(0);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(1.05) translateY(-10px);
-    filter: blur(10px);
-  }
-}
-
-/* ═══════════ Advanced Micro-interactions ═══════════ */
-.magnetic {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.tilt-card {
-  transform-style: preserve-3d;
-  transition: transform 0.3s ease;
-}
-
-.tilt-card:hover {
-  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-}
-
-/* ═══════════ Status Indicators ═══════════ */
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  position: relative;
-}
-
-.status-dot::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0.3;
-  animation: statusPulse 2s ease-in-out infinite;
-}
-
-@keyframes statusPulse {
-  0%, 100% { transform: scale(1); opacity: 0.3; }
-  50% { transform: scale(1.5); opacity: 0; }
-}
-
-.status-online { color: var(--success); }
-.status-offline { color: var(--text-tertiary); }
-.status-busy { color: var(--warning); }
-
-/* ═══════════ Loading Skeletons ═══════════ */
-.skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--bg-solid-3) 0%,
-    var(--bg-solid-2) 50%,
-    var(--bg-solid-3) 100%
-  );
-  background-size: 200% 100%;
-  animation: skeletonShimmer 1.5s ease-in-out infinite;
-  border-radius: var(--radius-sm);
-}
-
-@keyframes skeletonShimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-/* ═══════════ Theme Transition ═══════════ */
-body {
-  transition: background-color 0.5s ease, color 0.5s ease;
-}
-
-body.theme-transitioning * {
-  transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease !important;
+.list-item-clean:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-solid-3);
 }
 
 /* ═══════════ Agents ═══════════ */
@@ -2952,168 +2624,177 @@ body.theme-transitioning * {
 
     <!-- Tasks -->
     <div id="view-tasks" class="view">
-      <div class="topbar">
-        <div>
-          <div class="topbar-title">Tasks</div>
-          <div class="topbar-subtitle">Background jobs your agents run and report on</div>
-        </div>
-        <div class="topbar-actions">
-          <button class="btn btn-primary btn-sm" onclick="openModal('mTask')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            New Task
-          </button>
-        </div>
-      </div>
-      <div class="content">
-        <div class="stats-grid" id="taskStats"></div>
-        <div class="card honey-card">
-          <div class="section-head" style="margin-bottom:10px">
+      <div class="content" style="padding: 32px;">
+        <div class="page-header">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
-              <div class="section-title" style="font-size:15px">Activity</div>
-              <div style="font-size:12px;color:var(--text-tertiary)">Task runs over the last 12 weeks</div>
+              <div class="page-title">Tasks</div>
+              <div class="page-subtitle">Background jobs your agents run and report on</div>
             </div>
-            <div class="honey-legend">
-              <span>Less</span>
-              <i class="hx lv0"></i><i class="hx lv1"></i><i class="hx lv2"></i><i class="hx lv3"></i><i class="hx lv4"></i>
-              <span>More</span>
-            </div>
+            <button class="btn btn-primary" onclick="openModal('mTask')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              New Task
+            </button>
           </div>
-          <div id="taskHoney" class="honey-wrap"></div>
         </div>
-        <div class="section-head"><div class="section-title">All tasks</div></div>
-        <div id="tasksList"></div>
+        
+        <div class="stats-grid-clean" id="taskStats"></div>
+        
+        <div class="section-clean">
+          <div class="section-header-clean">
+            <div class="section-title-clean">All Tasks</div>
+          </div>
+          <div id="tasksList"></div>
+        </div>
       </div>
     </div>
 
     <!-- Knowledge (RAG) -->
     <div id="view-knowledge" class="view">
-      <div class="topbar">
-        <div>
-          <div class="topbar-title">Knowledge</div>
-          <div class="topbar-subtitle">Documents your agents can search with semantic retrieval</div>
+      <div class="content" style="padding: 32px;">
+        <div class="page-header">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <div class="page-title">Knowledge</div>
+              <div class="page-subtitle">Documents your agents can search with semantic retrieval</div>
+            </div>
+            <button class="btn btn-primary" onclick="openModal('mDoc')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Document
+            </button>
+          </div>
         </div>
-        <div class="topbar-actions">
-          <button class="btn btn-primary btn-sm" onclick="openModal('mDoc')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add Text
-          </button>
-        </div>
-      </div>
-      <div class="content">
-        <div class="card" style="margin-bottom:22px">
-          <div style="font-weight:700;margin-bottom:12px;font-size:15px;letter-spacing:-0.01em">Ask your knowledge base</div>
-          <div style="display:flex;gap:8px">
-            <input id="ragQuery" class="input" placeholder="Ask a question across all documents…" onkeydown="if(event.key==='Enter')runRagQuery()">
+
+        <div class="card-clean" style="margin-bottom: 24px;">
+          <div class="card-clean-title">Search Knowledge Base</div>
+          <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+            <input id="ragQuery" class="input" placeholder="Ask a question across all documents…" onkeydown="if(event.key==='Enter')runRagQuery()" style="flex: 1;">
             <button class="btn btn-primary" onclick="runRagQuery()">Search</button>
           </div>
           <div id="ragResults"></div>
         </div>
-        <div class="section-head">
-          <div class="section-title">Documents</div>
-          <div style="font-size:12px;color:var(--text-tertiary)" id="docCount"></div>
+
+        <div class="section-clean">
+          <div class="section-header-clean">
+            <div class="section-title-clean">Documents</div>
+            <div style="font-size: 13px; color: var(--text-secondary);" id="docCount"></div>
+          </div>
+          <div id="docsList"></div>
         </div>
-        <div id="docsList"></div>
       </div>
     </div>
 
     <!-- Dashboard -->
     <div id="view-dashboard" class="view">
-      <div class="topbar">
-        <div>
-          <div class="topbar-title">Dashboard</div>
-          <div class="topbar-subtitle">Everything happening in your hive</div>
+      <div class="content" style="padding: 32px;">
+        <div class="page-header">
+          <div class="page-title">Dashboard</div>
+          <div class="page-subtitle">Everything happening in your hive</div>
         </div>
-      </div>
-      <div class="content">
-        <div class="stats-grid" id="dashStats"></div>
-        <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:20px" class="dash-cols">
-          <div class="card honey-card">
-            <div class="section-head" style="margin-bottom:10px">
-              <div>
-                <div class="section-title" style="font-size:15px">Activity</div>
-                <div style="font-size:12px;color:var(--text-tertiary)">Tasks and messages over the last 12 weeks</div>
-              </div>
-              <div class="honey-legend">
-                <span>Less</span>
-                <i class="hx lv0"></i><i class="hx lv1"></i><i class="hx lv2"></i><i class="hx lv3"></i><i class="hx lv4"></i>
-                <span>More</span>
-              </div>
-            </div>
-            <div id="dashHoney" class="honey-wrap"></div>
+
+        <div class="stats-grid-clean" id="dashStats"></div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 32px;">
+          <div class="card-clean">
+            <div class="card-clean-title">Your Agents</div>
+            <div id="dashAgents" style="display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto;"></div>
           </div>
-          <div class="card" style="display:flex;flex-direction:column">
-            <div class="section-title" style="font-size:15px;margin-bottom:12px">Your agents</div>
-            <div id="dashAgents" style="display:flex;flex-direction:column;gap:8px;flex:1;overflow-y:auto"></div>
+          
+          <div class="card-clean">
+            <div class="card-clean-title">Hardware</div>
+            <div id="hwCard"></div>
           </div>
         </div>
-        <div class="section-head"><div class="section-title">Hardware</div></div>
-        <div class="card hw-card" id="hwCard"></div>
       </div>
     </div>
 
     <!-- Settings -->
     <div id="view-settings" class="view">
-      <div class="topbar">
-        <div>
-          <div class="topbar-title">Settings</div>
-          <div class="topbar-subtitle">Account, provider keys, and interface</div>
+      <div class="content" style="padding: 32px; max-width: 900px;">
+        <div class="page-header">
+          <div class="page-title">Settings</div>
+          <div class="page-subtitle">Account, provider keys, and interface</div>
         </div>
-      </div>
-      <div class="content">
-        <div class="card" style="margin-bottom:18px">
-          <div style="font-weight:700;margin-bottom:16px;font-size:15px;letter-spacing:-0.01em">Profile</div>
-          <div style="display:flex;gap:16px;align-items:center">
-            <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(145deg,#3A3A3C,#2C2C2E);display:flex;align-items:center;justify-content:center;color:var(--text-primary);font-size:24px;font-weight:700;border:2px solid var(--border-strong)" id="profileAvatar"></div>
+
+        <div class="card-clean" style="margin-bottom: 24px;">
+          <div class="card-clean-title">Profile</div>
+          <div style="display: flex; gap: 20px; align-items: center;">
+            <div id="profileAvatar" style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(145deg, #3A3A3C, #2C2C2E); display: flex; align-items: center; justify-content: center; color: var(--text-primary); font-size: 24px; font-weight: 700; border: 2px solid var(--border-strong);"></div>
             <div>
-              <div style="font-weight:700;font-size:16px;margin-bottom:3px;letter-spacing:-0.015em" id="profileName"></div>
-              <div style="font-size:13px;color:var(--text-tertiary)" id="profileUsername"></div>
+              <div id="profileName" style="font-weight: 600; font-size: 16px; margin-bottom: 4px; color: var(--text-primary);"></div>
+              <div id="profileUsername" style="font-size: 14px; color: var(--text-secondary);"></div>
             </div>
           </div>
         </div>
 
-        <div class="card" style="margin-bottom:18px">
-          <div style="font-weight:700;margin-bottom:6px;font-size:15px;letter-spacing:-0.01em">API Keys</div>
-          <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:10px">Connect a provider so your agents can run. Keys stay on your machine.</div>
-          <div id="keysList"></div>
-          <div style="display:flex;gap:8px;margin-top:16px">
-            <select id="keyProvider" class="input" style="width:170px"></select>
-            <input id="keyValue" class="input" placeholder="sk-…" style="flex:1">
-            <button class="btn btn-primary btn-sm" onclick="saveKey()">Save</button>
+        <div class="card-clean" style="margin-bottom: 24px;">
+          <div class="card-clean-title">API Keys</div>
+          <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5;">
+            Connect a provider so your agents can run. Keys stay on your machine.
+          </p>
+          
+          <div id="keysList" style="margin-bottom: 20px;"></div>
+          
+          <div style="display: flex; gap: 12px; align-items: flex-end;">
+            <div style="flex: 1;">
+              <label class="lbl" style="margin-bottom: 6px;">Provider</label>
+              <select id="keyProvider" class="input"></select>
+            </div>
+            <div style="flex: 2;">
+              <label class="lbl" style="margin-bottom: 6px;">API Key</label>
+              <input id="keyValue" class="input" placeholder="sk-…">
+            </div>
+            <button class="btn btn-primary" onclick="saveKey()" style="height: 40px;">Save</button>
           </div>
         </div>
 
-        <div class="card" style="margin-bottom:18px">
-          <div style="font-weight:700;margin-bottom:4px;font-size:15px;letter-spacing:-0.01em">Custom Providers</div>
-          <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:10px">Connect any OpenAI-compatible endpoint — vLLM, LiteLLM, llama.cpp, private gateways. Stored locally in custom_providers.json.</div>
-          <div id="customProvidersList"></div>
-          <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:12px">
-            <input id="cpName" class="input" placeholder="Name (e.g. vllm-local)">
-            <input id="cpUrl" class="input" placeholder="Base URL (e.g. http://localhost:8000/v1)">
-          </div>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <input id="cpKey" class="input" placeholder="API key (optional, e.g. none for local)" style="flex:1">
-            <button class="btn btn-primary btn-sm" onclick="addCustomProvider()">Add</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <div style="font-weight:700;margin-bottom:4px;font-size:15px;letter-spacing:-0.01em">Interface</div>
-          <div class="setting-row">
+        <div class="card-clean" style="margin-bottom: 24px;">
+          <div class="card-clean-title">Custom Providers</div>
+          <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5;">
+            Connect any OpenAI-compatible endpoint — vLLM, LiteLLM, llama.cpp, private gateways.
+          </p>
+          
+          <div id="customProvidersList" style="margin-bottom: 20px;"></div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin-bottom: 12px;">
             <div>
-              <div class="setting-name">Reduce motion</div>
-              <div class="setting-desc">Minimize animations throughout the app</div>
+              <label class="lbl" style="margin-bottom: 6px;">Name</label>
+              <input id="cpName" class="input" placeholder="e.g. vllm-local">
+            </div>
+            <div>
+              <label class="lbl" style="margin-bottom: 6px;">Base URL</label>
+              <input id="cpUrl" class="input" placeholder="e.g. http://localhost:8000/v1">
+            </div>
+          </div>
+          <div style="display: flex; gap: 12px;">
+            <div style="flex: 1;">
+              <label class="lbl" style="margin-bottom: 6px;">API Key (optional)</label>
+              <input id="cpKey" class="input" placeholder="none for local">
+            </div>
+            <button class="btn btn-primary" onclick="addCustomProvider()" style="height: 40px;">Add</button>
+          </div>
+        </div>
+
+        <div class="card-clean">
+          <div class="card-clean-title">Interface</div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border);">
+            <div>
+              <div style="font-weight: 500; margin-bottom: 4px; color: var(--text-primary);">Reduce motion</div>
+              <div style="font-size: 13px; color: var(--text-secondary);">Minimize animations throughout the app</div>
             </div>
             <label class="switch">
               <input type="checkbox" id="reduceMotionToggle" onchange="toggleReduceMotion(this.checked)">
               <span class="track"></span>
             </label>
           </div>
-          <div class="setting-row">
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 0;">
             <div>
-              <div class="setting-name">Take the tour again</div>
-              <div class="setting-desc">Replay the guided walkthrough of Hive</div>
+              <div style="font-weight: 500; margin-bottom: 4px; color: var(--text-primary);">Take the tour again</div>
+              <div style="font-size: 13px; color: var(--text-secondary);">Replay the guided walkthrough of Hive</div>
             </div>
-            <button class="btn btn-secondary btn-sm" onclick="startTour(true)">Start</button>
+            <button class="btn btn-secondary" onclick="startTour(true)">Start</button>
           </div>
         </div>
       </div>
