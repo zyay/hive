@@ -371,6 +371,32 @@ async def delete_agent_endpoint(agent_id: str):
     return {"deleted": True}
 
 
+@app.get("/api/agents/stats")
+async def agent_stats():
+    """Get agent statistics."""
+    agents = await get_all_agents()
+    
+    # Count by provider
+    providers = {}
+    for agent in agents:
+        provider = agent.get("provider", "unknown")
+        providers[provider] = providers.get(provider, 0) + 1
+    
+    # Count by model
+    models = {}
+    for agent in agents:
+        model = agent.get("model", "default")
+        models[model] = models.get(model, 0) + 1
+    
+    return {
+        "total": len(agents),
+        "by_provider": providers,
+        "by_model": models,
+        "active": len([a for a in agents if a.get("active", True)]),
+        "with_tools": len([a for a in agents if a.get("tools")]),
+    }
+
+
 # ---------------------------------------------------------------------------
 # Chat
 # ---------------------------------------------------------------------------
@@ -756,14 +782,25 @@ async def delete_user_key(user_id: str, provider: str):
 # ── Rooms ──
 
 @app.get("/api/rooms")
-async def list_rooms(user_id: str):
+async def list_rooms(request: Request, user_id: str = None):
     from hive.core.rooms import get_user_rooms
+    # Use authenticated user if no user_id provided
+    if not user_id:
+        user_id = getattr(request.state, "user_id", None)
+    if not user_id:
+        raise HTTPException(400, "user_id is required")
     return await get_user_rooms(user_id)
 
 
 @app.post("/api/rooms")
-async def create_room_endpoint(user_id: str, body: CreateRoomRequest):
+async def create_room_endpoint(request: Request, body: CreateRoomRequest, user_id: str = None):
     from hive.core.rooms import create_room, create_dm
+    # Use authenticated user if no user_id provided
+    if not user_id:
+        user_id = getattr(request.state, "user_id", None)
+    if not user_id:
+        raise HTTPException(400, "user_id is required")
+    
     if body.type == "dm" and body.name:
         # For DM, name is the other user's ID
         return await create_dm(user_id, body.name)
@@ -1948,19 +1985,19 @@ class RAGQueryRequest(BaseModel):
 @app.post("/api/rag/ingest")
 async def rag_ingest(body: RAGIngestRequest):
     """Ingest a document into the RAG pipeline."""
-    from hive.core.rag import RAGPipeline, UPLOAD_DIR
-    import base64
-
-    UPLOAD_DIR.mkdir(exist_ok=True)
-    file_path = UPLOAD_DIR / body.filename
-
     try:
-        content_bytes = base64.b64decode(body.content)
-        file_path.write_bytes(content_bytes)
-    except Exception:
-        file_path.write_text(body.content, encoding="utf-8")
+        from hive.core.rag import RAGPipeline, UPLOAD_DIR
+        import base64
 
-    try:
+        UPLOAD_DIR.mkdir(exist_ok=True)
+        file_path = UPLOAD_DIR / body.filename
+
+        try:
+            content_bytes = base64.b64decode(body.content)
+            file_path.write_bytes(content_bytes)
+        except Exception:
+            file_path.write_text(body.content, encoding="utf-8")
+
         pipeline = RAGPipeline()
         doc = pipeline.ingest_file(str(file_path), metadata=body.metadata)
         return {
@@ -1970,6 +2007,8 @@ async def rag_ingest(body: RAGIngestRequest):
             "chunks": len(doc.chunks),
             "chars": len(doc.content),
         }
+    except ImportError:
+        raise HTTPException(503, "RAG not available - chromadb not installed")
     except Exception as e:
         raise HTTPException(400, str(e))
 
@@ -1981,8 +2020,8 @@ class RAGIngestTextRequest(BaseModel):
 @app.post("/api/rag/ingest/text")
 async def rag_ingest_text(body: RAGIngestTextRequest):
     """Ingest raw text into the RAG pipeline."""
-    from hive.core.rag import RAGPipeline
     try:
+        from hive.core.rag import RAGPipeline
         pipeline = RAGPipeline()
         doc = pipeline.ingest_text(body.text, filename=body.filename, metadata=body.metadata)
         return {
@@ -1991,16 +2030,23 @@ async def rag_ingest_text(body: RAGIngestTextRequest):
             "filename": doc.filename,
             "chunks": len(doc.chunks),
         }
+    except ImportError:
+        raise HTTPException(503, "RAG not available - chromadb not installed")
     except Exception as e:
         raise HTTPException(400, str(e))
 
 @app.post("/api/rag/query")
 async def rag_query(body: RAGQueryRequest):
     """Query the RAG pipeline for relevant document chunks."""
-    from hive.core.rag import RAGPipeline
-    pipeline = RAGPipeline()
-    results = pipeline.query(body.question, top_k=body.top_k)
-    return {"results": results, "count": len(results)}
+    try:
+        from hive.core.rag import RAGPipeline
+        pipeline = RAGPipeline()
+        results = pipeline.query(body.question, top_k=body.top_k)
+        return {"results": results, "count": len(results)}
+    except ImportError:
+        raise HTTPException(503, "RAG not available - chromadb not installed")
+    except Exception as e:
+        raise HTTPException(400, str(e))
 
 @app.get("/api/rag/documents")
 async def rag_list_documents():
@@ -2017,18 +2063,28 @@ async def rag_list_documents():
 @app.delete("/api/rag/documents/{doc_id}")
 async def rag_delete_document(doc_id: str):
     """Delete a document from the RAG pipeline."""
-    from hive.core.rag import RAGPipeline
-    pipeline = RAGPipeline()
-    pipeline.delete_document(doc_id)
-    return {"deleted": True, "doc_id": doc_id}
+    try:
+        from hive.core.rag import RAGPipeline
+        pipeline = RAGPipeline()
+        pipeline.delete_document(doc_id)
+        return {"deleted": True, "doc_id": doc_id}
+    except ImportError:
+        raise HTTPException(503, "RAG not available - chromadb not installed")
+    except Exception as e:
+        raise HTTPException(400, str(e))
 
 @app.post("/api/rag/context")
 async def rag_build_context(body: RAGQueryRequest):
     """Build a context string from RAG for LLM augmentation."""
-    from hive.core.rag import RAGPipeline
-    pipeline = RAGPipeline()
-    context = pipeline.build_context(body.question, top_k=body.top_k)
-    return {"context": context, "length": len(context)}
+    try:
+        from hive.core.rag import RAGPipeline
+        pipeline = RAGPipeline()
+        context = pipeline.build_context(body.question, top_k=body.top_k)
+        return {"context": context, "length": len(context)}
+    except ImportError:
+        raise HTTPException(503, "RAG not available - chromadb not installed")
+    except Exception as e:
+        raise HTTPException(400, str(e))
 
 
 # ---------------------------------------------------------------------------
