@@ -2005,9 +2005,14 @@ async def rag_query(body: RAGQueryRequest):
 @app.get("/api/rag/documents")
 async def rag_list_documents():
     """List all ingested documents."""
-    from hive.core.rag import RAGPipeline
-    pipeline = RAGPipeline()
-    return {"documents": pipeline.list_documents(), "total_chunks": pipeline.count}
+    try:
+        from hive.core.rag import RAGPipeline
+        pipeline = RAGPipeline()
+        return {"documents": pipeline.list_documents(), "total_chunks": pipeline.count}
+    except ImportError:
+        return {"documents": [], "total_chunks": 0, "warning": "RAG not available - chromadb not installed"}
+    except Exception as e:
+        return {"documents": [], "total_chunks": 0, "error": str(e)}
 
 @app.delete("/api/rag/documents/{doc_id}")
 async def rag_delete_document(doc_id: str):
