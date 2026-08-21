@@ -393,6 +393,186 @@ label.lbl { font-size: 12px; font-weight: 600; color: var(--text-secondary); dis
 .chip-add { border-style: dashed; color: var(--text-tertiary); }
 
 /* Empty states */
+/* ═══════════ Window Management System ═══════════ */
+.window {
+  position: fixed;
+  background: var(--glass-strong);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-float), 0 0 0 1px rgba(255,255,255,0.05) inset;
+  min-width: 400px;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 1000;
+  animation: windowIn var(--dur-base) var(--ease-spring);
+}
+@keyframes windowIn {
+  from { opacity: 0; transform: scale(0.92) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.window.focused {
+  box-shadow: var(--shadow-float), 0 0 0 2px var(--accent), 0 0 0 1px rgba(255,255,255,0.05) inset;
+  z-index: 1001;
+}
+.window.minimized {
+  transform: scale(0) translateY(100vh);
+  opacity: 0;
+  pointer-events: none;
+}
+.window.maximized {
+  width: calc(100vw - 136px) !important;
+  height: calc(100vh - 68px) !important;
+  left: 68px !important;
+  top: 0 !important;
+  border-radius: 0;
+}
+
+.window-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--border);
+  cursor: move;
+  user-select: none;
+}
+.window-header:hover {
+  background: rgba(255,255,255,0.05);
+}
+.window-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  font-size: 14px;
+}
+.window-title {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.window-controls {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+.window-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.08);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: background var(--dur-fast), color var(--dur-fast), transform var(--dur-fast) var(--ease-spring);
+}
+.window-btn:hover {
+  background: rgba(255,255,255,0.14);
+  color: var(--text-primary);
+}
+.window-btn:active {
+  transform: scale(0.9);
+}
+.window-btn.close:hover {
+  background: var(--error);
+  color: #fff;
+}
+.window-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+/* Window resize handle */
+.window-resize {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  opacity: 0;
+  transition: opacity var(--dur-fast);
+}
+.window:hover .window-resize {
+  opacity: 1;
+}
+.window-resize::before {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--text-tertiary);
+  border-bottom: 2px solid var(--text-tertiary);
+}
+
+/* Taskbar */
+.taskbar {
+  position: fixed;
+  bottom: 0;
+  left: 68px;
+  right: 0;
+  height: 48px;
+  background: var(--glass-strong);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border-top: 1px solid var(--border);
+  display: none;
+  align-items: center;
+  padding: 0 16px;
+  gap: 8px;
+  z-index: 999;
+  animation: slideUp var(--dur-base) var(--ease-sheet);
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.taskbar.visible {
+  display: flex;
+}
+.taskbar-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--dur-fast), transform var(--dur-fast) var(--ease-spring);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.taskbar-item:hover {
+  background: rgba(255,255,255,0.14);
+  transform: translateY(-2px);
+}
+.taskbar-item.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.taskbar-item.minimized {
+  opacity: 0.5;
+}
+
 .empty {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   height: 100%; color: var(--text-tertiary); text-align: center; padding: 48px;
@@ -2091,7 +2271,7 @@ function loadAgents() {
   Promise.all([api('/api/agents'), api('/api/templates')]).then(([agents, templates]) => {
     AGENTS = agents;
     const mine = agents.map((x, i) => `
-      <div class="agent-card" style="animation-delay:${Math.min(i * 40, 320)}ms">
+      <div class="agent-card" style="animation-delay:${Math.min(i * 40, 320)}ms; cursor: pointer;" onclick="openAgentWindow(AGENTS.find(a => a.id === '${x.id}'))">
         <div class="agent-card-top">
           ${faceBadge(x.id, x.name)}
           <div style="min-width:0">
@@ -2762,6 +2942,429 @@ document.addEventListener('pointermove', e => {
     }
   }
 }, { passive: true });
+
+/* ═══════════ Window Management System ═══════════ */
+let windowZIndex = 1000;
+const openWindows = new Map();
+
+function createWindow(opts) {
+  const { id, title, icon, content, width = 600, height = 500, x, y } = opts;
+  
+  // Close existing window with same id
+  if (openWindows.has(id)) {
+    closeWindow(id);
+  }
+  
+  const win = document.createElement('div');
+  win.className = 'window focused';
+  win.id = 'window-' + id;
+  win.style.width = width + 'px';
+  win.style.height = height + 'px';
+  win.style.left = (x || (window.innerWidth - width) / 2) + 'px';
+  win.style.top = (y || (window.innerHeight - height) / 2) + 'px';
+  win.style.zIndex = ++windowZIndex;
+  
+  win.innerHTML = `
+    <div class="window-header">
+      <div class="window-icon">${icon || '□'}</div>
+      <div class="window-title">${title}</div>
+      <div class="window-controls">
+        <button class="window-btn" onclick="minimizeWindow('${id}')" title="Minimize">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </button>
+        <button class="window-btn" onclick="maximizeWindow('${id}')" title="Maximize">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <rect x="2" y="2" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          </svg>
+        </button>
+        <button class="window-btn close" onclick="closeWindow('${id}')" title="Close">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <line x1="2" y1="2" x2="10" y2="10" stroke="currentColor" stroke-width="1.5"/>
+            <line x1="10" y1="2" x2="2" y2="10" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="window-body">${content}</div>
+    <div class="window-resize"></div>
+  `;
+  
+  document.body.appendChild(win);
+  
+  // Store window data
+  openWindows.set(id, {
+    element: win,
+    minimized: false,
+    maximized: false,
+    prevState: null
+  });
+  
+  // Make window draggable
+  makeDraggable(win);
+  
+  // Make window resizable
+  makeResizable(win);
+  
+  // Focus on click
+  win.addEventListener('mousedown', () => focusWindow(id));
+  
+  // Update taskbar
+  updateTaskbar();
+  
+  // Focus this window
+  focusWindow(id);
+  
+  return win;
+}
+
+function focusWindow(id) {
+  const winData = openWindows.get(id);
+  if (!winData) return;
+  
+  // Unfocus all windows
+  openWindows.forEach(w => w.element.classList.remove('focused'));
+  
+  // Focus this window
+  winData.element.classList.add('focused');
+  winData.element.style.zIndex = ++windowZIndex;
+  
+  // Restore if minimized
+  if (winData.minimized) {
+    winData.minimized = false;
+    winData.element.classList.remove('minimized');
+  }
+  
+  updateTaskbar();
+}
+
+function minimizeWindow(id) {
+  const winData = openWindows.get(id);
+  if (!winData) return;
+  
+  winData.minimized = true;
+  winData.element.classList.add('minimized');
+  winData.element.classList.remove('focused');
+  
+  updateTaskbar();
+}
+
+function maximizeWindow(id) {
+  const winData = openWindows.get(id);
+  if (!winData) return;
+  
+  if (winData.maximized) {
+    // Restore
+    winData.element.style.left = winData.prevState.left + 'px';
+    winData.element.style.top = winData.prevState.top + 'px';
+    winData.element.style.width = winData.prevState.width + 'px';
+    winData.element.style.height = winData.prevState.height + 'px';
+    winData.element.classList.remove('maximized');
+    winData.maximized = false;
+  } else {
+    // Save current state
+    winData.prevState = {
+      left: parseInt(winData.element.style.left),
+      top: parseInt(winData.element.style.top),
+      width: parseInt(winData.element.style.width),
+      height: parseInt(winData.element.style.height)
+    };
+    
+    // Maximize
+    winData.element.classList.add('maximized');
+    winData.maximized = true;
+  }
+}
+
+function closeWindow(id) {
+  const winData = openWindows.get(id);
+  if (!winData) return;
+  
+  winData.element.style.animation = 'windowIn 0.2s ease reverse';
+  setTimeout(() => {
+    winData.element.remove();
+    openWindows.delete(id);
+    updateTaskbar();
+  }, 200);
+}
+
+function makeDraggable(win) {
+  const header = win.querySelector('.window-header');
+  let isDragging = false;
+  let startX, startY, startLeft, startTop;
+  
+  header.addEventListener('mousedown', e => {
+    if (e.target.closest('.window-btn')) return;
+    
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    startLeft = parseInt(win.style.left);
+    startTop = parseInt(win.style.top);
+    
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  });
+  
+  function onMouseMove(e) {
+    if (!isDragging) return;
+    
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    
+    win.style.left = (startLeft + dx) + 'px';
+    win.style.top = (startTop + dy) + 'px';
+  }
+  
+  function onMouseUp() {
+    isDragging = false;
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  }
+}
+
+function makeResizable(win) {
+  const resize = win.querySelector('.window-resize');
+  let isResizing = false;
+  let startX, startY, startWidth, startHeight;
+  
+  resize.addEventListener('mousedown', e => {
+    isResizing = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    startWidth = parseInt(win.style.width);
+    startHeight = parseInt(win.style.height);
+    
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    
+    e.stopPropagation();
+  });
+  
+  function onMouseMove(e) {
+    if (!isResizing) return;
+    
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    
+    win.style.width = Math.max(400, startWidth + dx) + 'px';
+    win.style.height = Math.max(300, startHeight + dy) + 'px';
+  }
+  
+  function onMouseUp() {
+    isResizing = false;
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  }
+}
+
+function updateTaskbar() {
+  let taskbar = document.getElementById('taskbar');
+  
+  if (!taskbar) {
+    taskbar = document.createElement('div');
+    taskbar.id = 'taskbar';
+    taskbar.className = 'taskbar';
+    document.body.appendChild(taskbar);
+  }
+  
+  if (openWindows.size === 0) {
+    taskbar.classList.remove('visible');
+    return;
+  }
+  
+  taskbar.classList.add('visible');
+  taskbar.innerHTML = '';
+  
+  openWindows.forEach((winData, id) => {
+    const item = document.createElement('div');
+    item.className = 'taskbar-item';
+    if (winData.element.classList.contains('focused')) item.classList.add('active');
+    if (winData.minimized) item.classList.add('minimized');
+    
+    const title = winData.element.querySelector('.window-title').textContent;
+    item.textContent = title;
+    
+    item.addEventListener('click', () => {
+      if (winData.minimized) {
+        focusWindow(id);
+      } else if (winData.element.classList.contains('focused')) {
+        minimizeWindow(id);
+      } else {
+        focusWindow(id);
+      }
+    });
+    
+    taskbar.appendChild(item);
+  });
+}
+
+// Global functions for opening windows
+window.openAgentWindow = function(agent) {
+  const tools = agent.tools ? (typeof agent.tools === 'string' ? JSON.parse(agent.tools || '[]') : agent.tools) : [];
+  
+  const content = `
+    <div style="margin-bottom: 20px;">
+      <h3 style="font-size: 18px; margin-bottom: 8px;">${agent.name}</h3>
+      <p style="color: var(--text-secondary); font-size: 13px; line-height: 1.6;">
+        ${agent.description || 'No description available'}
+      </p>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;">
+      <div style="padding: 14px; background: rgba(255,255,255,0.04); border-radius: var(--radius-md); border: 1px solid var(--border);">
+        <div style="font-size: 11px; color: var(--text-tertiary); margin-bottom: 4px;">Provider</div>
+        <div style="font-size: 14px; font-weight: 600;">${agent.provider || 'default'}</div>
+      </div>
+      <div style="padding: 14px; background: rgba(255,255,255,0.04); border-radius: var(--radius-md); border: 1px solid var(--border);">
+        <div style="font-size: 11px; color: var(--text-tertiary); margin-bottom: 4px;">Temperature</div>
+        <div style="font-size: 14px; font-weight: 600;">${agent.temperature || 0.7}</div>
+      </div>
+    </div>
+    
+    ${tools.length ? `
+    <div style="margin-bottom: 20px;">
+      <h4 style="font-size: 13px; font-weight: 600; margin-bottom: 10px; color: var(--text-secondary);">Tools (${tools.length})</h4>
+      <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+        ${tools.map(t => `<span class="pill pill-accent">${t}</span>`).join('')}
+      </div>
+    </div>
+    ` : ''}
+    
+    <div style="display: flex; gap: 8px; margin-top: 24px;">
+      <button class="btn btn-primary" onclick="quickChatAgent('${agent.id}')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        Chat
+      </button>
+      <button class="btn btn-secondary" onclick="editAgent('${agent.id}')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+        Edit
+      </button>
+    </div>
+  `;
+  
+  createWindow({
+    id: 'agent-' + agent.id,
+    title: agent.name,
+    icon: '🤖',
+    content: content,
+    width: 550,
+    height: 500
+  });
+};
+
+window.openFileWindow = function(file) {
+  const content = `
+    <div style="margin-bottom: 20px;">
+      <h3 style="font-size: 18px; margin-bottom: 8px;">${file.filename}</h3>
+      <div style="display: flex; gap: 8px; margin-top: 8px;">
+        <span class="pill pill-neutral">${formatBytes(file.size)}</span>
+        <span class="pill pill-neutral">${file.type || 'Unknown'}</span>
+      </div>
+    </div>
+    
+    <div style="padding: 14px; background: rgba(255,255,255,0.04); border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 20px;">
+      <div style="font-size: 11px; color: var(--text-tertiary); margin-bottom: 4px;">Uploaded</div>
+      <div style="font-size: 14px;">${new Date(file.created_at * 1000).toLocaleString()}</div>
+    </div>
+    
+    <div style="display: flex; gap: 8px;">
+      <button class="btn btn-primary" onclick="downloadFile('${file.id}')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Download
+      </button>
+      <button class="btn btn-danger" onclick="deleteFile('${file.id}')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+        </svg>
+        Delete
+      </button>
+    </div>
+  `;
+  
+  createWindow({
+    id: 'file-' + file.id,
+    title: file.filename,
+    icon: '📄',
+    content: content,
+    width: 500,
+    height: 400
+  });
+};
+
+window.openTaskWindow = function(task) {
+  const statusColors = {
+    pending: 'warning',
+    running: 'accent',
+    completed: 'success',
+    failed: 'error'
+  };
+  
+  const content = `
+    <div style="margin-bottom: 20px;">
+      <h3 style="font-size: 18px; margin-bottom: 8px;">${task.title}</h3>
+      <span class="pill pill-${statusColors[task.status]}">${task.status}</span>
+    </div>
+    
+    ${task.description ? `
+    <div style="margin-bottom: 20px;">
+      <h4 style="font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-secondary);">Description</h4>
+      <p style="color: var(--text-primary); font-size: 14px; line-height: 1.6;">${task.description}</p>
+    </div>
+    ` : ''}
+    
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;">
+      <div style="padding: 14px; background: rgba(255,255,255,0.04); border-radius: var(--radius-md); border: 1px solid var(--border);">
+        <div style="font-size: 11px; color: var(--text-tertiary); margin-bottom: 4px;">Created</div>
+        <div style="font-size: 14px;">${new Date(task.created_at * 1000).toLocaleString()}</div>
+      </div>
+      ${task.completed_at ? `
+      <div style="padding: 14px; background: rgba(255,255,255,0.04); border-radius: var(--radius-md); border: 1px solid var(--border);">
+        <div style="font-size: 11px; color: var(--text-tertiary); margin-bottom: 4px;">Completed</div>
+        <div style="font-size: 14px;">${new Date(task.completed_at * 1000).toLocaleString()}</div>
+      </div>
+      ` : ''}
+    </div>
+    
+    ${task.result ? `
+    <div style="margin-bottom: 20px;">
+      <h4 style="font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-secondary);">Result</h4>
+      <div style="padding: 14px; background: rgba(255,255,255,0.04); border-radius: var(--radius-md); border: 1px solid var(--border); font-family: var(--font-mono); font-size: 13px; white-space: pre-wrap;">${task.result}</div>
+    </div>
+    ` : ''}
+    
+    ${task.status === 'pending' || task.status === 'running' ? `
+    <button class="btn btn-danger" onclick="cancelTask('${task.id}')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="15" y1="9" x2="9" y2="15"/>
+        <line x1="9" y1="9" x2="15" y2="15"/>
+      </svg>
+      Cancel Task
+    </button>
+    ` : ''}
+  `;
+  
+  createWindow({
+    id: 'task-' + task.id,
+    title: task.title,
+    icon: '⚡',
+    content: content,
+    width: 600,
+    height: 500
+  });
+};
 </script>
 </body>
 </html>
