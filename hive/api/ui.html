@@ -1174,6 +1174,438 @@ label.lbl { font-size: 12px; font-weight: 600; color: var(--text-secondary); dis
 .stat-value { font-size: 32px; font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
 .stat-label { font-size: 11px; color: var(--text-tertiary); margin-top: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; }
 
+/* ═══════════ Interactive Particle Background ═══════════ */
+#particleCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+/* ═══════════ Holographic Cards ═══════════ */
+.holographic {
+  position: relative;
+  overflow: hidden;
+}
+
+.holographic::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 0, 255, 0.08) 40%,
+    rgba(0, 255, 255, 0.08) 50%,
+    rgba(255, 255, 0, 0.08) 60%,
+    transparent 70%
+  );
+  animation: holographicShift 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes holographicShift {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(10%, 10%) rotate(90deg); }
+  50% { transform: translate(0, 20%) rotate(180deg); }
+  75% { transform: translate(-10%, 10%) rotate(270deg); }
+}
+
+/* ═══════════ Neon Glow Effects ═══════════ */
+.neon-text {
+  text-shadow: 
+    0 0 5px currentColor,
+    0 0 10px currentColor,
+    0 0 20px currentColor,
+    0 0 40px currentColor;
+  animation: neonPulse 2s ease-in-out infinite;
+}
+
+@keyframes neonPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+.neon-border {
+  box-shadow: 
+    0 0 5px var(--accent),
+    0 0 10px var(--accent),
+    inset 0 0 5px var(--accent),
+    inset 0 0 10px var(--accent);
+  animation: neonBorderPulse 2s ease-in-out infinite;
+}
+
+@keyframes neonBorderPulse {
+  0%, 100% { 
+    box-shadow: 
+      0 0 5px var(--accent),
+      0 0 10px var(--accent),
+      inset 0 0 5px var(--accent),
+      inset 0 0 10px var(--accent);
+  }
+  50% { 
+    box-shadow: 
+      0 0 10px var(--accent),
+      0 0 20px var(--accent),
+      0 0 30px var(--accent),
+      inset 0 0 10px var(--accent),
+      inset 0 0 20px var(--accent);
+  }
+}
+
+/* ═══════════ Particle Explosion ═══════════ */
+.particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.particle-circle {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+}
+
+.particle-star {
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 8px solid var(--accent);
+  filter: drop-shadow(0 0 5px var(--accent));
+}
+
+@keyframes particleExplode {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx), var(--ty)) scale(0);
+    opacity: 0;
+  }
+}
+
+/* ═══════════ Command Palette ═══════════ */
+.command-palette {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  max-width: 90vw;
+  background: rgba(20, 20, 25, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  z-index: 10000;
+  display: none;
+  animation: commandPaletteIn 0.2s ease-out;
+}
+
+.command-palette.active {
+  display: block;
+}
+
+@keyframes commandPaletteIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+.command-palette-input {
+  width: 100%;
+  padding: 20px 24px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 16px;
+  outline: none;
+}
+
+.command-palette-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.command-palette-results {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.command-item {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-primary);
+}
+
+.command-item:hover,
+.command-item.selected {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.command-item-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-solid-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.command-item-content {
+  flex: 1;
+}
+
+.command-item-title {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.command-item-desc {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.command-item-shortcut {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  background: var(--bg-solid-3);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+}
+
+/* ═══════════ Audio Wave Visualization ═══════════ */
+.audio-wave {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 24px;
+}
+
+.audio-wave-bar {
+  width: 3px;
+  background: var(--accent);
+  border-radius: 2px;
+  animation: audioWave 1s ease-in-out infinite;
+}
+
+.audio-wave-bar:nth-child(1) { animation-delay: 0s; height: 40%; }
+.audio-wave-bar:nth-child(2) { animation-delay: 0.1s; height: 60%; }
+.audio-wave-bar:nth-child(3) { animation-delay: 0.2s; height: 80%; }
+.audio-wave-bar:nth-child(4) { animation-delay: 0.3s; height: 100%; }
+.audio-wave-bar:nth-child(5) { animation-delay: 0.4s; height: 80%; }
+.audio-wave-bar:nth-child(6) { animation-delay: 0.5s; height: 60%; }
+.audio-wave-bar:nth-child(7) { animation-delay: 0.6s; height: 40%; }
+
+@keyframes audioWave {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+
+/* ═══════════ Context Menu ═══════════ */
+.context-menu {
+  position: fixed;
+  background: rgba(20, 20, 25, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  padding: 6px;
+  z-index: 10000;
+  min-width: 180px;
+  animation: contextMenuIn 0.15s ease-out;
+}
+
+@keyframes contextMenuIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.context-menu-item {
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.context-menu-item:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.context-menu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 6px 0;
+}
+
+/* ═══════════ Custom Scrollbar ═══════════ */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-solid-2);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--accent), var(--success));
+  border-radius: 6px;
+  border: 2px solid var(--bg-solid-2);
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--accent-hover), var(--success));
+  box-shadow: 0 0 10px var(--accent);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--bg-solid-2);
+}
+
+/* ═══════════ Morphing Transitions ═══════════ */
+.view-morph-enter {
+  animation: morphEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes morphEnter {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+    filter: blur(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+
+.view-morph-exit {
+  animation: morphExit 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes morphExit {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.05) translateY(-10px);
+    filter: blur(10px);
+  }
+}
+
+/* ═══════════ Advanced Micro-interactions ═══════════ */
+.magnetic {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tilt-card {
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+}
+
+.tilt-card:hover {
+  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+}
+
+/* ═══════════ Status Indicators ═══════════ */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  position: relative;
+}
+
+.status-dot::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.3;
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.5); opacity: 0; }
+}
+
+.status-online { color: var(--success); }
+.status-offline { color: var(--text-tertiary); }
+.status-busy { color: var(--warning); }
+
+/* ═══════════ Loading Skeletons ═══════════ */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-solid-3) 0%,
+    var(--bg-solid-2) 50%,
+    var(--bg-solid-3) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ═══════════ Theme Transition ═══════════ */
+body {
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+body.theme-transitioning * {
+  transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease !important;
+}
+
 /* ═══════════ Agents ═══════════ */
 .agent-grid { 
   display: grid; 
@@ -4142,6 +4574,425 @@ window.showLoading = showLoading;
 window.showSkeleton = showSkeleton;
 window.createProgressBar = createProgressBar;
 window.smoothScrollTo = smoothScrollTo;
+
+/* ═══════════ Interactive Particle Background ═══════════ */
+class ParticleSystem {
+  constructor() {
+    this.canvas = document.createElement('canvas');
+    this.canvas.id = 'particleCanvas';
+    this.ctx = this.canvas.getContext('2d');
+    this.particles = [];
+    this.connectionDistance = 150;
+    this.isRunning = true;
+    
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
+    
+    // Create particles
+    for (let i = 0; i < 80; i++) {
+      this.particles.push(new Particle(this));
+    }
+    
+    document.body.appendChild(this.canvas);
+    this.animate();
+  }
+  
+  resize() {
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+  }
+  
+  animate() {
+    if (!this.isRunning) return;
+    
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    
+    this.particles.forEach(p => {
+      p.update(this.canvas);
+      p.draw(this.ctx);
+    });
+    
+    // Draw connections
+    for (let i = 0; i < this.particles.length; i++) {
+      for (let j = i + 1; j < this.particles.length; j++) {
+        const dx = this.particles[i].x - this.particles[j].x;
+        const dy = this.particles[i].y - this.particles[j].y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < this.connectionDistance) {
+          const opacity = (1 - distance / this.connectionDistance) * 0.2;
+          this.ctx.strokeStyle = `rgba(10, 132, 255, ${opacity})`;
+          this.ctx.lineWidth = 1;
+          this.ctx.beginPath();
+          this.ctx.moveTo(this.particles[i].x, this.particles[i].y);
+          this.ctx.lineTo(this.particles[j].x, this.particles[j].y);
+          this.ctx.stroke();
+        }
+      }
+    }
+    
+    requestAnimationFrame(() => this.animate());
+  }
+}
+
+class Particle {
+  constructor(system) {
+    this.system = system;
+    this.x = Math.random() * system.canvas.width;
+    this.y = Math.random() * system.canvas.height;
+    this.vx = (Math.random() - 0.5) * 0.5;
+    this.vy = (Math.random() - 0.5) * 0.5;
+    this.radius = Math.random() * 2 + 1;
+  }
+  
+  update(canvas) {
+    this.x += this.vx;
+    this.y += this.vy;
+    
+    if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+    if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+  }
+  
+  draw(ctx) {
+    ctx.fillStyle = 'rgba(10, 132, 255, 0.5)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// Initialize particle system
+const particleSystem = new ParticleSystem();
+
+/* ═══════════ Command Palette (Ctrl+K) ═══════════ */
+class CommandPalette {
+  constructor() {
+    this.commands = [
+      { id: 'new-agent', title: 'Create New Agent', desc: 'Create a new AI agent', icon: '🤖', shortcut: 'Ctrl+Shift+A', action: () => showCreateAgent() },
+      { id: 'new-chat', title: 'New Chat', desc: 'Start a new conversation', icon: '💬', shortcut: 'Ctrl+N', action: () => showView('chat') },
+      { id: 'agents', title: 'View Agents', desc: 'Browse all agents', icon: '👥', shortcut: 'Ctrl+1', action: () => showView('agents') },
+      { id: 'tasks', title: 'View Tasks', desc: 'Manage tasks', icon: '⚡', shortcut: 'Ctrl+2', action: () => showView('tasks') },
+      { id: 'files', title: 'View Files', desc: 'Manage files', icon: '📁', shortcut: 'Ctrl+3', action: () => showView('files') },
+      { id: 'dashboard', title: 'Dashboard', desc: 'View analytics', icon: '📊', shortcut: 'Ctrl+4', action: () => showView('dashboard') },
+      { id: 'settings', title: 'Settings', desc: 'Open settings', icon: '⚙️', shortcut: 'Ctrl+,', action: () => showView('settings') },
+      { id: 'theme', title: 'Toggle Theme', desc: 'Switch light/dark mode', icon: '🌓', shortcut: 'Ctrl+Shift+T', action: () => toggleTheme() }
+    ];
+    
+    this.element = this.createElement();
+    this.selectedIndex = 0;
+    this.filteredCommands = [...this.commands];
+    
+    document.body.appendChild(this.element);
+    this.bindEvents();
+  }
+  
+  createElement() {
+    const el = document.createElement('div');
+    el.className = 'command-palette';
+    el.innerHTML = `
+      <input type="text" class="command-palette-input" placeholder="Type a command..." autocomplete="off">
+      <div class="command-palette-results"></div>
+    `;
+    return el;
+  }
+  
+  bindEvents() {
+    const input = this.element.querySelector('.command-palette-input');
+    
+    input.addEventListener('input', (e) => this.filter(e.target.value));
+    input.addEventListener('keydown', (e) => this.handleKeydown(e));
+    
+    // Ctrl+K to open
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        this.toggle();
+      }
+    });
+    
+    // Close on escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && this.element.classList.contains('active')) {
+        this.close();
+      }
+    });
+  }
+  
+  toggle() {
+    if (this.element.classList.contains('active')) {
+      this.close();
+    } else {
+      this.open();
+    }
+  }
+  
+  open() {
+    this.element.classList.add('active');
+    const input = this.element.querySelector('.command-palette-input');
+    input.value = '';
+    input.focus();
+    this.filteredCommands = [...this.commands];
+    this.render();
+  }
+  
+  close() {
+    this.element.classList.remove('active');
+  }
+  
+  filter(query) {
+    const q = query.toLowerCase();
+    this.filteredCommands = this.commands.filter(cmd => 
+      cmd.title.toLowerCase().includes(q) || 
+      cmd.desc.toLowerCase().includes(q)
+    );
+    this.selectedIndex = 0;
+    this.render();
+  }
+  
+  render() {
+    const results = this.element.querySelector('.command-palette-results');
+    results.innerHTML = this.filteredCommands.map((cmd, i) => `
+      <div class="command-item ${i === this.selectedIndex ? 'selected' : ''}" data-id="${cmd.id}">
+        <div class="command-item-icon">${cmd.icon}</div>
+        <div class="command-item-content">
+          <div class="command-item-title">${cmd.title}</div>
+          <div class="command-item-desc">${cmd.desc}</div>
+        </div>
+        <div class="command-item-shortcut">${cmd.shortcut}</div>
+      </div>
+    `).join('');
+    
+    results.querySelectorAll('.command-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const cmd = this.commands.find(c => c.id === item.dataset.id);
+        if (cmd) {
+          cmd.action();
+          this.close();
+        }
+      });
+    });
+  }
+  
+  handleKeydown(e) {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      this.selectedIndex = Math.min(this.selectedIndex + 1, this.filteredCommands.length - 1);
+      this.render();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
+      this.render();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const cmd = this.filteredCommands[this.selectedIndex];
+      if (cmd) {
+        cmd.action();
+        this.close();
+      }
+    }
+  }
+}
+
+const commandPalette = new CommandPalette();
+
+/* ═══════════ Particle Explosion Effect ═══════════ */
+window.createParticleExplosion = function(x, y, count = 20) {
+  for (let i = 0; i < count; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle particle-circle';
+    particle.style.left = x + 'px';
+    particle.style.top = y + 'px';
+    
+    const angle = (Math.PI * 2 * i) / count;
+    const velocity = 50 + Math.random() * 100;
+    const tx = Math.cos(angle) * velocity;
+    const ty = Math.sin(angle) * velocity;
+    
+    particle.style.setProperty('--tx', tx + 'px');
+    particle.style.setProperty('--ty', ty + 'px');
+    particle.style.animation = `particleExplode 0.8s ease-out forwards`;
+    
+    document.body.appendChild(particle);
+    
+    setTimeout(() => particle.remove(), 800);
+  }
+};
+
+// Add explosion to successful actions
+document.addEventListener('click', (e) => {
+  if (e.target.closest('.btn-primary')) {
+    const rect = e.target.getBoundingClientRect();
+    createParticleExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2, 15);
+  }
+});
+
+/* ═══════════ Context Menu ═══════════ */
+class ContextMenu {
+  constructor() {
+    this.element = null;
+    this.bindEvents();
+  }
+  
+  bindEvents() {
+    document.addEventListener('contextmenu', (e) => {
+      if (e.target.closest('.agent-card')) {
+        e.preventDefault();
+        this.show(e.clientX, e.clientY, [
+          { label: 'Open', icon: '→', action: () => console.log('Open') },
+          { label: 'Edit', icon: '✎', action: () => console.log('Edit') },
+          { label: 'Duplicate', icon: '⎘', action: () => console.log('Duplicate') },
+          { type: 'divider' },
+          { label: 'Delete', icon: '🗑', action: () => console.log('Delete'), danger: true }
+        ]);
+      }
+    });
+    
+    document.addEventListener('click', () => this.hide());
+  }
+  
+  show(x, y, items) {
+    this.hide();
+    
+    this.element = document.createElement('div');
+    this.element.className = 'context-menu';
+    this.element.style.left = x + 'px';
+    this.element.style.top = y + 'px';
+    
+    this.element.innerHTML = items.map(item => {
+      if (item.type === 'divider') {
+        return '<div class="context-menu-divider"></div>';
+      }
+      return `
+        <div class="context-menu-item ${item.danger ? 'danger' : ''}">
+          <span>${item.icon}</span>
+          <span>${item.label}</span>
+        </div>
+      `;
+    }).join('');
+    
+    document.body.appendChild(this.element);
+    
+    // Bind actions
+    const menuItems = this.element.querySelectorAll('.context-menu-item');
+    let itemIndex = 0;
+    items.forEach(item => {
+      if (item.type !== 'divider') {
+        menuItems[itemIndex].addEventListener('click', () => {
+          item.action();
+          this.hide();
+        });
+        itemIndex++;
+      }
+    });
+  }
+  
+  hide() {
+    if (this.element) {
+      this.element.remove();
+      this.element = null;
+    }
+  }
+}
+
+const contextMenu = new ContextMenu();
+
+/* ═══════════ 3D Tilt Cards ═══════════ */
+function initTiltCards() {
+  document.querySelectorAll('.agent-card').forEach(card => {
+    card.classList.add('tilt-card');
+    
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      
+      const rotateX = (y - centerY) / 10;
+      const rotateY = (centerX - x) / 10;
+      
+      card.style.setProperty('--rx', -rotateX + 'deg');
+      card.style.setProperty('--ry', rotateY + 'deg');
+    });
+    
+    card.addEventListener('mouseleave', () => {
+      card.style.setProperty('--rx', '0deg');
+      card.style.setProperty('--ry', '0deg');
+    });
+  });
+}
+
+// Initialize tilt cards
+setTimeout(initTiltCards, 100);
+
+/* ═══════════ Audio Wave Visualization ═══════════ */
+window.createAudioWave = function(container) {
+  const wave = document.createElement('div');
+  wave.className = 'audio-wave';
+  wave.innerHTML = Array(7).fill('<div class="audio-wave-bar"></div>').join('');
+  container.appendChild(wave);
+  return wave;
+};
+
+/* ═══════════ Magnetic Buttons ═══════════ */
+document.querySelectorAll('.btn-primary').forEach(btn => {
+  btn.addEventListener('mousemove', (e) => {
+    const rect = btn.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    
+    btn.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
+  });
+  
+  btn.addEventListener('mouseleave', () => {
+    btn.style.transform = 'translate(0, 0)';
+  });
+});
+
+/* ═══════════ View Transitions ═══════════ */
+const originalShowView = window.showView;
+window.showView = function(viewName) {
+  const currentView = document.querySelector('.view.active');
+  if (currentView) {
+    currentView.classList.add('view-morph-exit');
+    setTimeout(() => {
+      currentView.classList.remove('view-morph-exit', 'active');
+      originalShowView(viewName);
+      const newView = document.querySelector('.view.active');
+      if (newView) {
+        newView.classList.add('view-morph-enter');
+        setTimeout(() => newView.classList.remove('view-morph-enter'), 400);
+      }
+    }, 300);
+  } else {
+    originalShowView(viewName);
+  }
+};
+
+/* ═══════════ Status Indicators ═══════════ */
+window.createStatusDot = function(status) {
+  const dot = document.createElement('div');
+  dot.className = `status-dot status-${status}`;
+  return dot;
+};
+
+/* ═══════════ Keyboard Shortcuts ═══════════ */
+document.addEventListener('keydown', (e) => {
+  // Ctrl+Shift+A: New Agent
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'A') {
+    e.preventDefault();
+    if (typeof showCreateAgent === 'function') showCreateAgent();
+  }
+  
+  // Ctrl+1-4: Switch views
+  if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
+    if (e.key === '1') { e.preventDefault(); showView('agents'); }
+    if (e.key === '2') { e.preventDefault(); showView('tasks'); }
+    if (e.key === '3') { e.preventDefault(); showView('files'); }
+    if (e.key === '4') { e.preventDefault(); showView('dashboard'); }
+  }
+});
 
 </script>
 </body>
