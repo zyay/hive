@@ -964,7 +964,7 @@ html {
   transition: transform var(--dur-base) var(--ease-spring), box-shadow var(--dur-base);
   box-shadow: 0 4px 16px rgba(245,158,11,0.18);
 }
-.rail-logo:hover { transform: scale(1.07) rotate(-2deg); }
+.rail-logo:hover { transform: none; }
 .rail-logo:active { transform: scale(0.94); }
 .rail-logo img { width: 28px; height: 28px; }
 
@@ -3396,6 +3396,11 @@ function doRegister() {
       else { $('rErr').textContent = r.detail || 'Error'; $('rErr').style.display = 'block'; }
     });
 }
+
+// Make auth functions globally accessible
+window.authTab = authTab;
+window.doLogin = doLogin;
+window.doRegister = doRegister;
 
 function logout() { T = null; U = null; N = null; if (ws) ws.close(); localStorage.clear(); location.reload(); }
 
@@ -5861,24 +5866,7 @@ document.querySelectorAll('.btn-primary').forEach(btn => {
 });
 
 /* ═══════════ View Transitions ═══════════ */
-const originalShowView = window.showView;
-window.showView = function(viewName) {
-  const currentView = document.querySelector('.view.active');
-  if (currentView) {
-    currentView.classList.add('view-morph-exit');
-    setTimeout(() => {
-      currentView.classList.remove('view-morph-exit', 'active');
-      originalShowView(viewName);
-      const newView = document.querySelector('.view.active');
-      if (newView) {
-        newView.classList.add('view-morph-enter');
-        setTimeout(() => newView.classList.remove('view-morph-enter'), 400);
-      }
-    }, 300);
-  } else {
-    originalShowView(viewName);
-  }
-};
+// Note: View transitions are handled by the Apple-style page transition system above
 
 /* ═══════════ Status Indicators ═══════════ */
 window.createStatusDot = function(status) {
