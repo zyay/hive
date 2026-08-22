@@ -4025,10 +4025,13 @@ function loadAgents() {
           ${x.status === 'active' ? '<span class="status-apple status-apple-active">Active</span>' : ''}
         </div>
         <div class="agent-desc body-medium">${escHtml(x.description || x.system_prompt || '')}</div>
-        <div class="agent-actions">
-          <button class="btn-apple btn-apple-primary" style="flex:1; font-size: 13px; padding: 8px 16px;" onclick="event.stopPropagation(); openEditAgent('${x.id}')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-            Configure
+        <div class="agent-actions" style="display: flex; gap: 8px; margin-top: 12px;">
+          <button class="btn-apple btn-apple-primary" style="flex:1; font-size: 13px; padding: 8px 16px;" onclick="event.stopPropagation(); startChatWithAgent('${x.id}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            Chat
+          </button>
+          <button class="btn-apple" style="font-size: 13px; padding: 8px 16px; background: rgba(255,255,255,0.05); color: var(--text-primary);" onclick="event.stopPropagation(); openEditAgent('${x.id}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
           </button>
           <button class="btn-apple" style="font-size: 13px; padding: 8px 16px; background: rgba(255,69,58,0.1); color: var(--error);" onclick="event.stopPropagation(); deleteAgent('${x.id}')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -4088,6 +4091,16 @@ function loadAgents() {
       </div>
       <div id="agentsLib" style="display:${AGENT_TAB === 'lib' ? 'block' : 'none'}">${lib}</div>`;
     renderRoomAgents();
+  });
+}
+
+function startChatWithAgent(agentId) {
+  api('/api/rooms', {
+    method: 'POST',
+    body: JSON.stringify({ name: `Chat with ${AGENTS.find(a => a.id === agentId)?.name || 'Agent'}`, agent_ids: [agentId] })
+  }).then(room => {
+    showView('chat');
+    setTimeout(() => selectRoom(room.id), 100);
   });
 }
 
