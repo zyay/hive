@@ -6287,15 +6287,15 @@ function playHoverSound() {
 // });
 
 // Smooth page transitions
-const originalShowView = window.showView;
-if (originalShowView) {
+if (window.showView) {
+  const _originalShowView = window.showView;
   window.showView = function(viewName) {
     const view = document.getElementById(`view-${viewName}`);
     if (view) {
       view.classList.add('page-enter');
       setTimeout(() => view.classList.remove('page-enter'), 300);
     }
-    return originalShowView.apply(this, arguments);
+    return _originalShowView.apply(this, arguments);
   };
 }
 
