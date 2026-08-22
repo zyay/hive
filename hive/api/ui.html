@@ -3578,30 +3578,74 @@ function countUp(el, target) {
 
 /* ═══════════ Auth ═══════════ */
 function authTab(i) {
-  $('authTabLogin').classList.toggle('active', i === 0);
-  $('authTabRegister').classList.toggle('active', i === 1);
-  $('authLogin').style.display = i ? 'none' : 'block';
-  $('authRegister').style.display = i ? 'block' : 'none';
+  const loginTab = document.getElementById('authTabLogin');
+  const registerTab = document.getElementById('authTabRegister');
+  const loginForm = document.getElementById('authLogin');
+  const registerForm = document.getElementById('authRegister');
+  
+  if (loginTab && registerTab && loginForm && registerForm) {
+    loginTab.classList.toggle('active', i === 0);
+    registerTab.classList.toggle('active', i === 1);
+    loginForm.style.display = i ? 'none' : 'block';
+    registerForm.style.display = i ? 'block' : 'none';
+  }
 }
 
 function doLogin() {
-  const u = $('lU').value, p = $('lP').value;
-  if (!u || !p) { $('lErr').textContent = 'Fill all fields'; $('lErr').style.display = 'block'; return; }
+  const u = document.getElementById('lU').value;
+  const p = document.getElementById('lP').value;
+  const lErr = document.getElementById('lErr');
+  
+  if (!u || !p) { 
+    lErr.textContent = 'Fill all fields'; 
+    lErr.style.display = 'block'; 
+    return; 
+  }
+  
   api('/api/auth/login', { method: 'POST', body: JSON.stringify({ username: u, password: p }) })
     .then(r => {
-      if (r.token) { T = r.token; U = r.id; N = r.username; enterApp(); toast('Welcome back', 'success'); }
-      else { $('lErr').textContent = r.detail || 'Invalid credentials'; $('lErr').style.display = 'block'; }
+      if (r.token) { 
+        T = r.token; 
+        U = r.id; 
+        N = r.username; 
+        enterApp(); 
+        toast('Welcome back', 'success'); 
+      } else { 
+        lErr.textContent = r.detail || 'Invalid credentials'; 
+        lErr.style.display = 'block'; 
+      }
     });
 }
 
 function doRegister() {
-  const u = $('rU').value, p = $('rP').value, n = $('rN').value;
-  if (!u || !p) { $('rErr').textContent = 'Fill all fields'; $('rErr').style.display = 'block'; return; }
-  if (p.length < 8) { $('rErr').textContent = 'Password must be at least 8 characters'; $('rErr').style.display = 'block'; return; }
+  const u = document.getElementById('rU').value;
+  const p = document.getElementById('rP').value;
+  const n = document.getElementById('rN').value;
+  const rErr = document.getElementById('rErr');
+  
+  if (!u || !p) { 
+    rErr.textContent = 'Fill all fields'; 
+    rErr.style.display = 'block'; 
+    return; 
+  }
+  if (p.length < 8) { 
+    rErr.textContent = 'Password must be at least 8 characters'; 
+    rErr.style.display = 'block'; 
+    return; 
+  }
+  
   api('/api/auth/register', { method: 'POST', body: JSON.stringify({ username: u, password: p, display_name: n }) })
     .then(r => {
-      if (r.token) { T = r.token; U = r.id; N = r.username; enterApp(); toast('Account created', 'success'); }
-      else { $('rErr').textContent = r.detail || 'Error'; $('rErr').style.display = 'block'; }
+      if (r.token) { 
+        T = r.token; 
+        U = r.id; 
+        N = r.username; 
+        enterApp(); 
+        toast('Account created', 'success'); 
+      } else { 
+        rErr.textContent = r.detail || 'Registration failed'; 
+        rErr.style.display = 'block'; 
+      }
     });
 }
 
