@@ -3618,24 +3618,31 @@ function doLogin() {
 }
 
 function doRegister() {
+  console.log('doRegister called');
   const u = document.getElementById('rU').value;
   const p = document.getElementById('rP').value;
   const n = document.getElementById('rN').value;
   const rErr = document.getElementById('rErr');
   
+  console.log('Form values:', { u, p, n });
+  
   if (!u || !p) { 
+    console.log('Validation failed: missing fields');
     rErr.textContent = 'Fill all fields'; 
     rErr.style.display = 'block'; 
     return; 
   }
   if (p.length < 8) { 
+    console.log('Validation failed: password too short');
     rErr.textContent = 'Password must be at least 8 characters'; 
     rErr.style.display = 'block'; 
     return; 
   }
   
+  console.log('Calling API...');
   api('/api/auth/register', { method: 'POST', body: JSON.stringify({ username: u, password: p, display_name: n }) })
     .then(r => {
+      console.log('API response:', r);
       if (r.token) { 
         T = r.token; 
         U = r.id; 
@@ -3646,6 +3653,11 @@ function doRegister() {
         rErr.textContent = r.detail || 'Registration failed'; 
         rErr.style.display = 'block'; 
       }
+    })
+    .catch(err => {
+      console.error('API error:', err);
+      rErr.textContent = 'Network error: ' + err.message;
+      rErr.style.display = 'block';
     });
 }
 
