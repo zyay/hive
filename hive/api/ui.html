@@ -135,11 +135,6 @@
   height: 300px;
 }
 
-/* Card hover with playful lift */
-.card {
-  transition: all var(--dur-base) var(--ease-bounce-soft);
-}
-
 .card:hover {
   transform: translateY(-6px) scale(1.01);
   box-shadow: 0 12px 24px rgba(0,0,0,0.2);
@@ -1063,12 +1058,6 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   height: 300px;
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-  background-size: 200% 200%;
-  animation: gradientShift 3s ease infinite;
-}
-
 .btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(10, 132, 255, 0.4);
@@ -1078,12 +1067,7 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   transform: translateY(0);
 }
 
-/* Enhanced Cards */
-.card {
-  transition: all var(--dur-base) var(--ease-spring);
-  position: relative;
-}
-
+/* Enhanced Cards - border glow effect */
 .card::before {
   content: '';
   position: absolute;
@@ -1096,11 +1080,6 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   mask-composite: exclude;
   opacity: 0;
   transition: opacity var(--dur-base);
-}
-
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
 }
 
 .card:hover::before {
@@ -1469,16 +1448,7 @@ html {
 
 .btn:active { transform: scale(0.95); }
 
-.btn-primary {
-  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-  background-size: 200% 200%;
-  color: #fff;
-  box-shadow: 0 4px 14px rgba(10,132,255,0.28);
-  animation: gradientShift 3s ease infinite;
-}
-
 .btn-primary:hover {
-  background: linear-gradient(135deg, var(--accent-hover), var(--accent));
   box-shadow: 0 8px 24px rgba(10,132,255,0.45);
   transform: translateY(-2px);
 }
@@ -2759,7 +2729,12 @@ label.lbl { font-size: 12px; font-weight: 600; color: var(--text-secondary); dis
   100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 }
 
-.btn-primary { background: linear-gradient(145deg, var(--accent), #0868d9); }
+.btn-primary {
+  background: linear-gradient(145deg, var(--accent), #0868d9);
+  position: relative;
+  overflow: hidden;
+}
+
 .btn-primary::before {
   content: '';
   position: absolute; inset: 0; border-radius: inherit;
@@ -2768,7 +2743,7 @@ label.lbl { font-size: 12px; font-weight: 600; color: var(--text-secondary); dis
   background-position: 200% 0;
   transition: background-position 700ms ease;
 }
-.btn-primary { position: relative; overflow: hidden; }
+
 .btn-primary:hover::before { background-position: -50% 0; }
 
 .chip, .mention-item, .list-item { will-change: transform; }
