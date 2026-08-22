@@ -99,13 +99,6 @@
   --ease-playful: cubic-bezier(0.5, 1.5, 0.5, 1);
 }
 
-/* Interactive button styles */
-.btn {
-  transition: all var(--dur-fast) var(--ease-bounce-soft);
-  position: relative;
-  overflow: hidden;
-}
-
 .btn:hover {
   transform: translateY(-2px) scale(1.02);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -114,25 +107,6 @@
 .btn:active {
   transform: translateY(0) scale(0.98);
   transition-duration: 80ms;
-}
-
-/* Ripple effect on click */
-.btn::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.3);
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
-}
-
-.btn:active::after {
-  width: 300px;
-  height: 300px;
 }
 
 .card:hover {
@@ -1031,31 +1005,6 @@ body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after 
   width: 20px;
   height: 20px;
   border-width: 2px;
-}
-
-/* Enhanced Buttons */
-.btn {
-  position: relative;
-  overflow: hidden;
-  transition: all var(--dur-fast) var(--ease-spring);
-}
-
-.btn::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
-}
-
-.btn:active::before {
-  width: 300px;
-  height: 300px;
 }
 
 .btn-primary:hover {
