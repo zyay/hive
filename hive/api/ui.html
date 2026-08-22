@@ -320,6 +320,146 @@ html {
   animation: pop 0.2s var(--ease-bounce);
 }
 
+/* ═══════════ Dashboard V2 ═══════════ */
+
+/* Stats Grid */
+.dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+/* Stat Card V2 */
+.stat-card-v2 {
+  background: var(--bg-solid-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  transition: all var(--dur-base) var(--ease-bounce-soft);
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card-v2::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity var(--dur-fast);
+}
+
+.stat-card-v2:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+  border-color: var(--accent-soft);
+}
+
+.stat-card-v2:hover::before {
+  opacity: 1;
+}
+
+.stat-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.stat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-label-v2 {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value-v2 {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(255,255,255,0.05);
+}
+
+.stat-trend-up {
+  color: var(--success);
+  background: var(--success-soft);
+}
+
+.stat-trend-down {
+  color: var(--error);
+  background: var(--error-soft);
+}
+
+.stat-trend-neutral {
+  color: var(--text-secondary);
+}
+
+/* Quick Action Buttons */
+.quick-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--bg-solid-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-bounce-soft);
+  text-align: left;
+}
+
+.quick-action-btn:hover {
+  background: var(--bg-raise);
+  border-color: var(--accent);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 4px 12px rgba(10,132,255,0.2);
+}
+
+.quick-action-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.quick-action-btn svg {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
 /* ═══════════ Apple-Style Sophistication ═══════════ */
 
 /* Refined Typography */
@@ -2960,17 +3100,136 @@ label.lbl { font-size: 12px; font-weight: 600; color: var(--text-secondary); dis
           <div class="page-subtitle">Everything happening in your hive</div>
         </div>
 
-        <div class="stats-grid-clean" id="dashStats"></div>
+        <!-- Stats Cards Grid -->
+        <div class="dashboard-stats-grid">
+          <div class="stat-card-v2">
+            <div class="stat-icon-wrapper" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label-v2">Total Agents</div>
+              <div class="stat-value-v2" id="stat-agents-count">0</div>
+              <div class="stat-trend stat-trend-up">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                  <polyline points="17 6 23 6 23 12"></polyline>
+                </svg>
+                Active
+              </div>
+            </div>
+          </div>
 
+          <div class="stat-card-v2">
+            <div class="stat-icon-wrapper" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label-v2">Active Rooms</div>
+              <div class="stat-value-v2" id="stat-rooms-count">0</div>
+              <div class="stat-trend stat-trend-neutral">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                </svg>
+                Conversations
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-card-v2">
+            <div class="stat-icon-wrapper" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label-v2">Tasks Running</div>
+              <div class="stat-value-v2" id="stat-tasks-count">0</div>
+              <div class="stat-trend stat-trend-up">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                In Progress
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-card-v2">
+            <div class="stat-icon-wrapper" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <div class="stat-label-v2">Providers</div>
+              <div class="stat-value-v2" id="stat-providers-count">0</div>
+              <div class="stat-trend stat-trend-neutral">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+                </svg>
+                Connected
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Content Grid -->
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 32px;">
+          <!-- Agents Section -->
           <div class="card-clean">
-            <div class="card-clean-title">Your Agents</div>
-            <div id="dashAgents" style="display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto;"></div>
+            <div class="card-clean-title" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Your Agents</span>
+              <button class="btn btn-sm btn-ghost" onclick="showView('agents')">View All</button>
+            </div>
+            <div id="dashAgents" style="display: flex; flex-direction: column; gap: 12px; max-height: 400px; overflow-y: auto;"></div>
           </div>
           
+          <!-- Hardware Section -->
           <div class="card-clean">
-            <div class="card-clean-title">Hardware</div>
+            <div class="card-clean-title">System Status</div>
             <div id="hwCard"></div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card-clean">
+          <div class="card-clean-title">Quick Actions</div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+            <button class="quick-action-btn" onclick="showView('agents'); setTimeout(() => document.getElementById('addAgentBtn')?.click(), 100);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+              </svg>
+              <span>New Agent</span>
+            </button>
+            <button class="quick-action-btn" onclick="showView('chat');">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <span>Start Chat</span>
+            </button>
+            <button class="quick-action-btn" onclick="showView('tasks');">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 11 12 14 22 4"></polyline>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+              </svg>
+              <span>View Tasks</span>
+            </button>
+            <button class="quick-action-btn" onclick="showView('files');">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              <span>Manage Files</span>
+            </button>
           </div>
         </div>
       </div>
@@ -4137,28 +4396,39 @@ function loadDashboard() {
     api('/api/hardware').catch(() => null),
     api('/api/rag/documents').catch(() => null),
     api('/api/tasks').catch(() => null),
-  ]).then(([tasks, agents, files, rooms, hw, rag, allTasks]) => {
-    agents = agents || []; rooms = rooms || []; tasks = tasks || {}; allTasks = allTasks || [];
+    api('/api/providers/all?user_id=' + U).catch(() => null),
+  ]).then(([tasks, agents, files, rooms, hw, rag, allTasks, providers]) => {
+    agents = agents || []; 
+    rooms = rooms || []; 
+    tasks = tasks || {}; 
+    allTasks = allTasks || [];
+    providers = providers || {};
     AGENTS = agents;
 
-    // Rings row: hive size + throughput
-    const done = tasks.completed || 0;
-    $('dashStats').innerHTML = [
-      ringCard(agents.length, 'Agents', 'your AI workforce', 'var(--accent-hover)', 0),
-      ringCard(rooms.length, 'Chats', 'conversations', 'var(--success)', 60),
-      ringCard(done, 'Tasks Done', `${tasks.running || 0} running now`, 'var(--brand)', 120),
-      ringCard((files || []).length, 'Files', 'shared in chats', 'var(--text-primary)', 180),
-      ringCard(((rag || {}).documents || []).length, 'Knowledge', 'indexed documents', '#AF52DE', 240),
-    ].join('');
-    animateRings('#dashStats');
+    // Update new stat cards
+    const statAgents = $('stat-agents-count');
+    const statRooms = $('stat-rooms-count');
+    const statTasks = $('stat-tasks-count');
+    const statProviders = $('stat-providers-count');
+    
+    if (statAgents) statAgents.textContent = agents.length;
+    if (statRooms) statRooms.textContent = rooms.length;
+    if (statTasks) statTasks.textContent = tasks.running || 0;
+    if (statProviders) statProviders.textContent = Object.keys(providers).length;
 
-    // Honeycomb: tasks + message events per day
-    const events = allTasks.map(t => t.created_at);
-    Promise.all(rooms.map(rm => api('/api/rooms/' + rm.id + '/messages?limit=50').catch(() => [])))
-      .then(msgBatches => {
-        msgBatches.forEach(batch => events.push(...(batch || []).map(m => m.created_at)));
-        honeycomb(events, $('dashHoney'));
-      });
+    // Legacy rings (keep for compatibility)
+    const done = tasks.completed || 0;
+    const dashStats = $('dashStats');
+    if (dashStats) {
+      dashStats.innerHTML = [
+        ringCard(agents.length, 'Agents', 'your AI workforce', 'var(--accent-hover)', 0),
+        ringCard(rooms.length, 'Chats', 'conversations', 'var(--success)', 60),
+        ringCard(done, 'Tasks Done', `${tasks.running || 0} running now`, 'var(--brand)', 120),
+        ringCard((files || []).length, 'Files', 'shared in chats', 'var(--text-primary)', 180),
+        ringCard(((rag || {}).documents || []).length, 'Knowledge', 'indexed documents', '#AF52DE', 240),
+      ].join('');
+      animateRings('#dashStats');
+    }
 
     // Agents strip with faces
     $('dashAgents').innerHTML = agents.slice(0, 8).map((a, i) => `
